@@ -28,6 +28,7 @@ const Databases = lazy(() => import("./dashboard/pages/Databases"));
 const Schedules = lazy(() => import("./dashboard/pages/Schedules"));
 const Subusers = lazy(() => import("./dashboard/pages/Subusers"));
 const Invoices = lazy(() => import("./dashboard/pages/Invoices"));
+const PaymentHistory = lazy(() => import("./dashboard/pages/PaymentHistory"));
 const Tickets = lazy(() => import("./dashboard/pages/Tickets"));
 const CreateTicket = lazy(() => import("./dashboard/pages/CreateTicket"));
 const TicketDetail = lazy(() => import("./dashboard/pages/TicketDetail"));
@@ -83,6 +84,7 @@ export default function App() {
               <Route path="schedules" element={<Schedules />} />
               <Route path="subusers" element={<Subusers />} />
               <Route path="invoices" element={<Invoices />} />
+              <Route path="payment-history" element={<PaymentHistory />} />
               <Route path="support" element={<Tickets />} />
               <Route path="support/create" element={<CreateTicket />} />
               <Route path="support/:id" element={<TicketDetail />} />

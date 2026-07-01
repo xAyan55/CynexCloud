@@ -20,7 +20,8 @@ import {
   Key, 
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  History
 } from "lucide-react";
 
 interface SidebarProps {
@@ -51,6 +52,7 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
       title: "Account",
       items: [
         { path: "/dashboard/invoices", label: "Invoices", icon: Receipt },
+        { path: "/dashboard/payment-history", label: "Payment History", icon: History },
         { path: "/dashboard/support", label: "Support", icon: HelpCircle },
         { path: "/dashboard/announcements", label: "Announcements", icon: Megaphone },
         { path: "/dashboard/knowledge-base", label: "Knowledgebase", icon: BookOpen }

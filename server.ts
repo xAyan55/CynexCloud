@@ -12,6 +12,7 @@ import panelRouter from "./server/routes/panelRoutes";
 import ticketRouter from "./server/routes/ticketRoutes";
 import apiKeyRouter from "./server/routes/apiKeyRoutes";
 import adminRouter from "./server/routes/adminRoutes";
+import paymentRouter from "./server/routes/paymentRoutes";
 import { securityHeaders, sanitizeInput } from "./server/middleware/security";
 import { queryGet, queryRun, queryAll } from "./server/db/database";
 import { enqueueProvisioningJob } from "./server/services/queueService";
@@ -124,7 +125,11 @@ const FieldValue = {
 async function startServer() {
   await dbInit();
   const app = express();
-  app.use(express.json());
+  app.use(express.json({
+    verify: (req: any, res, buf) => {
+      req.rawBody = buf.toString();
+    }
+  }));
   app.use(cookieParser());
   app.use(securityHeaders);
   app.use(sanitizeInput);
@@ -134,6 +139,7 @@ async function startServer() {
   app.use("/api/tickets", ticketRouter);
   app.use("/api/api-keys", apiKeyRouter);
   app.use("/api/admin", adminRouter);
+  app.use("/api/payments", paymentRouter);
   
   app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -451,52 +457,11 @@ async function startServer() {
     }
   });
 
+  // Legacy pay endpoint — now deprecated in favour of OxaPay gateway
   app.post("/api/invoices/:id/pay", checkAuth, async (req: any, res) => {
-    const { id } = req.params;
-    try {
-      const invoice = await queryGet<any>(
-        `SELECT * FROM invoices WHERE id = ? AND userId = ?`,
-        [id, req.user.userId]
-      );
-
-      if (!invoice) {
-        return res.status(404).json({ error: "Invoice record not found." });
-      }
-
-      if (invoice.status === "Paid") {
-        return res.status(400).json({ error: "Invoice has already been paid." });
-      }
-
-      // Mark Invoice as Paid
-      await queryRun(`UPDATE invoices SET status = 'Paid' WHERE id = ?`, [id]);
-      
-      // Update Order Status
-      await queryRun(`UPDATE orders SET status = 'Paid' WHERE id = ?`, [invoice.orderId]);
-
-      // Create payment notification record
-      await queryRun(
-        `INSERT INTO notifications (id, userId, title, message) VALUES (?, ?, 'Invoice Paid', ?)`,
-        ["notif-" + crypto.randomUUID(), req.user.userId, `Invoice ${id} has been paid successfully.`]
-      );
-
-      // Get associated service
-      const service = await queryGet<any>(
-        `SELECT s.id FROM services s
-         INNER JOIN orders o ON s.planId = o.planId
-         WHERE o.id = ? AND s.userId = ? AND s.status = 'Pending Payment' LIMIT 1`,
-        [invoice.orderId, req.user.userId]
-      );
-
-      if (service) {
-        // Enqueue Async Provisioning Job!
-        await enqueueProvisioningJob(service.id);
-      }
-
-      res.json({ success: true, message: "Payment processed successfully. Service provisioning queued." });
-    } catch (err: any) {
-      console.error("Payment processing error:", err);
-      res.status(500).json({ error: "Payment processing failed." });
-    }
+    return res.status(400).json({
+      error: "Direct payment is no longer supported. Use the OxaPay cryptocurrency gateway via POST /api/payments/oxapay/create."
+    });
   });
 
   app.get("/api/services", checkAuth, async (req: any, res) => {

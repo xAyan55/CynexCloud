@@ -13,6 +13,7 @@ export default function PanelConfig() {
   const [panelUrl, setPanelUrl] = useState("");
   const [appKey, setAppKey] = useState("");
   const [clientKey, setClientKey] = useState("");
+  const [oxapayKey, setOxapayKey] = useState("");
   
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -25,6 +26,7 @@ export default function PanelConfig() {
         setPanelUrl(data.settings?.pterodactyl_url || "");
         setAppKey(data.settings?.pterodactyl_app_key || "");
         setClientKey(data.settings?.pterodactyl_client_key || "");
+        setOxapayKey(data.settings?.oxapay_merchant_key || "");
       }
     } catch (err) {
       console.error("Failed to load settings:", err);
@@ -49,7 +51,8 @@ export default function PanelConfig() {
         body: JSON.stringify({
           pterodactyl_url: panelUrl,
           pterodactyl_app_key: appKey,
-          pterodactyl_client_key: clientKey
+          pterodactyl_client_key: clientKey,
+          oxapay_merchant_key: oxapayKey
         })
       });
 
@@ -122,6 +125,21 @@ export default function PanelConfig() {
                   onChange={(e) => setClientKey(e.target.value)}
                   className="w-full bg-zinc-950 border border-zinc-800 focus:border-zinc-700 text-white rounded-lg px-3.5 py-2.5 text-xs font-semibold focus:outline-none"
                   placeholder="ptlc_••••••••"
+                />
+              </div>
+            </div>
+          </DashboardCard>
+
+          <DashboardCard title="OxaPay Cryptocurrency Gateway" subtitle="Accept payments in Bitcoin, Ethereum, USDT, etc.">
+            <div className="space-y-4 pt-2">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Merchant API Key</label>
+                <input
+                  type="password"
+                  value={oxapayKey}
+                  onChange={(e) => setOxapayKey(e.target.value)}
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-zinc-700 text-white rounded-lg px-3.5 py-2.5 text-xs font-semibold focus:outline-none"
+                  placeholder="sandbox_•••••••• or merchant_••••••••"
                 />
               </div>
             </div>

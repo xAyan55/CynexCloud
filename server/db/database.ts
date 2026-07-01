@@ -224,6 +224,32 @@ export const dbInit = () => {
     console.error("Failed to run settings database migration:", err);
   }
 
+  // Alter invoices table to add OxaPay properties if missing
+  const columnsToMigrate = [
+    { name: "paymentProvider", type: "TEXT" },
+    { name: "paymentId", type: "TEXT" },
+    { name: "paymentCurrency", type: "TEXT" },
+    { name: "paymentAmount", type: "REAL" },
+    { name: "paymentStatus", type: "TEXT" },
+    { name: "transactionHash", type: "TEXT" },
+    { name: "paidAt", type: "TEXT" },
+    { name: "expiresAt", type: "TEXT" },
+    { name: "callbackVerified", type: "INTEGER DEFAULT 0" },
+    { name: "lastWebhookEvent", type: "TEXT" },
+    { name: "confirmationCount", type: "INTEGER DEFAULT 0" }
+  ];
+
+  columnsToMigrate.forEach(col => {
+    try {
+      db.prepare(`ALTER TABLE invoices ADD COLUMN ${col.name} ${col.type}`).run();
+    } catch (err: any) {
+      // Ignore "duplicate column name" error
+      if (!err.message.includes("duplicate column name")) {
+        console.warn(`[Migration] Failed to add column ${col.name}:`, err.message);
+      }
+    }
+  });
+
   console.log("SQLite database initialized successfully at", dbPath);
 };
 

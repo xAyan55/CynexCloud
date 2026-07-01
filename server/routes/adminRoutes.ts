@@ -20,13 +20,15 @@ router.get("/settings", requireAuth, requireAdmin, async (req: any, res: Respons
     const url = await queryGet<{ value: string }>("SELECT value FROM settings WHERE key = 'pterodactyl_url'");
     const appKey = await queryGet<{ value: string }>("SELECT value FROM settings WHERE key = 'pterodactyl_app_key'");
     const clientKey = await queryGet<{ value: string }>("SELECT value FROM settings WHERE key = 'pterodactyl_client_key'");
+    const oxaKey = await queryGet<{ value: string }>("SELECT value FROM settings WHERE key = 'oxapay_merchant_key'");
 
     res.json({
       success: true,
       settings: {
         pterodactyl_url: url?.value || "",
         pterodactyl_app_key: appKey?.value || "",
-        pterodactyl_client_key: clientKey?.value || ""
+        pterodactyl_client_key: clientKey?.value || "",
+        oxapay_merchant_key: oxaKey?.value || ""
       }
     });
   } catch (err) {
@@ -36,7 +38,7 @@ router.get("/settings", requireAuth, requireAdmin, async (req: any, res: Respons
 
 // Update settings (Admin only)
 router.put("/settings", requireAuth, requireAdmin, async (req: any, res: Response) => {
-  const { pterodactyl_url, pterodactyl_app_key, pterodactyl_client_key } = req.body;
+  const { pterodactyl_url, pterodactyl_app_key, pterodactyl_client_key, oxapay_merchant_key } = req.body;
 
   try {
     const insertSetting = async (key: string, val: string) => {
@@ -50,6 +52,7 @@ router.put("/settings", requireAuth, requireAdmin, async (req: any, res: Respons
     if (pterodactyl_url !== undefined) await insertSetting("pterodactyl_url", pterodactyl_url);
     if (pterodactyl_app_key !== undefined) await insertSetting("pterodactyl_app_key", pterodactyl_app_key);
     if (pterodactyl_client_key !== undefined) await insertSetting("pterodactyl_client_key", pterodactyl_client_key);
+    if (oxapay_merchant_key !== undefined) await insertSetting("oxapay_merchant_key", oxapay_merchant_key);
 
     res.json({ success: true, message: "Settings saved successfully." });
   } catch (err) {
