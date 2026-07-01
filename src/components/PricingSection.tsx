@@ -188,8 +188,13 @@ export default function PricingSection({ title, description, plans, id = "pricin
                     <div className="flex items-start gap-4 sm:gap-6">
                       <div className="relative">
                         <div className="w-14 h-14 sm:w-20 sm:h-20 bg-zinc-900 rounded-2xl flex items-center justify-center overflow-hidden border border-white/5 shadow-2xl group-hover:scale-110 transition-transform duration-700">
-                          {plan.iconUrl ? (
-                            <img src={plan.iconUrl} alt={plan.name} className="w-9 h-9 sm:w-14 sm:h-14 object-contain grayscale brightness-125 group-hover:grayscale-0 transition-all duration-700" referrerPolicy="no-referrer" />
+                          {plan.iconUrl || (plan as any).image ? (
+                            <img 
+                              src={plan.iconUrl || (plan as any).image} 
+                              alt={plan.name} 
+                              className="w-full h-full object-cover transition-all duration-700" 
+                              referrerPolicy="no-referrer" 
+                            />
                           ) : (
                             <div className="w-9 h-9 bg-zinc-800 rounded-lg" />
                           )}
@@ -242,13 +247,13 @@ export default function PricingSection({ title, description, plans, id = "pricin
                     </div>
 
                     {/* Pricing + CTA */}
-                    <div className="mt-auto pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
+                    <div className="mt-auto pt-6 flex flex-col gap-4">
                       <div className="flex flex-col">
                         {plan.originalPrice && (
-                          <span className="text-zinc-600 text-xs line-through font-black mb-1 tracking-wider uppercase">₹{plan.originalPrice}</span>
+                          <span className="text-zinc-600 text-[10px] line-through font-black mb-0.5 tracking-wider uppercase">₹{plan.originalPrice}</span>
                         )}
                         <div className="flex items-baseline gap-1">
-                          <span className="text-3xl sm:text-4xl font-black text-white tracking-tighter">₹{plan.price}</span>
+                          <span className="text-2xl sm:text-3xl font-black text-white tracking-tighter">₹{plan.price}</span>
                           <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">/mo</span>
                         </div>
                       </div>
@@ -256,7 +261,7 @@ export default function PricingSection({ title, description, plans, id = "pricin
                       <Button 
                         disabled={provisioningId !== null}
                         onClick={() => handleProvision(plan)}
-                        className="w-full sm:w-auto bg-white text-black hover:bg-zinc-200 font-black px-6 sm:px-8 py-4 sm:py-6 rounded-2xl transition-all duration-500 uppercase tracking-[0.1em] sm:tracking-[0.2em] text-[10px] h-auto border-none hover:scale-105 sm:hover:scale-110 active:scale-95 shadow-[0_0_0_rgba(255,255,255,0)] hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] disabled:opacity-50"
+                        className="w-full bg-white text-black hover:bg-[var(--color-brand)] hover:text-black font-black py-4 rounded-xl transition-all duration-300 uppercase tracking-widest text-[10px] h-auto border-none hover:scale-[1.01] active:scale-[0.98]"
                       >
                         {provisioningId === plan.id ? "Deploying..." : "Deploy Now"}
                       </Button>
