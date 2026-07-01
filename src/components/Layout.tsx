@@ -171,6 +171,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {user ? (
               <div className="flex items-center gap-4">
                 <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Hi, {user.username}</span>
+                <Link to="/dashboard">
+                  <Button className="bg-white text-black hover:bg-zinc-200 font-bold px-6 hover:scale-105 active:scale-95 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+                    Client Area
+                  </Button>
+                </Link>
                 <Button 
                   onClick={logout}
                   className="bg-zinc-900 border border-white/10 text-white hover:bg-zinc-800 font-bold px-6 hover:scale-105 active:scale-95 transition-all duration-300"
@@ -255,6 +260,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   {user ? (
                     <div className="flex flex-col gap-2 w-full">
                       <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 text-center">Logged in as {user.username}</span>
+                      <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                        <Button className="bg-white text-zinc-950 hover:bg-zinc-200 w-full font-bold">
+                          Client Area
+                        </Button>
+                      </Link>
                       <Button 
                         className="bg-zinc-800 text-white border border-white/5 w-full font-bold"
                         onClick={() => { logout(); setMobileMenuOpen(false); }}
