@@ -5,6 +5,10 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import axios from "axios";
 import fs from "fs";
+import cookieParser from "cookie-parser";
+import { dbInit } from "./server/db/database";
+import authRouter, { requireAuth } from "./server/routes/authRoutes";
+import { securityHeaders, sanitizeInput } from "./server/middleware/security";
 import { initializeApp as initializeClientApp } from "firebase/app";
 import { 
   getFirestore as getClientFirestore, 
@@ -112,8 +116,14 @@ const FieldValue = {
 };
 
 async function startServer() {
+  await dbInit();
   const app = express();
   app.use(express.json());
+  app.use(cookieParser());
+  app.use(securityHeaders);
+  app.use(sanitizeInput);
+
+  app.use("/api/auth", authRouter);
   
   app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -135,13 +145,16 @@ async function startServer() {
   const PORT = 3000;
 
   // Middleware to check auth
-  const checkAuth = async (req: any, res: any, next: any) => {
-    next();
-  };
+  const checkAuth = requireAuth;
 
   // Middleware to check admin
-  const checkAdmin = async (req: any, res: any, next: any) => {
-    next();
+  const checkAdmin = (req: any, res: any, next: any) => {
+    requireAuth(req, res, () => {
+      if (req.user?.role !== "admin") {
+        return res.status(403).json({ error: "Forbidden. Admin access required." });
+      }
+      next();
+    });
   };
 
   // API routes

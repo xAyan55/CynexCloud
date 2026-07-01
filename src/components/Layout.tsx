@@ -14,8 +14,10 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { NAV_LINKS } from "../constants";
 import config from "../config.json";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const { user, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -166,11 +168,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="hidden md:flex items-center gap-4">
-            <a href="https://billing.cynexcloud.eu.cc" target="_blank" rel="noopener noreferrer">
-              <Button className="bg-white text-black hover:bg-zinc-200 font-bold px-6 hover:scale-105 active:scale-95 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.15)]">
-                Client Area
-              </Button>
-            </a>
+            {user ? (
+              <div className="flex items-center gap-4">
+                <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Hi, {user.username}</span>
+                <Button 
+                  onClick={logout}
+                  className="bg-zinc-900 border border-white/10 text-white hover:bg-zinc-800 font-bold px-6 hover:scale-105 active:scale-95 transition-all duration-300"
+                >
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <Link to="/auth">
+                <Button className="bg-white text-black hover:bg-zinc-200 font-bold px-6 hover:scale-105 active:scale-95 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+                  Client Area
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -238,14 +252,26 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 ))}
                 <Separator className="bg-zinc-800 my-2" />
                 <div className="flex flex-col gap-4">
-                  <a href="https://billing.cynexcloud.eu.cc" target="_blank" rel="noopener noreferrer" className="w-full">
-                    <Button 
-                      className="bg-white text-black w-full font-bold"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Client Area
-                    </Button>
-                  </a>
+                  {user ? (
+                    <div className="flex flex-col gap-2 w-full">
+                      <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 text-center">Logged in as {user.username}</span>
+                      <Button 
+                        className="bg-zinc-800 text-white border border-white/5 w-full font-bold"
+                        onClick={() => { logout(); setMobileMenuOpen(false); }}
+                      >
+                        Logout
+                      </Button>
+                    </div>
+                  ) : (
+                    <Link to="/auth" className="w-full">
+                      <Button 
+                        className="bg-white text-black w-full font-bold"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Client Area
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </div>
             </motion.div>
