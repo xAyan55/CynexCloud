@@ -10,8 +10,8 @@ export interface PasswordCheckResult {
 
 // 1. Password Strength Policy
 export const validatePasswordStrength = (password: string): PasswordCheckResult => {
-  if (password.length < 12) {
-    return { valid: false, message: "Password must be at least 12 characters long." };
+  if (password.length < 8) {
+    return { valid: false, message: "Password must be at least 8 characters long." };
   }
   if (!/[A-Z]/.test(password)) {
     return { valid: false, message: "Password must contain at least one uppercase letter." };

@@ -55,10 +55,15 @@ export const register = async (req: Request, res: Response) => {
     const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
     const verificationToken = crypto.randomBytes(32).toString("hex");
 
+    const countRow = await queryGet<{ count: number }>(`SELECT COUNT(*) as count FROM users`);
+    const isFirstUser = !countRow || countRow.count === 0;
+    const role = isFirstUser ? "admin" : "user";
+    const permissions = isFirstUser ? JSON.stringify(["admin"]) : JSON.stringify([]);
+
     await queryRun(
-      `INSERT INTO users (id, username, email, passwordHash, twoFactorSecret)
-       VALUES (?, ?, ?, ?, ?)`,
-      [userId, username, email, passwordHash, verificationToken] // We hijack twoFactorSecret temporarily for registration activation token to save space, or use dynamic field
+      `INSERT INTO users (id, username, email, passwordHash, twoFactorSecret, role, permissions)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [userId, username, email, passwordHash, verificationToken, role, permissions]
     );
 
     // Save initial password in history
