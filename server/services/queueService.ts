@@ -245,6 +245,12 @@ export const processProvisioningJob = async (jobId: string): Promise<void> => {
       [jobId]
     );
 
+    // Write real notification to database
+    await queryRun(
+      `INSERT INTO notifications (id, userId, title, message) VALUES (?, ?, 'Service Active', ?)`,
+      ["notif-" + crypto.randomUUID(), service.userId, `Your service '${service.name}' is now active on node '${activeNode.attributes.name}' at ${serverAddress}.`]
+    );
+
     console.log(`[Worker] Provisioning job ${jobId} completed successfully.`);
   } catch (err: any) {
     const errMsg = err.response?.data?.errors?.[0]?.detail || err.message || "Unknown error occurred.";
@@ -257,6 +263,19 @@ export const processProvisioningJob = async (jobId: string): Promise<void> => {
        WHERE id = ?`,
       [errMsg, jobId]
     );
+
+    // Write real error notification to database
+    try {
+      const service = await queryGet<any>(`SELECT userId, name FROM services WHERE id = (SELECT serviceId FROM provisioning_jobs WHERE id = ?)`, [jobId]);
+      if (service) {
+        await queryRun(
+          `INSERT INTO notifications (id, userId, title, message) VALUES (?, ?, 'Provisioning Failed', ?)`,
+          ["notif-" + crypto.randomUUID(), service.userId, `Failed to provision '${service.name}': ${errMsg}`]
+        );
+      }
+    } catch (dbErr) {
+      console.error("Failed to insert error notification:", dbErr);
+    }
 
     // Mark service state as Failed
     await queryRun(

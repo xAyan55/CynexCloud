@@ -33,6 +33,7 @@ export default function DashboardHome() {
   });
 
   const [activity, setActivity] = useState<any[]>([]);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
 
   useEffect(() => {
     const loadHomeData = async () => {
@@ -42,11 +43,13 @@ export default function DashboardHome() {
         const ticketsRes = await authFetch("/api/tickets");
         const activityRes = await authFetch("/api/auth/activity");
         const plansRes = await authFetch("/api/plans");
+        const annRes = await authFetch("/api/announcements");
 
         const servicesData = servicesRes.ok ? await servicesRes.json() : { services: [] };
         const ticketsData = ticketsRes.ok ? await ticketsRes.json() : { tickets: [] };
         const activityData = activityRes.ok ? await activityRes.json() : { logs: [] };
         const plansData = plansRes.ok ? await plansRes.json() : [];
+        const annData = annRes.ok ? await annRes.json() : { announcements: [] };
 
         // Count pending invoices and filter open tickets
         const openTickets = (ticketsData.tickets || []).filter((t: any) => t.status !== "closed").length;
@@ -80,6 +83,7 @@ export default function DashboardHome() {
         });
 
         setActivity(activityData.logs || []);
+        setAnnouncements(annData.announcements || []);
       } catch (err) {
         console.error("Failed to load dashboard metrics:", err);
       } finally {
@@ -96,10 +100,7 @@ export default function DashboardHome() {
     { label: "Pay Due Invoices", path: "/dashboard/invoices", icon: Receipt }
   ];
 
-  const announcements = [
-    { title: "Intel Core Ultra Nodes Active", desc: "New high-frequency game instances are now open for deployment in Central Europe.", date: "Today" },
-    { title: "WAL DB Performance Tuning", desc: "Database query latency improved by 40% globally.", date: "Yesterday" }
-  ];
+
 
   if (loading) return <SkeletonLoader />;
 
@@ -197,15 +198,19 @@ export default function DashboardHome() {
           {/* Announcements block */}
           <DashboardCard title="System Announcements" subtitle="Latest status alerts & system changes" headerAction={<Megaphone className="w-4 h-4 text-zinc-500" />}>
             <div className="space-y-4 pt-2">
-              {announcements.map((ann, idx) => (
-                <div key={idx} className="space-y-1.5 border-b border-zinc-800/40 last:border-0 pb-3 last:pb-0">
-                  <div className="flex justify-between items-center">
-                    <h5 className="text-xs font-bold text-white">{ann.title}</h5>
-                    <span className="text-[9px] bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded text-zinc-550 font-bold uppercase tracking-wider">{ann.date}</span>
+              {announcements.length > 0 ? (
+                announcements.slice(0, 3).map((ann, idx) => (
+                  <div key={idx} className="space-y-1.5 border-b border-zinc-800/40 last:border-0 pb-3 last:pb-0 text-xs">
+                    <div className="flex justify-between items-center">
+                      <h5 className="text-xs font-bold text-white">{ann.title}</h5>
+                      <span className="text-[9px] bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded text-zinc-550 font-bold uppercase tracking-wider">{new Date(ann.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <p className="text-[11px] text-zinc-500 leading-normal">{ann.content}</p>
                   </div>
-                  <p className="text-[11px] text-zinc-500 leading-normal">{ann.desc}</p>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-center py-6 text-zinc-655 text-xs font-semibold">No recent announcements.</p>
+              )}
             </div>
           </DashboardCard>
         </div>

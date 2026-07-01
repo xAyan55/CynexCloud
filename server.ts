@@ -424,6 +424,12 @@ async function startServer() {
         [invoiceId, orderId, req.user.userId, price]
       );
 
+      // Create notification record
+      await queryRun(
+        `INSERT INTO notifications (id, userId, title, message) VALUES (?, ?, 'Invoice Generated', ?)`,
+        ["notif-" + crypto.randomUUID(), req.user.userId, `Invoice ${invoiceId} generated for plan '${planId}' (${serviceName}).`]
+      );
+
       res.json({ success: true, orderId, invoiceId, serviceId });
     } catch (err: any) {
       console.error("Order creation failed:", err);
@@ -466,6 +472,12 @@ async function startServer() {
       
       // Update Order Status
       await queryRun(`UPDATE orders SET status = 'Paid' WHERE id = ?`, [invoice.orderId]);
+
+      // Create payment notification record
+      await queryRun(
+        `INSERT INTO notifications (id, userId, title, message) VALUES (?, ?, 'Invoice Paid', ?)`,
+        ["notif-" + crypto.randomUUID(), req.user.userId, `Invoice ${id} has been paid successfully.`]
+      );
 
       // Get associated service
       const service = await queryGet<any>(
@@ -512,6 +524,72 @@ async function startServer() {
       res.json({ success: true, service });
     } catch (err) {
       res.status(500).json({ error: "Failed to retrieve service details." });
+    }
+  });
+
+  // Notifications API endpoints
+  app.get("/api/notifications", checkAuth, async (req: any, res) => {
+    try {
+      const notifications = await queryAll(
+        `SELECT * FROM notifications WHERE userId = ? ORDER BY createdAt DESC LIMIT 20`,
+        [req.user.userId]
+      );
+      res.json({ success: true, notifications });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to load account notifications." });
+    }
+  });
+
+  app.post("/api/notifications/read-all", checkAuth, async (req: any, res) => {
+    try {
+      await queryRun(
+        `UPDATE notifications SET read = 1 WHERE userId = ?`,
+        [req.user.userId]
+      );
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to mark notifications read." });
+    }
+  });
+
+  // Announcements API endpoints
+  app.get("/api/announcements", checkAuth, async (req, res) => {
+    try {
+      const announcements = await queryAll(
+        `SELECT * FROM announcements ORDER BY createdAt DESC`
+      );
+      res.json({ success: true, announcements });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to load system announcements." });
+    }
+  });
+
+  app.post("/api/admin/announcements", checkAdmin, async (req, res) => {
+    const { title, content, category } = req.body;
+    if (!title || !content) {
+      return res.status(400).json({ error: "title and content are required fields." });
+    }
+    try {
+      const id = "ann-" + crypto.randomUUID().substring(0, 8);
+      await queryRun(
+        `INSERT INTO announcements (id, title, content, category) VALUES (?, ?, ?, ?)`,
+        [id, title, content, category || "Platform"]
+      );
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to publish system announcement." });
+    }
+  });
+
+  app.delete("/api/admin/announcements/:id", checkAdmin, async (req, res) => {
+    try {
+      await queryRun(
+        `DELETE FROM announcements WHERE id = ?`,
+        [req.params.id]
+      );
+      res.json({ success: true });
+    } catch (err) {
+      res.status(550).json({ error: "Failed to delete announcement." });
     }
   });
 

@@ -20,11 +20,12 @@ interface TopNavProps {
 }
 
 export default function TopNav({ setMobileOpen, onSearchOpen }: TopNavProps) {
-  const { user, logout } = useAuth();
+  const { user, logout, authFetch } = useAuth();
   const location = useLocation();
   const [avatarUrl, setAvatarUrl] = useState("/images/pfp/Circle/OSLO-1.png");
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const profileRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
 
@@ -34,6 +35,38 @@ export default function TopNav({ setMobileOpen, onSearchOpen }: TopNavProps) {
       getAvatarUrl(user.email, user.id).then(setAvatarUrl);
     }
   }, [user]);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await authFetch("/api/notifications");
+      if (res.ok) {
+        const data = await res.json();
+        setNotifications(data.notifications || []);
+      }
+    } catch (err) {
+      console.error("Failed to load notifications:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchNotifications();
+      // Poll every 30s to keep it real-time
+      const interval = setInterval(fetchNotifications, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  const handleMarkAllRead = async () => {
+    try {
+      const res = await authFetch("/api/notifications/read-all", { method: "POST" });
+      if (res.ok) {
+        fetchNotifications();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   // Click outside to close dropdowns
   useEffect(() => {
@@ -69,11 +102,6 @@ export default function TopNav({ setMobileOpen, onSearchOpen }: TopNavProps) {
       );
     });
   };
-
-  const mockNotifications = [
-    { id: 1, title: "Server deploy complete", desc: "Your Minecraft Server is online", time: "5m ago" },
-    { id: 2, title: "Invoice generated", desc: "Invoice TCK-932 has been created", time: "1h ago" },
-  ];
 
   return (
     <header className="sticky top-0 z-20 h-16 border-b border-zinc-850 bg-zinc-950/80 backdrop-blur-md flex items-center justify-between px-6 select-none">
@@ -111,23 +139,41 @@ export default function TopNav({ setMobileOpen, onSearchOpen }: TopNavProps) {
             className="p-2 rounded-lg hover:bg-zinc-900 border border-transparent hover:border-zinc-800/80 text-zinc-400 hover:text-white transition-all relative cursor-pointer"
           >
             <Bell className="w-4 h-4" />
-            <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-white rounded-full" />
+            {notifications.some(n => !n.read) && (
+              <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-white rounded-full" />
+            )}
           </button>
 
           {notificationsOpen && (
-            <div className="absolute right-0 mt-2 w-80 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden py-1 z-50">
+            <div className="absolute right-0 mt-2 w-80 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden py-1 z-50 select-none">
               <div className="px-4 py-2 border-b border-zinc-800 flex items-center justify-between">
                 <span className="text-[10px] font-bold text-white uppercase tracking-wider">Notifications</span>
-                <button className="text-[9px] text-zinc-500 hover:text-white transition-colors cursor-pointer">Mark all read</button>
+                {notifications.some(n => !n.read) && (
+                  <button 
+                    onClick={handleMarkAllRead} 
+                    className="text-[9px] text-zinc-500 hover:text-white transition-colors cursor-pointer"
+                  >
+                    Mark all read
+                  </button>
+                )}
               </div>
               <div className="max-h-64 overflow-y-auto">
-                {mockNotifications.map(notif => (
-                  <div key={notif.id} className="px-4 py-3 hover:bg-zinc-950 border-b border-zinc-800/50 last:border-b-0 transition-colors">
-                    <h5 className="text-xs font-semibold text-white mb-0.5">{notif.title}</h5>
-                    <p className="text-[11px] text-zinc-500 mb-1 leading-normal">{notif.desc}</p>
-                    <span className="text-[9px] text-zinc-600 font-bold">{notif.time}</span>
+                {notifications.length > 0 ? (
+                  notifications.map(notif => (
+                    <div key={notif.id} className="px-4 py-3 hover:bg-zinc-950 border-b border-zinc-800/50 last:border-b-0 transition-colors">
+                      <div className="flex justify-between items-start gap-1">
+                        <h5 className="text-xs font-semibold text-white mb-0.5">{notif.title}</h5>
+                        {!notif.read && <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full shrink-0 mt-1" />}
+                      </div>
+                      <p className="text-[11px] text-zinc-500 mb-1 leading-normal">{notif.message}</p>
+                      <span className="text-[9px] text-zinc-650 font-bold">{new Date(notif.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-6 text-center text-xs text-zinc-550 font-bold">
+                    No new notifications.
                   </div>
-                ))}
+                )}
               </div>
             </div>
           )}

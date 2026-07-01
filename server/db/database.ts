@@ -181,6 +181,38 @@ export const dbInit = () => {
     )
   `);
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS announcements (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      content TEXT NOT NULL,
+      category TEXT DEFAULT 'Platform',
+      poster TEXT DEFAULT 'CynexCloud System',
+      createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS notifications (
+      id TEXT PRIMARY KEY,
+      userId TEXT NOT NULL,
+      title TEXT NOT NULL,
+      message TEXT NOT NULL,
+      read INTEGER DEFAULT 0,
+      createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(userId) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `);
+
+  // Seed default startup system announcement if empty
+  const checkAnn = db.prepare("SELECT count(*) as count FROM announcements").get() as any;
+  if (checkAnn.count === 0) {
+    db.prepare(`
+      INSERT INTO announcements (id, title, content, category, poster) 
+      VALUES ('ann-start', 'CynexCloud Portal Launch', 'CynexCloud business storefront portal has launched successfully. Active services are decoupled and linked directly to Pterodactyl panels.', 'Launch', 'Cynex System')
+    `).run();
+  }
+
   console.log("SQLite database initialized successfully at", dbPath);
 };
 
