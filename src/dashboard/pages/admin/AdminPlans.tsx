@@ -40,6 +40,7 @@ export default function AdminPlans() {
   const { authFetch } = useAuth();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<"minecraft" | "vps" | "discord">("minecraft");
 
   // Modal / Editor State
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -288,9 +289,50 @@ export default function AdminPlans() {
         </Button>
       </div>
 
-      <DashboardCard title="All Hosting Plans" subtitle="Plan list source of truth">
+      {/* Category Tabs */}
+      <div className="flex gap-2 border-b border-zinc-900 pb-2">
+        <button
+          onClick={() => setSelectedCategory("minecraft")}
+          className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
+            selectedCategory === "minecraft"
+              ? "bg-white text-zinc-950"
+              : "text-zinc-500 hover:text-white"
+          }`}
+        >
+          Minecraft Server Plans
+        </button>
+        <button
+          onClick={() => setSelectedCategory("vps")}
+          className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
+            selectedCategory === "vps"
+              ? "bg-white text-zinc-950"
+              : "text-zinc-500 hover:text-white"
+          }`}
+        >
+          Linux VPS Plans
+        </button>
+        <button
+          onClick={() => setSelectedCategory("discord")}
+          className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
+            selectedCategory === "discord"
+              ? "bg-white text-zinc-950"
+              : "text-zinc-500 hover:text-white"
+          }`}
+        >
+          Discord Bot Plans
+        </button>
+      </div>
+
+      <DashboardCard 
+        title={`${selectedCategory.toUpperCase()} Hosting Plans`} 
+        subtitle="Plan list filtered configuration source of truth"
+      >
         <div className="pt-2">
-          <DataTable columns={columns} data={plans} pageSize={10} />
+          <DataTable 
+            columns={columns} 
+            data={plans.filter(p => p.category === selectedCategory)} 
+            pageSize={10} 
+          />
         </div>
       </DashboardCard>
 
