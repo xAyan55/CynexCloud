@@ -92,14 +92,10 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
 export const sanitizeInput = (req: Request, res: Response, next: NextFunction) => {
   const sanitize = (val: any): any => {
     if (typeof val === "string") {
-      // Escape HTML entities to prevent XSS
+      // Escape HTML angle brackets to block script injection while preserving slashes, quotes, and ampersands
       return val
-        .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#x27;")
-        .replace(/\//g, "&#x2F;");
+        .replace(/>/g, "&gt;");
     }
     if (Array.isArray(val)) {
       return val.map(sanitize);

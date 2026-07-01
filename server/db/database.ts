@@ -213,6 +213,17 @@ export const dbInit = () => {
     `).run();
   }
 
+  // Cleanup Settings HTML entities (un-escape slashes saved by previous sanitizeInput)
+  try {
+    db.prepare(`
+      UPDATE settings 
+      SET value = replace(replace(value, '&#x2F;', '/'), '&#x27;', '''') 
+      WHERE value LIKE '%&#x2F;%' OR value LIKE '%&#x27;%'
+    `).run();
+  } catch (err) {
+    console.error("Failed to run settings database migration:", err);
+  }
+
   console.log("SQLite database initialized successfully at", dbPath);
 };
 
