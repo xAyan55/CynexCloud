@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import StatCard from "../components/StatCard";
 import DashboardCard from "../components/DashboardCard";
@@ -10,16 +10,15 @@ import {
   HelpCircle, 
   Receipt, 
   Wallet, 
-  Terminal, 
   Clock, 
-  PlusCircle,
   Megaphone
 } from "lucide-react";
 
 export default function DashboardHome() {
-  const { user } = useAuth();
+  const { user, authFetch } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  
   const [stats, setStats] = useState({
     servers: 0,
     tickets: 0,
@@ -27,26 +26,53 @@ export default function DashboardHome() {
     balance: "$0.00"
   });
 
+  const [resources, setResources] = useState({
+    cpu: 0,
+    ram: 0,
+    disk: 0
+  });
+
+  const [activity, setActivity] = useState<any[]>([]);
+
   useEffect(() => {
     const loadHomeData = async () => {
       try {
         // Fetch real counts from backend APIs
-        const serversRes = await fetch("/api/panel/servers");
-        const ticketsRes = await fetch("/api/tickets");
-        const keysRes = await fetch("/api/api-keys");
+        const serversRes = await authFetch("/api/panel/servers");
+        const ticketsRes = await authFetch("/api/tickets");
+        const activityRes = await authFetch("/api/auth/activity");
 
         const serversData = serversRes.ok ? await serversRes.json() : { servers: [] };
         const ticketsData = ticketsRes.ok ? await ticketsRes.json() : { tickets: [] };
+        const activityData = activityRes.ok ? await activityRes.json() : { logs: [] };
 
         // Count pending invoices and filter open tickets
         const openTickets = (ticketsData.tickets || []).filter((t: any) => t.status !== "closed").length;
 
+        // Calculate real resource limits from running Pterodactyl server instances
+        let totalCpu = 0;
+        let totalRam = 0;
+        let totalDisk = 0;
+        (serversData.servers || []).forEach((srv: any) => {
+          totalCpu += srv.attributes.limits?.cpu || 0;
+          totalRam += srv.attributes.limits?.memory || 0;
+          totalDisk += srv.attributes.limits?.disk || 0;
+        });
+
         setStats({
           servers: serversData.servers?.length || 0,
           tickets: openTickets,
-          invoices: 1, // Mock pending invoice
-          balance: "$15.50" // Mock credit balance
+          invoices: 0,
+          balance: "$0.00"
         });
+
+        setResources({
+          cpu: totalCpu,
+          ram: totalRam,
+          disk: totalDisk
+        });
+
+        setActivity(activityData.logs || []);
       } catch (err) {
         console.error("Failed to load dashboard metrics:", err);
       } finally {
@@ -63,17 +89,17 @@ export default function DashboardHome() {
     { label: "Pay Due Invoices", path: "/dashboard/invoices", icon: Receipt }
   ];
 
-  const recentActivity = [
-    { action: "Account Registered", desc: "Successfully verified profile", time: "Just now", icon: Clock },
-    { action: "Secure Session Started", desc: "Auth token family rotated", time: "5 minutes ago", icon: Terminal },
-  ];
-
   const announcements = [
     { title: "Intel Core Ultra Nodes Active", desc: "New high-frequency game instances are now open for deployment in Central Europe.", date: "Today" },
     { title: "WAL DB Performance Tuning", desc: "Database query latency improved by 40% globally.", date: "Yesterday" }
   ];
 
   if (loading) return <SkeletonLoader />;
+
+  // Max thresholds representing limits of contract tiers
+  const maxCpu = 800; // 8 Cores (800%)
+  const maxRam = 8192; // 8 GB
+  const maxDisk = 102400; // 100 GB
 
   return (
     <div className="space-y-8 select-none text-zinc-300 font-sans">
@@ -107,7 +133,7 @@ export default function DashboardHome() {
                   <button
                     key={idx}
                     onClick={() => navigate(act.path)}
-                    className="flex flex-col items-center justify-center p-5 rounded-xl border border-zinc-800 bg-zinc-950/60 hover:bg-white/[0.02] hover:border-zinc-700 text-center transition-all cursor-pointer group gap-3"
+                    className="w-full flex flex-col items-center justify-center p-5 rounded-xl border border-zinc-800 bg-zinc-950/60 hover:bg-white/[0.02] hover:border-zinc-700 text-center transition-all cursor-pointer group gap-3"
                   >
                     <div className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-500 group-hover:text-white transition-colors">
                       <Icon className="w-5 h-5" />
@@ -124,9 +150,9 @@ export default function DashboardHome() {
           {/* Core Resource Metrics */}
           <DashboardCard title="Aggregated Resource Usage" subtitle="Total compute usage across all running instances">
             <div className="space-y-4.5 pt-2">
-              <ProgressBar value={stats.servers > 0 ? 34 : 0} label="CPU Core Allocation" sublabel={`${stats.servers > 0 ? "2" : "0"} / 8 Cores`} />
-              <ProgressBar value={stats.servers > 0 ? 50 : 0} label="Memory Allocation" sublabel={`${stats.servers > 0 ? "4" : "0"} / 8 GB`} />
-              <ProgressBar value={stats.servers > 0 ? 20 : 0} label="NVMe storage space" sublabel={`${stats.servers > 0 ? "20" : "0"} / 100 GB`} />
+              <ProgressBar value={resources.cpu} max={maxCpu} label="CPU Core Allocation" sublabel={`${(resources.cpu / 100).toFixed(1)} / 8.0 Cores`} />
+              <ProgressBar value={resources.ram} max={maxRam} label="Memory Allocation" sublabel={`${(resources.ram / 1024).toFixed(1)} / 8.0 GB`} />
+              <ProgressBar value={resources.disk} max={maxDisk} label="NVMe Storage Space" sublabel={`${(resources.disk / 1024).toFixed(1)} / 100.0 GB`} />
             </div>
           </DashboardCard>
         </div>
@@ -136,23 +162,28 @@ export default function DashboardHome() {
           {/* Timeline Activity list */}
           <DashboardCard title="Recent Activity" subtitle="User account security log events">
             <div className="space-y-4 pt-2">
-              {recentActivity.map((act, idx) => {
-                const Icon = act.icon;
-                return (
+              {activity.length > 0 ? (
+                activity.slice(0, 5).map((act, idx) => (
                   <div key={idx} className="flex gap-3 text-xs leading-normal">
                     <div className="p-1.5 h-fit rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-500 shrink-0">
-                      <Icon className="w-3.5 h-3.5" />
+                      <Clock className="w-3.5 h-3.5" />
                     </div>
                     <div className="space-y-0.5 flex-1">
                       <div className="flex justify-between items-center">
-                        <span className="font-bold text-white">{act.action}</span>
-                        <span className="text-[9px] font-semibold text-zinc-600">{act.time}</span>
+                        <span className="font-bold text-white uppercase tracking-wider text-[9px]">
+                          {act.action.replace(/_/g, " ")}
+                        </span>
+                        <span className="text-[9px] font-semibold text-zinc-650">
+                          {new Date(act.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
                       </div>
-                      <p className="text-zinc-500">{act.desc}</p>
+                      <p className="text-[10px] text-zinc-500 font-semibold">Security event logged successfully</p>
                     </div>
                   </div>
-                );
-              })}
+                ))
+              ) : (
+                <p className="text-center py-6 text-zinc-650 text-xs font-semibold">No recent log history.</p>
+              )}
             </div>
           </DashboardCard>
 
@@ -163,7 +194,7 @@ export default function DashboardHome() {
                 <div key={idx} className="space-y-1.5 border-b border-zinc-800/40 last:border-0 pb-3 last:pb-0">
                   <div className="flex justify-between items-center">
                     <h5 className="text-xs font-bold text-white">{ann.title}</h5>
-                    <span className="text-[9px] bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded text-zinc-500 font-bold uppercase tracking-wider">{ann.date}</span>
+                    <span className="text-[9px] bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded text-zinc-550 font-bold uppercase tracking-wider">{ann.date}</span>
                   </div>
                   <p className="text-[11px] text-zinc-500 leading-normal">{ann.desc}</p>
                 </div>

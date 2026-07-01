@@ -24,6 +24,7 @@ import {
   csrfCheck
 } from "../middleware/security";
 import { verifyAccessToken, handleTokenRefresh, verifyRefreshToken } from "../services/tokenService";
+import { queryAll } from "../db/database";
 
 const router = Router();
 
@@ -99,5 +100,16 @@ router.post("/refresh", async (req, res) => {
 router.get("/sessions", requireAuth, getSessions);
 router.post("/sessions/terminate", requireAuth, csrfCheck, terminateSession);
 router.post("/sessions/terminate-others", requireAuth, csrfCheck, terminateAllOtherSessions);
+router.get("/activity", requireAuth, async (req: any, res: Response) => {
+  try {
+    const logs = await queryAll(
+      `SELECT action, timestamp FROM audit_logs WHERE userId = ? ORDER BY timestamp DESC LIMIT 10`,
+      [req.user.id]
+    );
+    res.json({ success: true, logs });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load activity logs." });
+  }
+});
 
 export default router;
