@@ -1,69 +1,62 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../../hooks/useAuth";
 import DashboardCard from "../../components/DashboardCard";
-import DataTable, { Column } from "../../components/DataTable";
-import SkeletonLoader from "../../components/SkeletonLoader";
 import { Button } from "@/components/ui/button";
-import { Settings, Users, Server, Shield, Loader2, AlertCircle } from "lucide-react";
-
-interface AdminUser {
-  id: string;
-  username: string;
-  email: string;
-  role: string;
-  banned: number;
-  createdAt: string;
-}
+import SkeletonLoader from "../../components/SkeletonLoader";
+import { Server, Settings, Loader2 } from "lucide-react";
+import config from "../../../config.json";
 
 export default function PanelConfig() {
   const { authFetch } = useAuth();
-  const [activeTab, setActiveTab] = useState<"panel" | "users">("panel");
   const [loading, setLoading] = useState(true);
   
-  // Configuration states
+  // Panel credentials
   const [panelUrl, setPanelUrl] = useState("");
   const [appKey, setAppKey] = useState("");
   const [clientKey, setClientKey] = useState("");
-  const [configSaving, setConfigSaving] = useState(false);
-  const [configMessage, setConfigMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  
+  // Plan mappings
+  const [dirtNest, setDirtNest] = useState("1");
+  const [dirtEgg, setDirtEgg] = useState("1");
+  const [grassNest, setGrassNest] = useState("1");
+  const [grassEgg, setGrassEgg] = useState("1");
 
-  // User list states
-  const [users, setUsers] = useState<AdminUser[]>([]);
-  const [userActionId, setUserActionId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  const fetchAdminData = async () => {
-    setLoading(true);
+  const fetchConfig = async () => {
     try {
-      // 1. Fetch Panel Settings
-      const settingsRes = await authFetch("/api/admin/settings");
-      if (settingsRes.ok) {
-        const data = await settingsRes.json();
+      const res = await authFetch("/api/admin/settings");
+      if (res.ok) {
+        const data = await res.json();
         setPanelUrl(data.settings?.pterodactyl_url || "");
         setAppKey(data.settings?.pterodactyl_app_key || "");
         setClientKey(data.settings?.pterodactyl_client_key || "");
-      }
 
-      // 2. Fetch Users List
-      const usersRes = await authFetch("/api/admin/users");
-      if (usersRes.ok) {
-        const data = await usersRes.json();
-        setUsers(data.users || []);
+        // Load plan mappings if saved
+        const dirtMap = JSON.parse(data.settings?.plan_mc_dirt || '{"nestId":"1","eggId":"1"}');
+        setDirtNest(dirtMap.nestId);
+        setDirtEgg(dirtMap.eggId);
+
+        const grassMap = JSON.parse(data.settings?.plan_mc_grass || '{"nestId":"1","eggId":"1"}');
+        setGrassNest(grassMap.nestId);
+        setGrassEgg(grassMap.eggId);
       }
     } catch (err) {
-      console.error("Failed to load admin data:", err);
+      console.error("Failed to load settings:", err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchAdminData();
+    fetchConfig();
   }, []);
 
-  const handleSaveConfig = async (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setConfigSaving(true);
-    setConfigMessage(null);
+    setSaving(true);
+    setMessage(null);
 
     try {
       const res = await authFetch("/api/admin/settings", {
@@ -72,226 +65,152 @@ export default function PanelConfig() {
         body: JSON.stringify({
           pterodactyl_url: panelUrl,
           pterodactyl_app_key: appKey,
-          pterodactyl_client_key: clientKey
+          pterodactyl_client_key: clientKey,
+          // Save plan mappings as setting keys
+          plan_mc_dirt: JSON.stringify({ nestId: dirtNest, eggId: dirtEgg }),
+          plan_mc_grass: JSON.stringify({ nestId: grassNest, eggId: grassEgg })
         })
       });
 
       if (res.ok) {
-        setConfigMessage({ type: "success", text: "Pterodactyl settings saved successfully." });
+        setMessage({ type: "success", text: "Settings and plan configurations saved." });
       } else {
         const err = await res.json();
-        setConfigMessage({ type: "error", text: err.error || "Failed to save settings." });
+        setMessage({ type: "error", text: err.error || "Failed to save settings." });
       }
     } catch {
-      setConfigMessage({ type: "error", text: "Connection error occurred." });
+      setMessage({ type: "error", text: "Connection error occurred." });
     } finally {
-      setConfigSaving(false);
+      setSaving(false);
     }
   };
-
-  const handleToggleBan = async (user: AdminUser) => {
-    setUserActionId(user.id);
-    try {
-      const res = await authFetch(`/api/admin/users/${user.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ banned: !user.banned })
-      });
-      if (res.ok) {
-        fetchAdminData();
-      }
-    } catch (err) {
-      console.error("Failed to update user status:", err);
-    } finally {
-      setUserActionId(null);
-    }
-  };
-
-  const handleToggleRole = async (user: AdminUser) => {
-    setUserActionId(user.id);
-    const newRole = user.role === "admin" ? "user" : "admin";
-    try {
-      const res = await authFetch(`/api/admin/users/${user.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: newRole })
-      });
-      if (res.ok) {
-        fetchAdminData();
-      }
-    } catch (err) {
-      console.error("Failed to update user role:", err);
-    } finally {
-      setUserActionId(null);
-    }
-  };
-
-  const userColumns: Column<AdminUser>[] = [
-    { key: "username", label: "Username" },
-    { key: "email", label: "Email Address" },
-    {
-      key: "role",
-      label: "Account Role",
-      render: (row) => (
-        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-          row.role === "admin" ? "bg-white text-zinc-950" : "bg-zinc-950 border border-zinc-800 text-zinc-400"
-        }`}>
-          {row.role}
-        </span>
-      )
-    },
-    {
-      key: "banned",
-      label: "Ban Status",
-      render: (row) => (
-        <span className={`text-[10px] font-bold uppercase tracking-wider ${row.banned ? "text-red-400" : "text-zinc-500"}`}>
-          {row.banned ? "Banned" : "Active"}
-        </span>
-      )
-    },
-    {
-      key: "actions",
-      label: "Administrative Actions",
-      render: (row) => (
-        <div className="flex gap-2">
-          <Button
-            onClick={() => handleToggleRole(row)}
-            disabled={!!userActionId}
-            className="bg-zinc-950 border border-zinc-850 hover:bg-zinc-900 text-[10px] py-1 px-2.5 h-auto rounded transition-colors text-zinc-400 hover:text-white cursor-pointer"
-          >
-            Change Role
-          </Button>
-          <Button
-            onClick={() => handleToggleBan(row)}
-            disabled={!!userActionId}
-            className={`font-bold text-[10px] py-1 px-2.5 h-auto rounded transition-colors cursor-pointer border ${
-              row.banned 
-                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white" 
-                : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white"
-            }`}
-          >
-            {row.banned ? "Unban" : "Ban"}
-          </Button>
-        </div>
-      )
-    }
-  ];
 
   if (loading) return <SkeletonLoader />;
 
   return (
     <div className="space-y-6 select-none text-zinc-300 font-sans">
       <div className="space-y-1">
-        <h2 className="text-xl font-bold text-white tracking-tight">Admin Console</h2>
-        <p className="text-xs text-zinc-500 font-medium">Configure internal settings, sync Pterodactyl APIs, and manage registered profiles.</p>
+        <h2 className="text-xl font-bold text-white tracking-tight">Pterodactyl Configuration</h2>
+        <p className="text-xs text-zinc-500 font-medium">Configure Pterodactyl node credentials and map server build plans.</p>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-zinc-850 gap-2">
-        <button
-          onClick={() => setActiveTab("panel")}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 cursor-pointer transition-all ${
-            activeTab === "panel" 
-              ? "border-white text-white" 
-              : "border-transparent text-zinc-500 hover:text-zinc-300"
-          }`}
-        >
-          <Server className="w-4 h-4" />
-          <span>Pterodactyl Configuration</span>
-        </button>
-        <button
-          onClick={() => setActiveTab("users")}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 cursor-pointer transition-all ${
-            activeTab === "users" 
-              ? "border-white text-white" 
-              : "border-transparent text-zinc-500 hover:text-zinc-300"
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          <span>User Profiles</span>
-        </button>
-      </div>
+      {message && (
+        <div className={`p-3.5 rounded-lg border text-xs font-semibold ${
+          message.type === "success" 
+            ? "bg-emerald-950/20 border-emerald-500/10 text-emerald-400" 
+            : "bg-red-950/20 border-red-500/10 text-red-400"
+        }`}>
+          {message.text}
+        </div>
+      )}
 
-      {/* Tab Contents */}
-      {activeTab === "panel" ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <DashboardCard title="Pterodactyl Node Integration" subtitle="API mapping keys">
-              <form onSubmit={handleSaveConfig} className="space-y-4.5 pt-2">
-                {configMessage && (
-                  <div className={`p-3.5 rounded-lg border text-xs font-semibold ${
-                    configMessage.type === "success" 
-                      ? "bg-emerald-950/20 border-emerald-500/10 text-emerald-400" 
-                      : "bg-red-950/20 border-red-500/10 text-red-400"
-                  }`}>
-                    {configMessage.text}
-                  </div>
-                )}
-
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Panel URL</label>
-                  <input
-                    type="url"
-                    required
-                    value={panelUrl}
-                    onChange={(e) => setPanelUrl(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-zinc-700 text-white rounded-lg px-3.5 py-2.5 text-xs font-semibold focus:outline-none"
-                    placeholder="https://panel.cynexcloud.com"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Application API Key (Read/Write)</label>
-                  <input
-                    type="password"
-                    required
-                    value={appKey}
-                    onChange={(e) => setAppKey(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-zinc-700 text-white rounded-lg px-3.5 py-2.5 text-xs font-semibold focus:outline-none"
-                    placeholder="ptla_••••••••••••••••••••••••••••••••••••"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Client API Key (Read/Write)</label>
-                  <input
-                    type="password"
-                    required
-                    value={clientKey}
-                    onChange={(e) => setClientKey(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-zinc-700 text-white rounded-lg px-3.5 py-2.5 text-xs font-semibold focus:outline-none"
-                    placeholder="ptlc_••••••••••••••••••••••••••••••••••••"
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={configSaving}
-                  className="bg-white text-zinc-950 hover:bg-zinc-200 font-bold py-2.5 px-5 h-auto text-xs rounded-lg border-none cursor-pointer flex items-center gap-1.5"
-                >
-                  {configSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Save Settings"}
-                </Button>
-              </form>
-            </DashboardCard>
-          </div>
-
-          <div className="space-y-6">
-            <DashboardCard title="Integration Guide" subtitle="Helpful advice">
-              <div className="space-y-3 pt-2 text-xs text-zinc-400 leading-relaxed font-medium">
-                <p>1. Generate an **Application API Key** from your Pterodactyl Admin settings panel with full read/write permissions for Users and Servers.</p>
-                <p>2. Create a **Client API Key** from your personal account settings on Pterodactyl. This key is used to proxy server resource stats and execute power controls (start, stop, etc.).</p>
-                <p>3. CynexCloud automatically maps login email profiles to Pterodactyl user profiles to query server listings seamlessly.</p>
+      <form onSubmit={handleSave} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <DashboardCard title="Pterodactyl Credentials" subtitle="Wings node secrets">
+            <div className="space-y-4 pt-2">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Panel URL</label>
+                <input
+                  type="url"
+                  required
+                  value={panelUrl}
+                  onChange={(e) => setPanelUrl(e.target.value)}
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-zinc-700 text-white rounded-lg px-3.5 py-2.5 text-xs font-semibold focus:outline-none"
+                  placeholder="https://panel.cynexcloud.com"
+                />
               </div>
-            </DashboardCard>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Application API Key</label>
+                <input
+                  type="password"
+                  required
+                  value={appKey}
+                  onChange={(e) => setAppKey(e.target.value)}
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-zinc-700 text-white rounded-lg px-3.5 py-2.5 text-xs font-semibold focus:outline-none"
+                  placeholder="ptla_••••••••"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Client API Key</label>
+                <input
+                  type="password"
+                  required
+                  value={clientKey}
+                  onChange={(e) => setClientKey(e.target.value)}
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-zinc-700 text-white rounded-lg px-3.5 py-2.5 text-xs font-semibold focus:outline-none"
+                  placeholder="ptlc_••••••••"
+                />
+              </div>
+            </div>
+          </DashboardCard>
+
+          <DashboardCard title="Minecraft Plan Configurations" subtitle="Map shop items to panel nests and eggs">
+            <div className="space-y-5 pt-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <h5 className="text-xs font-bold text-white mb-2">Dirt Plan (Lobby/Survival)</h5>
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Nest ID</label>
+                    <input
+                      type="number"
+                      required
+                      value={dirtNest}
+                      onChange={(e) => setDirtNest(e.target.value)}
+                      className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-lg px-3.5 py-2 text-xs focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Egg ID</label>
+                    <input
+                      type="number"
+                      required
+                      value={dirtEgg}
+                      onChange={(e) => setDirtEgg(e.target.value)}
+                      className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-lg px-3.5 py-2 text-xs focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <h5 className="text-xs font-bold text-white mb-2">Grass Plan (Bungee/Modded)</h5>
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Nest ID</label>
+                    <input
+                      type="number"
+                      required
+                      value={grassNest}
+                      onChange={(e) => setGrassNest(e.target.value)}
+                      className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-lg px-3.5 py-2 text-xs focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Egg ID</label>
+                    <input
+                      type="number"
+                      required
+                      value={grassEgg}
+                      onChange={(e) => setGrassEgg(e.target.value)}
+                      className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-lg px-3.5 py-2 text-xs focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </DashboardCard>
+
+          <div className="flex justify-end pt-2">
+            <Button
+              type="submit"
+              disabled={saving}
+              className="bg-white text-zinc-950 hover:bg-zinc-200 font-bold py-2.5 px-6 h-auto text-xs rounded-lg border-none cursor-pointer flex items-center gap-1.5"
+            >
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Configurations"}
+            </Button>
           </div>
         </div>
-      ) : (
-        <DashboardCard title="Registered User Profiles" subtitle="Manage permissions, roles, and ban lists">
-          <div className="pt-2">
-            <DataTable columns={userColumns} data={users} pageSize={8} />
-          </div>
-        </DashboardCard>
-      )}
+      </form>
     </div>
   );
 }

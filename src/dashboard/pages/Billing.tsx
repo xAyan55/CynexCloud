@@ -11,11 +11,8 @@ interface Invoice {
 }
 
 export default function Billing() {
-  const [balance, setBalance] = useState("$15.50");
-  const [invoices, setInvoices] = useState<Invoice[]>([
-    { id: "INV-9284", amount: "$7.50", status: "Paid", createdAt: "June 24, 2026" },
-    { id: "INV-8372", amount: "$15.00", status: "Paid", createdAt: "May 24, 2026" }
-  ]);
+  const [balance, setBalance] = useState("$0.00");
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
 
   const columns: Column<Invoice>[] = [
     {

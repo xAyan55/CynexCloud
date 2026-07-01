@@ -68,12 +68,15 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
     }
   ];
 
-  // If admin, append Admin Panel to overview section
+  // If admin, append Admin Panel to the bottom as a separate category
   if (user?.role === "admin") {
-    menuGroups[0].items.push({
-      path: "/dashboard/admin",
-      label: "Admin Config",
-      icon: Settings
+    menuGroups.push({
+      title: "Admin",
+      items: [
+        { path: "/dashboard/admin/config", label: "Pterodactyl Config", icon: Settings },
+        { path: "/dashboard/admin/tickets", label: "Manage Tickets", icon: HelpCircle },
+        { path: "/dashboard/admin/users", label: "Manage Users", icon: Users }
+      ]
     });
   }
 

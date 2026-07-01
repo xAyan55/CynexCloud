@@ -62,12 +62,8 @@ export default function ServerDetail() {
   const consoleBottomRef = useRef<HTMLDivElement>(null);
 
   // Backups / DB states
-  const [backups, setBackups] = useState<Backup[]>([
-    { id: "1", name: "automated-backup-daily", size: "245 MB", createdAt: "Today at 04:00 AM" }
-  ]);
-  const [databases, setDatabases] = useState<ServerDb[]>([
-    { id: "1", name: "s1_main", username: "u1_f293b", host: "127.0.0.1" }
-  ]);
+  const [backups, setBackups] = useState<Backup[]>([]);
+  const [databases, setDatabases] = useState<ServerDb[]>([]);
 
   // Load server details
   useEffect(() => {
@@ -230,9 +226,9 @@ export default function ServerDetail() {
           <div className="lg:col-span-2 space-y-6">
             <DashboardCard title="Realtime Resource Usage" subtitle="Compute load specifications">
               <div className="space-y-4 pt-2">
-                <ProgressBar value={12.4} label="CPU Load" sublabel="12.4% / 100%" />
-                <ProgressBar value={52} label="Memory Usage" sublabel="2.1 GB / 4.0 GB" />
-                <ProgressBar value={20} label="Storage utilization" sublabel="10 GB / 50 GB" />
+                <ProgressBar value={0} label="CPU Load" sublabel={`0.0% / ${server.limits.cpu > 0 ? `${server.limits.cpu}%` : "Unlimited"}`} />
+                <ProgressBar value={0} label="Memory Usage" sublabel={`0.0 GB / ${(server.limits.memory / 1024).toFixed(1)} GB`} />
+                <ProgressBar value={0} label="Storage utilization" sublabel={`0.0 GB / ${(server.limits.disk / 1024).toFixed(1)} GB`} />
               </div>
             </DashboardCard>
           </div>

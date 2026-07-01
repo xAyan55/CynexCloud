@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import MinecraftPlans from "./pages/MinecraftPlans";
@@ -15,7 +15,7 @@ import Privacy from "./pages/Privacy";
 import KnowledgeBase from "./pages/KnowledgeBase";
 import DesignSystem from "./pages/DesignSystem";
 import Auth from "./pages/Auth";
-import { AuthProvider } from "./hooks/useAuth";
+import { AuthProvider, useAuth } from "./hooks/useAuth";
 
 // Dashboard Lazy Route Imports
 const DashboardLayout = lazy(() => import("./dashboard/DashboardLayout"));
@@ -37,7 +37,20 @@ const Profile = lazy(() => import("./dashboard/pages/Profile"));
 const Security = lazy(() => import("./dashboard/pages/Security"));
 const ApiKeys = lazy(() => import("./dashboard/pages/ApiKeys"));
 const Settings = lazy(() => import("./dashboard/pages/Settings"));
+
+// Admin pages
 const PanelConfig = lazy(() => import("./dashboard/pages/admin/PanelConfig"));
+const AdminTickets = lazy(() => import("./dashboard/pages/admin/AdminTickets"));
+const AdminTicketDetail = lazy(() => import("./dashboard/pages/admin/AdminTicketDetail"));
+const AdminUsers = lazy(() => import("./dashboard/pages/admin/AdminUsers"));
+
+function RequireAdmin({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  if (user?.role !== "admin") {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return <>{children}</>;
+}
 
 export default function App() {
   return (
@@ -78,7 +91,12 @@ export default function App() {
               <Route path="security" element={<Security />} />
               <Route path="api-keys" element={<ApiKeys />} />
               <Route path="settings" element={<Settings />} />
-              <Route path="admin" element={<PanelConfig />} />
+              
+              {/* Admin specific routes */}
+              <Route path="admin/config" element={<RequireAdmin><PanelConfig /></RequireAdmin>} />
+              <Route path="admin/tickets" element={<RequireAdmin><AdminTickets /></RequireAdmin>} />
+              <Route path="admin/tickets/:id" element={<RequireAdmin><AdminTicketDetail /></RequireAdmin>} />
+              <Route path="admin/users" element={<RequireAdmin><AdminUsers /></RequireAdmin>} />
             </Route>
 
             {/* Site Core Pages (With Header/Footer Layout) */}

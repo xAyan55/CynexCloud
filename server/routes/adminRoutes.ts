@@ -91,4 +91,19 @@ router.put("/users/:id", requireAuth, requireAdmin, async (req: any, res: Respon
   }
 });
 
+// Retrieve all user tickets for admin management
+router.get("/tickets", requireAuth, requireAdmin, async (req: any, res: Response) => {
+  try {
+    const tickets = await queryAll(
+      `SELECT t.*, u.username, u.email 
+       FROM tickets t
+       LEFT JOIN users u ON t.userId = u.id
+       ORDER BY t.updatedAt DESC`
+    );
+    res.json({ success: true, tickets });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load admin support tickets." });
+  }
+});
+
 export default router;
