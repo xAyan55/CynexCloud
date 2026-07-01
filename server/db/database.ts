@@ -72,6 +72,7 @@ export const dbInit = () => {
       passwordHash TEXT NOT NULL,
       createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY(userId) REFERENCES users(id) ON DELETE CASCADE
+    )
   `);
 
   db.exec(`
