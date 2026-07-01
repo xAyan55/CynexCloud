@@ -1,18 +1,54 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../hooks/useAuth";
 import DashboardCard from "../components/DashboardCard";
 import DataTable, { Column } from "../components/DataTable";
-import { Receipt, Wallet, CreditCard, Sparkles } from "lucide-react";
+import { Wallet, CreditCard, Receipt } from "lucide-react";
 
 interface Invoice {
   id: string;
-  amount: string;
-  status: "Paid" | "Unpaid" | "Overdue";
+  orderId: string;
+  amount: number;
+  status: "Paid" | "Unpaid";
   createdAt: string;
 }
 
 export default function Billing() {
-  const [balance, setBalance] = useState("$0.00");
+  const { authFetch } = useAuth();
+  const [balance, setBalance] = useState("₹0.00");
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [payingId, setPayingId] = useState<string | null>(null);
+
+  const fetchInvoices = async () => {
+    try {
+      const res = await authFetch("/api/invoices");
+      if (res.ok) {
+        const data = await res.json();
+        setInvoices(data.invoices || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch invoices:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchInvoices();
+  }, []);
+
+  const handlePayInvoice = async (invoiceId: string) => {
+    setPayingId(invoiceId);
+    try {
+      const res = await authFetch(`/api/invoices/${invoiceId}/pay`, {
+        method: "POST"
+      });
+      if (res.ok) {
+        fetchInvoices();
+      }
+    } catch (err) {
+      console.error("Failed to pay invoice:", err);
+    } finally {
+      setPayingId(null);
+    }
+  };
 
   const columns: Column<Invoice>[] = [
     {
@@ -20,12 +56,16 @@ export default function Billing() {
       label: "Invoice ID",
       render: (row) => (
         <div className="flex items-center gap-2.5">
-          <Receipt className="w-3.5 h-3.5 text-zinc-500" />
-          <span className="font-bold text-white">{row.id}</span>
+          <Receipt className="w-4 h-4 text-zinc-500" />
+          <span className="font-bold text-white select-all font-mono text-[10px]">{row.id}</span>
         </div>
       )
     },
-    { key: "amount", label: "Amount" },
+    {
+      key: "amount",
+      label: "Amount",
+      render: (row) => <span className="font-mono text-white text-[11px]">₹{row.amount}</span>
+    },
     {
       key: "status",
       label: "Status",
@@ -39,7 +79,28 @@ export default function Billing() {
         </span>
       )
     },
-    { key: "createdAt", label: "Billing Date" }
+    {
+      key: "createdAt",
+      label: "Billing Date",
+      render: (row) => <span className="text-[10px] font-semibold text-zinc-500">{new Date(row.createdAt).toLocaleDateString()}</span>
+    },
+    {
+      key: "actions",
+      label: "Payment Action",
+      render: (row) => (
+        row.status === "Unpaid" ? (
+          <button
+            onClick={() => handlePayInvoice(row.id)}
+            disabled={payingId === row.id}
+            className="px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider bg-white text-zinc-950 hover:bg-zinc-200 rounded transition-colors cursor-pointer"
+          >
+            {payingId === row.id ? "Paying..." : "Pay (Simulate)"}
+          </button>
+        ) : (
+          <span className="text-[9px] text-zinc-600 font-bold uppercase tracking-wider">COMPLETED</span>
+        )
+      )
+    }
   ];
 
   return (

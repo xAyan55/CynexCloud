@@ -44,8 +44,7 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
     {
       title: "Services",
       items: [
-        { path: "/dashboard/servers", label: "Servers", icon: Gamepad2 },
-        { path: "/dashboard/deploy", label: "Deploy Server", icon: PlusCircle }
+        { path: "/dashboard/services", label: "Services", icon: Gamepad2 }
       ]
     },
     {
@@ -74,6 +73,7 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
       title: "Admin",
       items: [
         { path: "/dashboard/admin/config", label: "Pterodactyl Config", icon: Settings },
+        { path: "/dashboard/admin/plans", label: "Plan Management", icon: LayoutDashboard },
         { path: "/dashboard/admin/tickets", label: "Manage Tickets", icon: HelpCircle },
         { path: "/dashboard/admin/users", label: "Manage Users", icon: Users }
       ]

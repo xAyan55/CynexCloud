@@ -20,10 +20,10 @@ export default function DashboardHome() {
   const [loading, setLoading] = useState(true);
   
   const [stats, setStats] = useState({
-    servers: 0,
+    services: 0,
     tickets: 0,
     invoices: 0,
-    balance: "$0.00"
+    balance: "₹0.00"
   });
 
   const [resources, setResources] = useState({
@@ -38,32 +38,39 @@ export default function DashboardHome() {
     const loadHomeData = async () => {
       try {
         // Fetch real counts from backend APIs
-        const serversRes = await authFetch("/api/panel/servers");
+        const servicesRes = await authFetch("/api/services");
         const ticketsRes = await authFetch("/api/tickets");
         const activityRes = await authFetch("/api/auth/activity");
+        const plansRes = await authFetch("/api/plans");
 
-        const serversData = serversRes.ok ? await serversRes.json() : { servers: [] };
+        const servicesData = servicesRes.ok ? await servicesRes.json() : { services: [] };
         const ticketsData = ticketsRes.ok ? await ticketsRes.json() : { tickets: [] };
         const activityData = activityRes.ok ? await activityRes.json() : { logs: [] };
+        const plansData = plansRes.ok ? await plansRes.json() : [];
 
         // Count pending invoices and filter open tickets
         const openTickets = (ticketsData.tickets || []).filter((t: any) => t.status !== "closed").length;
 
-        // Calculate real resource limits from running Pterodactyl server instances
+        // Calculate real resource limits from purchased plans of active services
         let totalCpu = 0;
         let totalRam = 0;
         let totalDisk = 0;
-        (serversData.servers || []).forEach((srv: any) => {
-          totalCpu += srv.attributes.limits?.cpu || 0;
-          totalRam += srv.attributes.limits?.memory || 0;
-          totalDisk += srv.attributes.limits?.disk || 0;
+        const activeServices = (servicesData.services || []).filter((s: any) => s.status === "Active");
+        
+        activeServices.forEach((srv: any) => {
+          const plan = plansData.find((p: any) => p.id === srv.planId);
+          if (plan) {
+            totalCpu += plan.cpu_pct || 0;
+            totalRam += plan.ram_mb || 0;
+            totalDisk += plan.disk_mb || 0;
+          }
         });
 
         setStats({
-          servers: serversData.servers?.length || 0,
+          services: activeServices.length,
           tickets: openTickets,
-          invoices: 0,
-          balance: "$0.00"
+          invoices: (servicesData.services || []).filter((s: any) => s.status === "Pending Payment").length,
+          balance: "₹0.00"
         });
 
         setResources({
@@ -84,7 +91,7 @@ export default function DashboardHome() {
   }, []);
 
   const quickActions = [
-    { label: "Deploy Minecraft Server", path: "/dashboard/deploy", icon: Gamepad2 },
+    { label: "Order Service", path: "/dashboard/deploy", icon: Gamepad2 },
     { label: "Open Support Ticket", path: "/dashboard/support/create", icon: HelpCircle },
     { label: "Pay Due Invoices", path: "/dashboard/invoices", icon: Receipt }
   ];
@@ -115,7 +122,7 @@ export default function DashboardHome() {
 
       {/* Stats Cards Row Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <StatCard label="Active Servers" value={stats.servers} icon={Gamepad2} />
+        <StatCard label="Active Services" value={stats.services} icon={Gamepad2} />
         <StatCard label="Open Tickets" value={stats.tickets} icon={HelpCircle} />
         <StatCard label="Pending Invoices" value={stats.invoices} icon={Receipt} />
         <StatCard label="Account Balance" value={stats.balance} icon={Wallet} />
@@ -148,7 +155,7 @@ export default function DashboardHome() {
           </DashboardCard>
 
           {/* Core Resource Metrics */}
-          <DashboardCard title="Aggregated Resource Usage" subtitle="Total compute usage across all running instances">
+          <DashboardCard title="Aggregated Resource Usage" subtitle="Total purchased compute allocation details">
             <div className="space-y-4.5 pt-2">
               <ProgressBar value={resources.cpu} max={maxCpu} label="CPU Core Allocation" sublabel={`${(resources.cpu / 100).toFixed(1)} / 8.0 Cores`} />
               <ProgressBar value={resources.ram} max={maxRam} label="Memory Allocation" sublabel={`${(resources.ram / 1024).toFixed(1)} / 8.0 GB`} />
@@ -173,7 +180,7 @@ export default function DashboardHome() {
                         <span className="font-bold text-white uppercase tracking-wider text-[9px]">
                           {act.action.replace(/_/g, " ")}
                         </span>
-                        <span className="text-[9px] font-semibold text-zinc-650">
+                        <span className="text-[9px] font-semibold text-zinc-655">
                           {new Date(act.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
@@ -182,7 +189,7 @@ export default function DashboardHome() {
                   </div>
                 ))
               ) : (
-                <p className="text-center py-6 text-zinc-650 text-xs font-semibold">No recent log history.</p>
+                <p className="text-center py-6 text-zinc-655 text-xs font-semibold">No recent log history.</p>
               )}
             </div>
           </DashboardCard>

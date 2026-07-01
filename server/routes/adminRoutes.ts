@@ -1,6 +1,8 @@
 import { Router, Response, NextFunction } from "express";
 import { requireAuth } from "./authRoutes";
 import { queryRun, queryGet, queryAll } from "../db/database";
+import axios from "axios";
+import { getPanelConfig } from "../services/pterodactylService";
 
 const router = Router();
 
@@ -103,6 +105,73 @@ router.get("/tickets", requireAuth, requireAdmin, async (req: any, res: Response
     res.json({ success: true, tickets });
   } catch (err) {
     res.status(500).json({ error: "Failed to load admin support tickets." });
+  }
+});
+
+// Retrieve locations list from Pterodactyl
+router.get("/pterodactyl/locations", requireAuth, requireAdmin, async (req: any, res: Response) => {
+  try {
+    const config = await getPanelConfig();
+    const response = await axios.get(`${config.url}/api/application/locations`, {
+      headers: { Authorization: `Bearer ${config.appKey}`, Accept: "application/json" }
+    });
+    res.json({ success: true, locations: response.data.data });
+  } catch (err: any) {
+    res.status(500).json({ error: err.response?.data?.errors?.[0]?.detail || err.message || "Failed to load panel locations." });
+  }
+});
+
+// Retrieve nodes list from Pterodactyl
+router.get("/pterodactyl/nodes", requireAuth, requireAdmin, async (req: any, res: Response) => {
+  try {
+    const config = await getPanelConfig();
+    const response = await axios.get(`${config.url}/api/application/nodes`, {
+      headers: { Authorization: `Bearer ${config.appKey}`, Accept: "application/json" }
+    });
+    res.json({ success: true, nodes: response.data.data });
+  } catch (err: any) {
+    res.status(500).json({ error: err.response?.data?.errors?.[0]?.detail || err.message || "Failed to load panel nodes." });
+  }
+});
+
+// Retrieve nests list from Pterodactyl
+router.get("/pterodactyl/nests", requireAuth, requireAdmin, async (req: any, res: Response) => {
+  try {
+    const config = await getPanelConfig();
+    const response = await axios.get(`${config.url}/api/application/nests`, {
+      headers: { Authorization: `Bearer ${config.appKey}`, Accept: "application/json" }
+    });
+    res.json({ success: true, nests: response.data.data });
+  } catch (err: any) {
+    res.status(500).json({ error: err.response?.data?.errors?.[0]?.detail || err.message || "Failed to load panel nests." });
+  }
+});
+
+// Retrieve eggs list for a specific Nest ID
+router.get("/pterodactyl/nests/:nestId/eggs", requireAuth, requireAdmin, async (req: any, res: Response) => {
+  const { nestId } = req.params;
+  try {
+    const config = await getPanelConfig();
+    const response = await axios.get(`${config.url}/api/application/nests/${nestId}/eggs`, {
+      headers: { Authorization: `Bearer ${config.appKey}`, Accept: "application/json" }
+    });
+    res.json({ success: true, eggs: response.data.data });
+  } catch (err: any) {
+    res.status(500).json({ error: err.response?.data?.errors?.[0]?.detail || err.message || "Failed to load nest eggs." });
+  }
+});
+
+// Retrieve allocations list for a specific Node ID
+router.get("/pterodactyl/nodes/:nodeId/allocations", requireAuth, requireAdmin, async (req: any, res: Response) => {
+  const { nodeId } = req.params;
+  try {
+    const config = await getPanelConfig();
+    const response = await axios.get(`${config.url}/api/application/nodes/${nodeId}/allocations`, {
+      headers: { Authorization: `Bearer ${config.appKey}`, Accept: "application/json" }
+    });
+    res.json({ success: true, allocations: response.data.data });
+  } catch (err: any) {
+    res.status(500).json({ error: err.response?.data?.errors?.[0]?.detail || err.message || "Failed to load node allocations." });
   }
 });
 

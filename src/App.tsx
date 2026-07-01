@@ -20,8 +20,8 @@ import { AuthProvider, useAuth } from "./hooks/useAuth";
 // Dashboard Lazy Route Imports
 const DashboardLayout = lazy(() => import("./dashboard/DashboardLayout"));
 const DashboardHome = lazy(() => import("./dashboard/pages/DashboardHome"));
-const Servers = lazy(() => import("./dashboard/pages/Servers"));
-const ServerDetail = lazy(() => import("./dashboard/pages/ServerDetail"));
+const Services = lazy(() => import("./dashboard/pages/Services"));
+const ServiceDetail = lazy(() => import("./dashboard/pages/ServiceDetail"));
 const Deploy = lazy(() => import("./dashboard/pages/Deploy"));
 const Backups = lazy(() => import("./dashboard/pages/Backups"));
 const Databases = lazy(() => import("./dashboard/pages/Databases"));
@@ -40,6 +40,7 @@ const Settings = lazy(() => import("./dashboard/pages/Settings"));
 
 // Admin pages
 const PanelConfig = lazy(() => import("./dashboard/pages/admin/PanelConfig"));
+const AdminPlans = lazy(() => import("./dashboard/pages/admin/AdminPlans"));
 const AdminTickets = lazy(() => import("./dashboard/pages/admin/AdminTickets"));
 const AdminTicketDetail = lazy(() => import("./dashboard/pages/admin/AdminTicketDetail"));
 const AdminUsers = lazy(() => import("./dashboard/pages/admin/AdminUsers"));
@@ -74,8 +75,8 @@ export default function App() {
             {/* Dashboard Workspace Routes */}
             <Route path="/dashboard" element={<DashboardLayout />}>
               <Route index element={<DashboardHome />} />
-              <Route path="servers" element={<Servers />} />
-              <Route path="servers/:id" element={<ServerDetail />} />
+              <Route path="services" element={<Services />} />
+              <Route path="services/:id" element={<ServiceDetail />} />
               <Route path="deploy" element={<Deploy />} />
               <Route path="backups" element={<Backups />} />
               <Route path="databases" element={<Databases />} />
@@ -92,8 +93,8 @@ export default function App() {
               <Route path="api-keys" element={<ApiKeys />} />
               <Route path="settings" element={<Settings />} />
               
-              {/* Admin specific routes */}
               <Route path="admin/config" element={<RequireAdmin><PanelConfig /></RequireAdmin>} />
+              <Route path="admin/plans" element={<RequireAdmin><AdminPlans /></RequireAdmin>} />
               <Route path="admin/tickets" element={<RequireAdmin><AdminTickets /></RequireAdmin>} />
               <Route path="admin/tickets/:id" element={<RequireAdmin><AdminTicketDetail /></RequireAdmin>} />
               <Route path="admin/users" element={<RequireAdmin><AdminUsers /></RequireAdmin>} />

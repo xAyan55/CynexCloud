@@ -13,6 +13,8 @@ import ticketRouter from "./server/routes/ticketRoutes";
 import apiKeyRouter from "./server/routes/apiKeyRoutes";
 import adminRouter from "./server/routes/adminRoutes";
 import { securityHeaders, sanitizeInput } from "./server/middleware/security";
+import { queryGet, queryRun, queryAll } from "./server/db/database";
+import { enqueueProvisioningJob } from "./server/services/queueService";
 import { initializeApp as initializeClientApp } from "firebase/app";
 import { 
   getFirestore as getClientFirestore, 
@@ -175,180 +177,178 @@ async function startServer() {
   app.get("/api/plans", async (req, res) => {
     try {
       const snapshot = await db.collection("plans").get();
-      const existingIds = snapshot.empty ? [] : snapshot.docs.map(doc => doc.id);
+      if (snapshot.empty) {
+        const minecraftPlans = config.minecraftPlans.map((p: any) => ({ 
+          ...p, 
+          category: 'minecraft',
+          storage: p.disk,
+          price_numeric: parseFloat(p.price.match(/[0-9.]+/)?.[0] || "0")
+        }));
+        const vpsPlans = [
+          {
+            id: "vps-dev",
+            name: "Cloud Dev",
+            price: "750",
+            price_numeric: 750,
+            originalPrice: "1000",
+            description: "An affordable, dedicated environment for testing, sandboxing, and lightweight applications.",
+            ram: "2GB",
+            cpu: "1 vCore",
+            storage: "40GB NVMe",
+            features: ["KVM Virtualization", "Root Access", "Dedicated IP"],
+            popular: false,
+            discountBadge: "25% OFF",
+            category: "vps"
+          },
+          {
+            id: "vps-start",
+            name: "Cloud Start",
+            price: "1200",
+            price_numeric: 1200,
+            originalPrice: "1600",
+            description: "Ideal for small projects, personal websites, or lightweight development environments.",
+            ram: "4GB",
+            cpu: "2 vCores",
+            storage: "80GB NVMe",
+            features: ["KVM Virtualization", "Root Access", "Dedicated IP"],
+            popular: false,
+            discountBadge: "25% OFF",
+            category: "vps"
+          },
+          {
+            id: "vps-pro",
+            name: "Cloud Pro",
+            price: "2400",
+            price_numeric: 2400,
+            originalPrice: "3200",
+            description: "High-performance VPS for growing applications and production workloads.",
+            ram: "8GB",
+            cpu: "4 vCores",
+            storage: "160GB NVMe",
+            features: ["KVM Virtualization", "Root Access", "Snapshot Backups"],
+            popular: true,
+            popularText: "MOST POPULAR CHOICE",
+            discountBadge: "25% OFF",
+            category: "vps"
+          },
+          {
+            id: "vps-ultra",
+            name: "Cloud Ultra",
+            price: "4800",
+            price_numeric: 4800,
+            originalPrice: "6400",
+            description: "Enterprise-grade resources for high-traffic sites and complex infrastructures.",
+            ram: "16GB",
+            cpu: "8 vCores",
+            storage: "320GB NVMe",
+            features: ["KVM Virtualization", "Root Access", "Daily Backups"],
+            popular: false,
+            discountBadge: "25% OFF",
+            category: "vps"
+          },
+          {
+            id: "vps-extreme",
+            name: "Cloud Extreme",
+            price: "9600",
+            price_numeric: 9600,
+            originalPrice: "12000",
+            description: "Ultrafast high-resource cluster nodes for maximum demanding workloads.",
+            ram: "32GB",
+            cpu: "16 vCores",
+            storage: "640GB NVMe",
+            features: ["KVM Virtualization", "Root Access", "Premium 10Gbps Uplink", "Daily Backups"],
+            popular: false,
+            discountBadge: "20% OFF",
+            category: "vps"
+          }
+        ];
+        const discordPlans = [
+          {
+            id: "bot-micro",
+            name: "Bot Micro",
+            price: "120",
+            price_numeric: 120,
+            originalPrice: "200",
+            description: "The lightest setup for background tasks and single-channel helper bots.",
+            ram: "256MB",
+            cpu: "0.25 vCore",
+            storage: "2GB SSD",
+            features: ["Node.js/Python/Go", "99.9% Uptime"],
+            popular: false,
+            discountBadge: "40% OFF",
+            category: "discord"
+          },
+          {
+            id: "bot-starter",
+            name: "Bot Starter",
+            price: "240",
+            price_numeric: 240,
+            originalPrice: "400",
+            description: "Perfect for small community bots and simple automation tasks.",
+            ram: "512MB",
+            cpu: "0.5 vCore",
+            storage: "5GB SSD",
+            features: ["Node.js/Python/Go", "99.9% Uptime"],
+            popular: false,
+            discountBadge: "40% OFF",
+            category: "discord"
+          },
+          {
+            id: "bot-advanced",
+            name: "Bot Advanced",
+            price: "480",
+            price_numeric: 480,
+            originalPrice: "800",
+            description: "Optimized for large servers with many active users and complex commands.",
+            ram: "1GB",
+            cpu: "1 vCore",
+            storage: "10GB SSD",
+            features: ["Node.js/Python/Go", "Auto-Restart"],
+            popular: true,
+            popularText: "RECOMMENDED FOR PROS",
+            discountBadge: "40% OFF",
+            category: "discord"
+          },
+          {
+            id: "bot-enterprise",
+            name: "Bot Enterprise",
+            price: "1000",
+            price_numeric: 1000,
+            originalPrice: "1600",
+            description: "Maximum performance for global bots serving millions of users.",
+            ram: "2GB",
+            cpu: "2 vCores",
+            storage: "20GB SSD",
+            features: ["Node.js/Python/Go", "Custom Database"],
+            popular: false,
+            discountBadge: "35% OFF",
+            category: "discord"
+          },
+          {
+            id: "bot-extreme",
+            name: "Bot Extreme",
+            price: "1800",
+            price_numeric: 1800,
+            originalPrice: "2500",
+            description: "Premium hosting for top-tier verified Discord bots with high-intensity command queries.",
+            ram: "4GB",
+            cpu: "4 vCores",
+            storage: "40GB SSD",
+            features: ["Node.js/Python/Go", "Custom Redis/Database", "Priority 24/7 Support"],
+            popular: false,
+            discountBadge: "28% OFF",
+            category: "discord"
+          }
+        ];
 
-      const minecraftPlans = config.minecraftPlans.map((p: any) => ({ 
-        ...p, 
-        category: 'minecraft',
-        storage: p.disk,
-        price_numeric: parseFloat(p.price.match(/[0-9.]+/)?.[0] || "0")
-      }));
-      const vpsPlans = [
-        {
-          id: "vps-dev",
-          name: "Cloud Dev",
-          price: "750",
-          price_numeric: 750,
-          originalPrice: "1000",
-          description: "An affordable, dedicated environment for testing, sandboxing, and lightweight applications.",
-          ram: "2GB",
-          cpu: "1 vCore",
-          storage: "40GB NVMe",
-          features: ["KVM Virtualization", "Root Access", "Dedicated IP"],
-          popular: false,
-          discountBadge: "25% OFF",
-          category: "vps"
-        },
-        {
-          id: "vps-start",
-          name: "Cloud Start",
-          price: "1200",
-          price_numeric: 1200,
-          originalPrice: "1600",
-          description: "Ideal for small projects, personal websites, or lightweight development environments.",
-          ram: "4GB",
-          cpu: "2 vCores",
-          storage: "80GB NVMe",
-          features: ["KVM Virtualization", "Root Access", "Dedicated IP"],
-          popular: false,
-          discountBadge: "25% OFF",
-          category: "vps"
-        },
-        {
-          id: "vps-pro",
-          name: "Cloud Pro",
-          price: "2400",
-          price_numeric: 2400,
-          originalPrice: "3200",
-          description: "High-performance VPS for growing applications and production workloads.",
-          ram: "8GB",
-          cpu: "4 vCores",
-          storage: "160GB NVMe",
-          features: ["KVM Virtualization", "Root Access", "Snapshot Backups"],
-          popular: true,
-          popularText: "MOST POPULAR CHOICE",
-          discountBadge: "25% OFF",
-          category: "vps"
-        },
-        {
-          id: "vps-ultra",
-          name: "Cloud Ultra",
-          price: "4800",
-          price_numeric: 4800,
-          originalPrice: "6400",
-          description: "Enterprise-grade resources for high-traffic sites and complex infrastructures.",
-          ram: "16GB",
-          cpu: "8 vCores",
-          storage: "320GB NVMe",
-          features: ["KVM Virtualization", "Root Access", "Daily Backups"],
-          popular: false,
-          discountBadge: "25% OFF",
-          category: "vps"
-        },
-        {
-          id: "vps-extreme",
-          name: "Cloud Extreme",
-          price: "9600",
-          price_numeric: 9600,
-          originalPrice: "12000",
-          description: "Ultrafast high-resource cluster nodes for maximum demanding workloads.",
-          ram: "32GB",
-          cpu: "16 vCores",
-          storage: "640GB NVMe",
-          features: ["KVM Virtualization", "Root Access", "Premium 10Gbps Uplink", "Daily Backups"],
-          popular: false,
-          discountBadge: "20% OFF",
-          category: "vps"
-        }
-      ];
-      const discordPlans = [
-        {
-          id: "bot-micro",
-          name: "Bot Micro",
-          price: "120",
-          price_numeric: 120,
-          originalPrice: "200",
-          description: "The lightest setup for background tasks and single-channel helper bots.",
-          ram: "256MB",
-          cpu: "0.25 vCore",
-          storage: "2GB SSD",
-          features: ["Node.js/Python/Go", "99.9% Uptime"],
-          popular: false,
-          discountBadge: "40% OFF",
-          category: "discord"
-        },
-        {
-          id: "bot-starter",
-          name: "Bot Starter",
-          price: "240",
-          price_numeric: 240,
-          originalPrice: "400",
-          description: "Perfect for small community bots and simple automation tasks.",
-          ram: "512MB",
-          cpu: "0.5 vCore",
-          storage: "5GB SSD",
-          features: ["Node.js/Python/Go", "99.9% Uptime"],
-          popular: false,
-          discountBadge: "40% OFF",
-          category: "discord"
-        },
-        {
-          id: "bot-advanced",
-          name: "Bot Advanced",
-          price: "480",
-          price_numeric: 480,
-          originalPrice: "800",
-          description: "Optimized for large servers with many active users and complex commands.",
-          ram: "1GB",
-          cpu: "1 vCore",
-          storage: "10GB SSD",
-          features: ["Node.js/Python/Go", "Auto-Restart"],
-          popular: true,
-          popularText: "RECOMMENDED FOR PROS",
-          discountBadge: "40% OFF",
-          category: "discord"
-        },
-        {
-          id: "bot-enterprise",
-          name: "Bot Enterprise",
-          price: "1000",
-          price_numeric: 1000,
-          originalPrice: "1600",
-          description: "Maximum performance for global bots serving millions of users.",
-          ram: "2GB",
-          cpu: "2 vCores",
-          storage: "20GB SSD",
-          features: ["Node.js/Python/Go", "Custom Database"],
-          popular: false,
-          discountBadge: "35% OFF",
-          category: "discord"
-        },
-        {
-          id: "bot-extreme",
-          name: "Bot Extreme",
-          price: "1800",
-          price_numeric: 1800,
-          originalPrice: "2500",
-          description: "Premium hosting for top-tier verified Discord bots with high-intensity command queries.",
-          ram: "4GB",
-          cpu: "4 vCores",
-          storage: "40GB SSD",
-          features: ["Node.js/Python/Go", "Custom Redis/Database", "Priority 24/7 Support"],
-          popular: false,
-          discountBadge: "28% OFF",
-          category: "discord"
-        }
-      ];
-
-      const allInitialPlans = [...minecraftPlans, ...vpsPlans, ...discordPlans];
-
-      // Always write/sync initial plans to Firestore to ensure any updates are instantly propagated.
-      const batch = db.batch();
-      allInitialPlans.forEach(p => {
-        const docRef = db.collection("plans").doc(p.id);
-        batch.set(docRef, p);
-      });
-      await batch.commit();
+        const allInitialPlans = [...minecraftPlans, ...vpsPlans, ...discordPlans];
+        const batch = db.batch();
+        allInitialPlans.forEach(p => {
+          const docRef = db.collection("plans").doc(p.id);
+          batch.set(docRef, p);
+        });
+        await batch.commit();
+      }
       
       const updatedSnapshot = await db.collection("plans").get();
       const plans = updatedSnapshot.docs.map(doc => {
@@ -382,6 +382,136 @@ async function startServer() {
     } catch (error: any) {
       console.error("Delete plan error:", error);
       res.status(500).json({ error: "Failed to delete plan" });
+    }
+  });
+
+  // Business Services Portal Routes
+  app.post("/api/orders", checkAuth, async (req: any, res) => {
+    const { planId, serviceName } = req.body;
+    if (!planId || !serviceName) {
+      return res.status(400).json({ error: "planId and serviceName are required fields." });
+    }
+
+    try {
+      // Fetch plan price
+      const snapshot = await db.collection("plans").get();
+      const plan: any = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any)).find((p: any) => p.id === planId);
+
+      if (!plan) {
+        return res.status(404).json({ error: "Plan configuration not found." });
+      }
+
+      const price = parseFloat(plan.price_numeric || plan.price || "0");
+      const orderId = "ORD-" + crypto.randomUUID().substring(0, 8);
+      const invoiceId = "INV-" + crypto.randomUUID().substring(0, 8);
+      const serviceId = "SRV-" + crypto.randomUUID().substring(0, 8);
+
+      // Create service record (Pending Payment)
+      await queryRun(
+        `INSERT INTO services (id, userId, planId, name, status, price) VALUES (?, ?, ?, ?, 'Pending Payment', ?)`,
+        [serviceId, req.user.userId, planId, serviceName, price]
+      );
+
+      // Create order record
+      await queryRun(
+        `INSERT INTO orders (id, userId, planId, status, price) VALUES (?, ?, ?, 'Pending Payment', ?)`,
+        [orderId, req.user.userId, planId, price]
+      );
+
+      // Create invoice record
+      await queryRun(
+        `INSERT INTO invoices (id, orderId, userId, amount, status) VALUES (?, ?, ?, ?, 'Unpaid')`,
+        [invoiceId, orderId, req.user.userId, price]
+      );
+
+      res.json({ success: true, orderId, invoiceId, serviceId });
+    } catch (err: any) {
+      console.error("Order creation failed:", err);
+      res.status(500).json({ error: "Failed to submit hosting service order." });
+    }
+  });
+
+  app.get("/api/invoices", checkAuth, async (req: any, res) => {
+    try {
+      const invoices = await queryAll(
+        `SELECT i.*, o.planId, o.status as orderStatus FROM invoices i
+         LEFT JOIN orders o ON i.orderId = o.id
+         WHERE i.userId = ? ORDER BY i.createdAt DESC`,
+        [req.user.userId]
+      );
+      res.json({ success: true, invoices });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to load invoices history." });
+    }
+  });
+
+  app.post("/api/invoices/:id/pay", checkAuth, async (req: any, res) => {
+    const { id } = req.params;
+    try {
+      const invoice = await queryGet<any>(
+        `SELECT * FROM invoices WHERE id = ? AND userId = ?`,
+        [id, req.user.userId]
+      );
+
+      if (!invoice) {
+        return res.status(404).json({ error: "Invoice record not found." });
+      }
+
+      if (invoice.status === "Paid") {
+        return res.status(400).json({ error: "Invoice has already been paid." });
+      }
+
+      // Mark Invoice as Paid
+      await queryRun(`UPDATE invoices SET status = 'Paid' WHERE id = ?`, [id]);
+      
+      // Update Order Status
+      await queryRun(`UPDATE orders SET status = 'Paid' WHERE id = ?`, [invoice.orderId]);
+
+      // Get associated service
+      const service = await queryGet<any>(
+        `SELECT s.id FROM services s
+         INNER JOIN orders o ON s.planId = o.planId
+         WHERE o.id = ? AND s.userId = ? AND s.status = 'Pending Payment' LIMIT 1`,
+        [invoice.orderId, req.user.userId]
+      );
+
+      if (service) {
+        // Enqueue Async Provisioning Job!
+        await enqueueProvisioningJob(service.id);
+      }
+
+      res.json({ success: true, message: "Payment processed successfully. Service provisioning queued." });
+    } catch (err: any) {
+      console.error("Payment processing error:", err);
+      res.status(500).json({ error: "Payment processing failed." });
+    }
+  });
+
+  app.get("/api/services", checkAuth, async (req: any, res) => {
+    try {
+      const services = await queryAll(
+        `SELECT * FROM services WHERE userId = ? ORDER BY createdAt DESC`,
+        [req.user.userId]
+      );
+      res.json({ success: true, services });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to list client services." });
+    }
+  });
+
+  app.get("/api/services/:id", checkAuth, async (req: any, res) => {
+    const { id } = req.params;
+    try {
+      const service = await queryGet<any>(
+        `SELECT * FROM services WHERE id = ? AND userId = ?`,
+        [id, req.user.userId]
+      );
+      if (!service) {
+        return res.status(404).json({ error: "Service subscription details not found." });
+      }
+      res.json({ success: true, service });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to retrieve service details." });
     }
   });
 

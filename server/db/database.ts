@@ -123,6 +123,64 @@ export const dbInit = () => {
     )
   `);
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS services (
+      id TEXT PRIMARY KEY,
+      userId TEXT NOT NULL,
+      planId TEXT NOT NULL,
+      name TEXT NOT NULL,
+      status TEXT DEFAULT 'Pending Payment',
+      pterodactylId INTEGER,
+      pterodactylUuid TEXT,
+      price REAL NOT NULL,
+      billingCycle TEXT DEFAULT 'Monthly',
+      nextRenewalDate TEXT,
+      gracePeriodUntil TEXT,
+      terminationDate TEXT,
+      createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      updatedAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(userId) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS orders (
+      id TEXT PRIMARY KEY,
+      userId TEXT NOT NULL,
+      planId TEXT NOT NULL,
+      status TEXT DEFAULT 'Pending Payment',
+      price REAL NOT NULL,
+      createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      updatedAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(userId) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS invoices (
+      id TEXT PRIMARY KEY,
+      orderId TEXT NOT NULL,
+      userId TEXT NOT NULL,
+      amount REAL NOT NULL,
+      status TEXT DEFAULT 'Unpaid',
+      createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(orderId) REFERENCES orders(id) ON DELETE CASCADE,
+      FOREIGN KEY(userId) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS provisioning_jobs (
+      id TEXT PRIMARY KEY,
+      serviceId TEXT NOT NULL,
+      status TEXT DEFAULT 'Queued',
+      errorLog TEXT,
+      createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      updatedAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(serviceId) REFERENCES services(id) ON DELETE CASCADE
+    )
+  `);
+
   console.log("SQLite database initialized successfully at", dbPath);
 };
 

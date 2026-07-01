@@ -7,6 +7,7 @@ import { Tooltip } from "./CustomTooltip";
 import { PricingPlan } from "../types";
 import { FEATURE_DESCRIPTIONS } from "../featureDescriptions";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 import axios from "axios";
 
 
@@ -20,9 +21,13 @@ interface PricingSectionProps {
 
 export default function PricingSection({ title, description, plans, id = "pricing", columns = 3 }: PricingSectionProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [provisioningId, setProvisioningId] = useState<string | null>(null);
   const [successPlan, setSuccessPlan] = useState<PricingPlan | null>(null);
   const [activeTab, setActiveTab] = useState<"presets" | "custom">("presets");
+  const [namingPlan, setNamingPlan] = useState<PricingPlan | null>(null);
+  const [serviceNameInput, setServiceNameInput] = useState("");
+  const [orderError, setOrderError] = useState<string | null>(null);
 
   // Custom Builder Spec States
   const [customRam, setCustomRam] = useState(8); // in GB
@@ -62,38 +67,43 @@ export default function PricingSection({ title, description, plans, id = "pricin
     };
   };
 
-  const handleProvision = async (plan: PricingPlan) => {
-    try {
-      setProvisioningId(plan.id);
-      // Wait for a simulated deploy delay
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      setSuccessPlan(plan);
-      setProvisioningId(null);
-    } catch (error) {
-      console.error("Order simulation failed:", error);
-      setProvisioningId(null);
+  const handleProvision = (plan: PricingPlan) => {
+    if (!user) {
+      sessionStorage.setItem("selectedPlanId", plan.id);
+      navigate("/auth");
+      return;
     }
+    setNamingPlan(plan);
+    setServiceNameInput("");
+    setOrderError(null);
   };
 
-  const handleProvisionCustom = async () => {
-    const customPlan: PricingPlan = {
-      id: "custom-node",
-      name: `Custom Tailored Node`,
-      ram: `${customRam} GB DDR5 RAM`,
-      cpu: `${customCpu} Cores (AMD Ryzen 9)`,
-      storage: `${customStorage} GB NVMe SSD`,
-      price: customPrice,
-      features: ["Advanced DDoS Mitigation (12Tbps)", "Dedicated Allocation & Port", "Enterprise Control Panel", "Automated Daily Backups"],
-      description: `Tailored server node customized to exactly ${customRam}GB RAM, ${customCpu} vCPUs, and ${customStorage}GB storage.`
-    } as any;
+  const handleConfirmOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!namingPlan || !serviceNameInput.trim()) return;
+    setProvisioningId(namingPlan.id);
+    setOrderError(null);
 
     try {
-      setProvisioningId("custom-node");
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setSuccessPlan(customPlan);
-      setProvisioningId(null);
-    } catch (error) {
-      console.error("Order simulation failed:", error);
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          planId: namingPlan.id,
+          serviceName: serviceNameInput
+        })
+      });
+
+      if (res.ok) {
+        setNamingPlan(null);
+        navigate("/dashboard/invoices");
+      } else {
+        const err = await res.json();
+        setOrderError(err.error || "Failed to submit order.");
+      }
+    } catch {
+      setOrderError("Network connection error.");
+    } finally {
       setProvisioningId(null);
     }
   };
@@ -486,11 +496,10 @@ export default function PricingSection({ title, description, plans, id = "pricin
                   </div>
 
                   <Button
-                    disabled={provisioningId !== null}
-                    onClick={handleProvisionCustom}
-                    className="w-full bg-white text-black hover:bg-zinc-200 font-black py-5 sm:py-6 rounded-2xl transition-all duration-500 uppercase tracking-[0.2em] text-[10px] h-auto border-none hover:scale-[1.03] active:scale-[0.98] shadow-[0_0_30px_rgba(255,255,255,0.15)] disabled:opacity-50"
+                    onClick={() => navigate(user ? "/dashboard/support" : "/auth")}
+                    className="w-full bg-white text-black hover:bg-zinc-200 font-black py-5 sm:py-6 rounded-2xl transition-all duration-500 uppercase tracking-[0.2em] text-[10px] h-auto border-none hover:scale-[1.03] active:scale-[0.98] shadow-[0_0_30px_rgba(255,255,255,0.15)]"
                   >
-                    {provisioningId === "custom-node" ? "Initializing..." : "Provision Custom Instance"}
+                    Request Custom Quote
                   </Button>
                 </div>
               </div>
@@ -554,6 +563,66 @@ export default function PricingSection({ title, description, plans, id = "pricin
                   Continue Browsing
                 </Button>
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Service Naming Modal */}
+      <AnimatePresence>
+        {namingPlan && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-zinc-950 border border-zinc-900 rounded-[2.5rem] p-8 max-w-md w-full relative overflow-hidden shadow-[0_0_50px_rgba(255,255,255,0.1)]"
+            >
+              <button 
+                onClick={() => setNamingPlan(null)}
+                className="absolute top-6 right-6 text-zinc-500 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <form onSubmit={handleConfirmOrder} className="flex flex-col items-center text-center space-y-6">
+                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                  <Database className="w-8 h-8 text-black" />
+                </div>
+
+                <div>
+                  <h3 className="text-2xl font-black uppercase font-heading tracking-tight mb-2">Name Your Service</h3>
+                  <p className="text-zinc-500 text-xs leading-relaxed font-semibold">
+                    Give your new {namingPlan.name} a friendly display name to identify it in your services dashboard.
+                  </p>
+                </div>
+
+                {orderError && (
+                  <div className="p-3 w-full rounded-lg bg-red-950/20 border border-red-500/10 text-red-400 text-[10px] font-bold text-center">
+                    {orderError}
+                  </div>
+                )}
+
+                <div className="w-full text-left space-y-1.5">
+                  <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block">Service Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={serviceNameInput}
+                    onChange={(e) => setServiceNameInput(e.target.value)}
+                    className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-xl px-4 py-3 text-xs font-semibold focus:outline-none focus:border-zinc-700"
+                    placeholder="e.g. Lobby Survival"
+                  />
+                </div>
+
+                <Button 
+                  type="submit"
+                  disabled={provisioningId !== null || !serviceNameInput.trim()}
+                  className="w-full bg-white text-black hover:bg-zinc-200 font-bold rounded-2xl py-6 uppercase tracking-widest text-xs h-auto cursor-pointer"
+                >
+                  {provisioningId ? "Creating Order..." : "Confirm & Create Invoice"}
+                </Button>
+              </form>
             </motion.div>
           </div>
         )}
