@@ -6,7 +6,7 @@ import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from ".
 import { createSession } from "../services/sessionManager";
 import { sendMail } from "../services/mailService";
 import { logAuthEvent } from "../services/auditLogger";
-import { checkPasswordBreached, checkPasswordHistory } from "../validators/passwordPolicy";
+import { checkPasswordBreached, checkPasswordHistory, validatePasswordStrength } from "../validators/passwordPolicy";
 import { incrementAuthFailure, clearAuthFailure } from "../middleware/security";
 
 const BCRYPT_ROUNDS = 12;
@@ -371,4 +371,69 @@ export const logout = async (req: Request, res: Response) => {
   res.clearCookie("refreshToken");
   res.clearCookie("csrfToken");
   res.json({ success: true, message: "Logged out successfully." });
+};
+
+export const changePassword = async (req: any, res: Response) => {
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+  const ip = req.ip || req.socket.remoteAddress || "unknown_ip";
+  const userAgent = req.headers["user-agent"] || "";
+  const userId = req.user.id;
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    return res.status(400).json({ error: "All password fields are required." });
+  }
+
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({ error: "New passwords do not match." });
+  }
+
+  try {
+    // 1. Get user details
+    const user = await queryGet(`SELECT passwordHash FROM users WHERE id = ?`, [userId]);
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    // 2. Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Current password is incorrect." });
+    }
+
+    // 3. Validate new password strength
+    const strength = validatePasswordStrength(newPassword);
+    if (!strength.valid) {
+      return res.status(400).json({ error: strength.message });
+    }
+
+    // 4. Check breached database
+    const isLeaked = await checkPasswordBreached(newPassword);
+    if (isLeaked) {
+      return res.status(400).json({ error: "This password has been found in a data breach. Please choose a different password." });
+    }
+
+    // 5. Check password history
+    const isReused = await checkPasswordHistory(userId, newPassword);
+    if (isReused) {
+      return res.status(400).json({ error: "You cannot reuse any of your last 3 passwords." });
+    }
+
+    // 6. Hash and update password
+    const newHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+    await queryRun(`UPDATE users SET passwordHash = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?`, [newHash, userId]);
+
+    // 7. Save to password history
+    await queryRun(
+      `INSERT INTO password_history (id, userId, passwordHash) VALUES (?, ?, ?)`,
+      ["HST-" + crypto.randomUUID(), userId, newHash]
+    );
+
+    // 8. Log audit log
+    await logAuthEvent({ userId, action: "PASSWORD_CHANGE", ip, userAgent });
+
+    res.json({ success: true, message: "Password updated successfully." });
+  } catch (err) {
+    console.error("Change password error:", err);
+    res.status(500).json({ error: "Failed to update password." });
+  }
 };

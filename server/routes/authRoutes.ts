@@ -5,7 +5,8 @@ import {
   login,
   forgotPassword,
   resetPassword,
-  logout
+  logout,
+  changePassword
 } from "../controllers/authController";
 import {
   getSessions,
@@ -60,6 +61,7 @@ router.post("/login", authRateLimiter, authSlowDown, validateLoginInput, login);
 router.post("/forgot-password", authRateLimiter, forgotPassword);
 router.post("/reset-password", validateResetPasswordInput, resetPassword);
 router.post("/logout", logout);
+router.post("/change-password", requireAuth, changePassword);
 
 // 2. Token refresh endpoint
 router.post("/refresh", async (req, res) => {

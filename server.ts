@@ -8,6 +8,10 @@ import fs from "fs";
 import cookieParser from "cookie-parser";
 import { dbInit } from "./server/db/database";
 import authRouter, { requireAuth } from "./server/routes/authRoutes";
+import panelRouter from "./server/routes/panelRoutes";
+import ticketRouter from "./server/routes/ticketRoutes";
+import apiKeyRouter from "./server/routes/apiKeyRoutes";
+import adminRouter from "./server/routes/adminRoutes";
 import { securityHeaders, sanitizeInput } from "./server/middleware/security";
 import { initializeApp as initializeClientApp } from "firebase/app";
 import { 
@@ -124,6 +128,10 @@ async function startServer() {
   app.use(sanitizeInput);
 
   app.use("/api/auth", authRouter);
+  app.use("/api/panel", panelRouter);
+  app.use("/api/tickets", ticketRouter);
+  app.use("/api/api-keys", apiKeyRouter);
+  app.use("/api/admin", adminRouter);
   
   app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");

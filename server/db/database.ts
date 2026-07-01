@@ -72,6 +72,53 @@ export const dbInit = () => {
       passwordHash TEXT NOT NULL,
       createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY(userId) REFERENCES users(id) ON DELETE CASCADE
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    )
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS tickets (
+      id TEXT PRIMARY KEY,
+      userId TEXT NOT NULL,
+      subject TEXT NOT NULL,
+      category TEXT NOT NULL,
+      priority TEXT NOT NULL,
+      status TEXT DEFAULT 'open',
+      createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      updatedAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(userId) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS ticket_messages (
+      id TEXT PRIMARY KEY,
+      ticketId TEXT NOT NULL,
+      userId TEXT NOT NULL,
+      message TEXT NOT NULL,
+      isStaff INTEGER DEFAULT 0,
+      createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(ticketId) REFERENCES tickets(id) ON DELETE CASCADE,
+      FOREIGN KEY(userId) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS api_keys (
+      id TEXT PRIMARY KEY,
+      userId TEXT NOT NULL,
+      name TEXT NOT NULL,
+      keyHash TEXT NOT NULL UNIQUE,
+      permissions TEXT DEFAULT '[]',
+      lastUsed TEXT,
+      expiresAt TEXT,
+      createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(userId) REFERENCES users(id) ON DELETE CASCADE
     )
   `);
 
