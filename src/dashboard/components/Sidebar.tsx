@@ -49,15 +49,6 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
       ]
     },
     {
-      title: "Management",
-      items: [
-        { path: "/dashboard/backups", label: "Backups", icon: Archive },
-        { path: "/dashboard/databases", label: "Databases", icon: Database },
-        { path: "/dashboard/schedules", label: "Schedules", icon: Calendar },
-        { path: "/dashboard/subusers", label: "Subusers", icon: Users }
-      ]
-    },
-    {
       title: "Account",
       items: [
         { path: "/dashboard/invoices", label: "Invoices", icon: Receipt },
@@ -102,7 +93,7 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
       {/* Sidebar Header Logo */}
       <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-800">
         <Link to="/" className="flex items-center gap-2.5">
-          <img src="/images/main-imgs/cynex-tp.png" alt="Logo" className="w-6 h-6 object-contain invert" />
+          <img src="/images/main-imgs/cynex-tp.png" alt="Logo" className="w-6 h-6 object-contain" />
           {!collapsed && (
             <span className="font-heading font-bold text-white text-sm tracking-wider uppercase">
               Cynex<span className="text-zinc-400">Cloud</span>

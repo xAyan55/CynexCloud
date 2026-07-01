@@ -110,7 +110,7 @@ export default function Auth() {
           
           {/* Logo Header */}
           <div className="mb-10">
-            <img src="/images/main-imgs/cynex-tp.png" alt="Logo" className="w-7 h-7 object-contain invert" />
+            <img src="/images/main-imgs/cynex-tp.png" alt="Logo" className="w-7 h-7 object-contain" />
           </div>
 
           <AnimatePresence mode="wait">
