@@ -334,6 +334,7 @@ async function startServer() {
         const data = doc.data();
         return { id: doc.id, ...data, storage: data.storage || data.disk };
       });
+      plans.sort((a: any, b: any) => (a.price_numeric || 0) - (b.price_numeric || 0));
       res.json(plans);
     } catch (error: any) {
       console.error("Fetch plans error:", error);
