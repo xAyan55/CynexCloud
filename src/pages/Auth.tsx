@@ -178,12 +178,12 @@ export default function Auth() {
                         {mode === "login" ? "Username or email" : "Email address"}
                       </label>
                       <input
-                        type="email"
+                        type={mode === "login" ? "text" : "email"}
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="w-full bg-zinc-900/60 border border-white/5 focus:border-white/20 text-white rounded-lg px-3.5 py-3 text-sm font-medium transition-all focus:outline-none focus:ring-1 focus:ring-white/10"
-                        placeholder="you@example.com"
+                        placeholder={mode === "login" ? "username or email" : "you@example.com"}
                       />
                     </div>
                   )}

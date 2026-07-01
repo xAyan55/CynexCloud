@@ -186,7 +186,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             ) : (
               <Link to="/auth">
                 <Button className="bg-white text-black hover:bg-zinc-200 font-bold px-6 hover:scale-105 active:scale-95 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.15)]">
-                  Client Area
+                  Login
                 </Button>
               </Link>
             )}
@@ -278,7 +278,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         className="bg-white text-black w-full font-bold"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        Client Area
+                        Login
                       </Button>
                     </Link>
                   )}
