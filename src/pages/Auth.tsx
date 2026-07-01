@@ -30,11 +30,15 @@ export default function Auth() {
   useEffect(() => {
     if (mode === "verify" && tokenParam) {
       setLoading(true);
+      setError(null);
+      setSuccessMessage(null);
       verifyEmail(tokenParam).then(res => {
         setLoading(false);
         if (res.success) {
+          setError(null);
           setSuccessMessage(res.message || "Email verified! You can now log in.");
         } else {
+          setSuccessMessage(null);
           setError(res.error || "Email verification failed.");
         }
       });
