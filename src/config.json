@@ -1,0 +1,209 @@
+{
+  "brand": {
+    "name": "Cynex",
+    "suffix": "Cloud",
+    "logoUrl": "https://i.imgur.com/htv4fVV.jpeg",
+    "description": "Premium high-performance hosting solutions for Minecraft, VPS, and Discord Bots. Experience the power of Ryzen™ 9 nodes with enterprise NVMe storage."
+  },
+  "seo": {
+    "title": "Cynex Cloud | Premium High-Performance Hosting",
+    "description": "Cynex Cloud offers high-performance Minecraft, VPS, and Discord Bot hosting with instant setup and 24/7 support.",
+    "faviconUrl": "https://picsum.photos/seed/cynex/32/32"
+  },
+  "contact": {
+    "email": "support@yourdomain.com",
+    "discord": "https://discord.gg/SxKJqV5CNE",
+    "twitter": "https://twitter.com/yourhandle",
+    "instagram": "https://instagram.com/yourhandle"
+  },
+
+  "paypal": {
+    "clientId": "AcOyFgsx2Mw2fN4OYrhkN-DLsMsi6cEVZCqqQN9cpDbDevmL0otGZwiV9yddPzJBFbHJ-AId5a32MAsO",
+    "clientSecret": "EEbI76794pl9FvTNkK7k-iMgF8f277s-I7ajStQiZyr1NiSCX44VvN8wihzdHFAzddGSuSKOOLrBfmz-",
+    "webhookId": "1LA98815BM659042F",
+    "mode": "live"
+  },
+  "admin": {
+    "email": "ARVINDICA@gmail.com"
+  },
+  "firebase": {
+    "projectId": "gen-lang-client-0984523098",
+    "appId": "1:881595377814:web:9cd39b7e099960111cbab7",
+    "apiKey": "AIzaSyAXk4gDGh31ceXauSNJBDBc0pC9Xu4QYnM",
+    "authDomain": "gen-lang-client-0984523098.firebaseapp.com",
+    "firestoreDatabaseId": "ai-studio-cb04e41e-e2c6-45ee-ace4-80ef55b0ce4e",
+    "storageBucket": "gen-lang-client-0984523098.firebasestorage.app",
+    "messagingSenderId": "881595377814",
+    "measurementId": ""
+  },
+  "images": {
+    "heroBackground": "https://i.imgur.com/ZSqh7nz.gif",
+    "authImage": "https://i.imgur.com/pcFdVUw.jpeg",
+    "ctaImage": "https://i.imgur.com/fJsXGbR.jpeg",
+    "categories": {
+      "minecraft": {
+        "background": "https://i.imgur.com/u6hw4eh.jpeg",
+        "logo": "https://i.imgur.com/sVIC11l.jpeg"
+      },
+      "vps": {
+        "background": "https://i.imgur.com/XfiziYw.jpeg",
+        "logo": "https://i.imgur.com/z3PmWPX.jpeg"
+      },
+      "discord": {
+        "background": "https://i.imgur.com/bYiVuhu.jpeg",
+        "logo": "https://i.imgur.com/Qnxlhdb.jpeg"
+      }
+    },
+    "userAvatars": [
+      "https://i.pravatar.cc/150?u=1",
+      "https://i.pravatar.cc/150?u=2",
+      "https://i.pravatar.cc/150?u=3",
+      "https://i.pravatar.cc/150?u=4"
+    ]
+  },
+  "minecraftPlans": [
+    {
+      "id": "zombie",
+      "name": "Zombie Plan",
+      "ram": "4gb Ram",
+      "cpu": "100% Cpu",
+      "disk": "10gb Disk",
+      "features": ["Auto Backups"],
+      "price": "80/$0.80",
+      "image": "/images/mc-plan-imgs/zombie.webp",
+      "ram_mb": 4096,
+      "cpu_pct": 100,
+      "disk_mb": 10240
+    },
+    {
+      "id": "skeleton",
+      "name": "Skeleton Plan",
+      "ram": "8gb Ram",
+      "cpu": "200% Cpu",
+      "disk": "20gb Disk",
+      "features": ["Auto Backups"],
+      "price": "160/$1.60",
+      "image": "/images/mc-plan-imgs/skeleton.webp",
+      "ram_mb": 8192,
+      "cpu_pct": 200,
+      "disk_mb": 20480
+    },
+    {
+      "id": "creeper",
+      "name": "Creeper Plan",
+      "ram": "12gb Ram",
+      "cpu": "300% Cpu",
+      "disk": "30gb Disk",
+      "features": ["Auto Backups"],
+      "price": "240/$2.40",
+      "image": "/images/mc-plan-imgs/creeper.webp",
+      "ram_mb": 12288,
+      "cpu_pct": 300,
+      "disk_mb": 30720
+    },
+    {
+      "id": "slime",
+      "name": "Slime Plan",
+      "ram": "16gb Ram",
+      "cpu": "400% Cpu",
+      "disk": "40gb Disk",
+      "features": ["Auto Backups"],
+      "price": "320/$3.20",
+      "image": "/images/mc-plan-imgs/slime.webp",
+      "ram_mb": 16384,
+      "cpu_pct": 400,
+      "disk_mb": 40960
+    },
+    {
+      "id": "pigman",
+      "name": "Pigman Plan",
+      "ram": "20gb Ram",
+      "cpu": "500% Cpu",
+      "disk": "50gb Disk",
+      "features": ["Auto Backups"],
+      "price": "400/$4.00",
+      "image": "/images/mc-plan-imgs/pigman.webp",
+      "ram_mb": 20480,
+      "cpu_pct": 500,
+      "disk_mb": 51200
+    },
+    {
+      "id": "ghast",
+      "name": "Ghast Plan",
+      "ram": "24gb Ram",
+      "cpu": "600% Cpu",
+      "disk": "60gb Disk",
+      "features": ["Auto Backups"],
+      "price": "480/$4.80",
+      "image": "/images/mc-plan-imgs/ghast.webp",
+      "ram_mb": 24576,
+      "cpu_pct": 600,
+      "disk_mb": 61440
+    },
+    {
+      "id": "blaze",
+      "name": "Blaze Plan",
+      "ram": "28gb Ram",
+      "cpu": "700% Cpu",
+      "disk": "70gb Disk",
+      "features": ["Auto Backups"],
+      "price": "560/$5.60",
+      "image": "/images/mc-plan-imgs/blaze.webp",
+      "ram_mb": 28672,
+      "cpu_pct": 700,
+      "disk_mb": 71680
+    },
+    {
+      "id": "breeze",
+      "name": "Breeze Plan",
+      "ram": "32gb Ram",
+      "cpu": "800% Cpu",
+      "disk": "80gb Disk",
+      "features": ["Auto Backups"],
+      "price": "640/$6.40",
+      "image": "/images/mc-plan-imgs/breeze.webp",
+      "ram_mb": 32768,
+      "cpu_pct": 800,
+      "disk_mb": 81920
+    },
+    {
+      "id": "shulker",
+      "name": "Shulker Plan",
+      "ram": "36gb Ram",
+      "cpu": "900% Cpu",
+      "disk": "90gb Disk",
+      "features": ["Auto Backups"],
+      "price": "760/$7.60",
+      "image": "/images/mc-plan-imgs/shulker.webp",
+      "ram_mb": 36864,
+      "cpu_pct": 900,
+      "disk_mb": 92160
+    },
+    {
+      "id": "wither",
+      "name": "Wither Plan",
+      "ram": "40gb Ram",
+      "cpu": "1000% Cpu",
+      "disk": "100gb Disk",
+      "features": ["Auto Backups"],
+      "price": "840/$8.40",
+      "image": "/images/mc-plan-imgs/wither.webp",
+      "ram_mb": 40960,
+      "cpu_pct": 1000,
+      "disk_mb": 102400
+    },
+    {
+      "id": "warden",
+      "name": "Warden Plan",
+      "ram": "44gb Ram",
+      "cpu": "1100% Cpu",
+      "disk": "110gb Disk",
+      "features": ["Auto Backups"],
+      "price": "920/$9.20",
+      "image": "/images/mc-plan-imgs/warden.webp",
+      "ram_mb": 45056,
+      "cpu_pct": 1100,
+      "disk_mb": 112640
+    }
+  ]
+}

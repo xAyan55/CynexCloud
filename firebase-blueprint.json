@@ -1,0 +1,98 @@
+{
+  "entities": {
+    "users": {
+      "title": "User Profile",
+      "description": "Stores user profile information and settings.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique Firebase Auth ID." },
+        "email": { "type": "string", "format": "email", "description": "User's email address." },
+        "displayName": { "type": "string", "description": "User's display name." },
+        "photoURL": { "type": "string", "description": "URL to user's profile picture." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp when the user first signed in." },
+        "role": { "type": "string", "enum": ["user", "admin"], "description": "User's role in the system." },
+        "settings": {
+          "type": "object",
+          "properties": {
+            "emailNotifications": { "type": "boolean" },
+            "marketingEmails": { "type": "boolean" },
+            "twoFactorAuth": { "type": "boolean" },
+            "publicProfile": { "type": "boolean" },
+            "compactView": { "type": "boolean" },
+            "autoRenewal": { "type": "boolean" }
+          }
+        }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "payments": {
+      "title": "Payment Record",
+      "description": "Stores PayPal payment information.",
+      "type": "object",
+      "properties": {
+        "orderId": { "type": "string" },
+        "captureId": { "type": "string" },
+        "userId": { "type": "string" },
+        "planId": { "type": "string" },
+        "amount": { "type": "string" },
+        "currency": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["orderId", "userId", "amount", "status", "createdAt"]
+    },
+    "coupons": {
+      "title": "Coupon Code",
+      "description": "Stores discount coupon codes.",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "discountType": { "type": "string", "enum": ["percentage", "fixed"] },
+        "discountValue": { "type": "number" },
+        "maxUses": { "type": "number" },
+        "usedCount": { "type": "number" },
+        "expiryDate": { "type": "string", "format": "date-time" },
+        "active": { "type": "boolean" }
+      },
+      "required": ["code", "discountType", "discountValue", "active"]
+    },
+    "plans": {
+      "title": "Hosting Plan",
+      "description": "Stores hosting plan configurations including Pterodactyl specs.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "ram": { "type": "string" },
+        "cpu": { "type": "string" },
+        "disk": { "type": "string" },
+        "features": { "type": "array", "items": { "type": "string" } },
+        "price": { "type": "string" },
+        "image": { "type": "string" },
+        "ram_mb": { "type": "number" },
+        "cpu_pct": { "type": "number" },
+        "disk_mb": { "type": "number" },
+        "category": { "type": "string", "enum": ["minecraft", "vps", "discord"] }
+      },
+      "required": ["id", "name", "ram_mb", "cpu_pct", "disk_mb", "category"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "users",
+      "description": "User profile document."
+    },
+    "payments/{orderId}": {
+      "schema": "payments",
+      "description": "Payment record document."
+    },
+    "coupons/{couponId}": {
+      "schema": "coupons",
+      "description": "Coupon code document."
+    },
+    "plans/{planId}": {
+      "schema": "plans",
+      "description": "Hosting plan configuration document."
+    }
+  }
+}
