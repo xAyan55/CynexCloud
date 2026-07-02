@@ -1,8 +1,8 @@
 import { useState } from "react"
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom"
 import {
-  LayoutDashboard, Server, Upload, Archive, Database, CalendarClock, Users,
-  FileText, History, Ticket, Megaphone, BookOpen, User, Shield, Key, Settings,
+  LayoutDashboard, Server, Upload,
+  FileText, History, Ticket, Megaphone, User, Shield, Key, Settings,
   ChevronLeft, ChevronRight, LogOut, PanelTop, Package, Tickets
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -19,15 +19,10 @@ const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
   { label: "Services", icon: Server, path: "/dashboard/services" },
   { label: "Deploy", icon: Upload, path: "/dashboard/deploy" },
-  { label: "Backups", icon: Archive, path: "/dashboard/backups" },
-  { label: "Databases", icon: Database, path: "/dashboard/databases" },
-  { label: "Schedules", icon: CalendarClock, path: "/dashboard/schedules" },
-  { label: "Subusers", icon: Users, path: "/dashboard/subusers" },
   { label: "Invoices", icon: FileText, path: "/dashboard/invoices" },
   { label: "Payment History", icon: History, path: "/dashboard/payment-history" },
   { label: "Support Tickets", icon: Ticket, path: "/dashboard/support" },
   { label: "Announcements", icon: Megaphone, path: "/dashboard/announcements" },
-  { label: "Knowledge Base", icon: BookOpen, path: "/dashboard/knowledge-base" },
 ]
 
 const SETTINGS_ITEMS = [

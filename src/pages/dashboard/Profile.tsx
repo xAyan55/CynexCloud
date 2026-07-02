@@ -1,12 +1,30 @@
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Loader2 } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
+import { toast } from "sonner"
 
 export default function Profile() {
-  const { user } = useAuth()
+  const { user, authFetch } = useAuth()
+  const [username, setUsername] = useState(user?.username || "")
+  const [email, setEmail] = useState(user?.email || "")
+  const [saving, setSaving] = useState(false)
+
+  const saveProfile = async () => {
+    setSaving(true)
+    const r = await authFetch("/api/auth/change-password", {
+      method: "POST",
+      body: JSON.stringify({ username, email })
+    })
+    const data = await r.json()
+    if (data.success) toast.success("Profile updated")
+    else toast.error(data.error || "Failed to update profile")
+    setSaving(false)
+  }
 
   return (
     <div>
@@ -19,15 +37,16 @@ export default function Profile() {
             </Avatar>
             <p className="text-lg font-medium text-foreground">{user?.username}</p>
             <p className="text-sm text-muted-foreground">{user?.email}</p>
-            <Button variant="outline" size="sm" className="mt-4">Change Avatar</Button>
           </CardContent>
         </Card>
         <Card className="border-border md:col-span-2">
           <CardHeader><CardTitle className="text-base">Account Details</CardTitle><CardDescription>Update your account information.</CardDescription></CardHeader>
           <CardContent className="space-y-4">
-            <div><Label>Username</Label><Input defaultValue={user?.username} className="mt-1" /></div>
-            <div><Label>Email</Label><Input defaultValue={user?.email} className="mt-1" /></div>
-            <Button>Save Changes</Button>
+            <div><Label>Username</Label><Input value={username} onChange={e => setUsername(e.target.value)} className="mt-1" /></div>
+            <div><Label>Email</Label><Input value={email} onChange={e => setEmail(e.target.value)} className="mt-1" /></div>
+            <Button onClick={saveProfile} disabled={saving}>
+              {saving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : null}Save Changes
+            </Button>
           </CardContent>
         </Card>
       </div>

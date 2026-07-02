@@ -3,6 +3,7 @@ import { requireAuth } from "./authRoutes";
 import { queryRun, queryGet, queryAll } from "../db/database";
 import axios from "axios";
 import { getPanelConfig } from "../services/pterodactylService";
+import crypto from "crypto";
 
 const router = Router();
 
@@ -68,6 +69,52 @@ router.put("/settings", requireAuth, requireAdmin, async (req: any, res: Respons
     res.json({ success: true, message: "Settings saved successfully." });
   } catch (err) {
     res.status(500).json({ error: "Failed to update administrative settings." });
+  }
+});
+
+// Dashboard statistics (Admin only)
+router.get("/stats", requireAuth, requireAdmin, async (req: any, res: Response) => {
+  try {
+    const totalUsers = await queryGet<{ count: number }>("SELECT COUNT(*) as count FROM users");
+    const activeUsers = await queryGet<{ count: number }>("SELECT COUNT(*) as count FROM users WHERE banned = 0");
+    const verifiedUsers = await queryGet<{ count: number }>("SELECT COUNT(*) as count FROM users WHERE emailVerified = 1");
+    const totalServices = await queryGet<{ count: number }>("SELECT COUNT(*) as count FROM services");
+    const activeServices = await queryGet<{ count: number }>("SELECT COUNT(*) as count FROM services WHERE status = 'Active'");
+    const pendingServices = await queryGet<{ count: number }>("SELECT COUNT(*) as count FROM services WHERE status = 'Pending Payment'");
+    const totalOrders = await queryGet<{ count: number }>("SELECT COUNT(*) as count FROM orders");
+    const paidOrders = await queryGet<{ count: number }>("SELECT COUNT(*) as count FROM orders WHERE status = 'Paid'");
+    const pendingOrders = await queryGet<{ count: number }>("SELECT COUNT(*) as count FROM orders WHERE status = 'Pending Payment'");
+    const revenue = await queryGet<{ total: number }>("SELECT COALESCE(SUM(amount), 0) as total FROM invoices WHERE status = 'Paid'");
+    const totalInvoices = await queryGet<{ count: number }>("SELECT COUNT(*) as count FROM invoices");
+    const paidInvoices = await queryGet<{ count: number }>("SELECT COUNT(*) as count FROM invoices WHERE status = 'Paid'");
+    const unpaidInvoices = await queryGet<{ count: number }>("SELECT COUNT(*) as count FROM invoices WHERE status = 'Unpaid'");
+    const totalTickets = await queryGet<{ count: number }>("SELECT COUNT(*) as count FROM tickets");
+    const openTickets = await queryGet<{ count: number }>("SELECT COUNT(*) as count FROM tickets WHERE status = 'open'");
+    const closedTickets = await queryGet<{ count: number }>("SELECT COUNT(*) as count FROM tickets WHERE status = 'closed'");
+
+    res.json({
+      success: true,
+      stats: {
+        totalUsers: totalUsers?.count || 0,
+        activeUsers: activeUsers?.count || 0,
+        verifiedUsers: verifiedUsers?.count || 0,
+        totalServices: totalServices?.count || 0,
+        activeServices: activeServices?.count || 0,
+        pendingServices: pendingServices?.count || 0,
+        totalOrders: totalOrders?.count || 0,
+        paidOrders: paidOrders?.count || 0,
+        pendingOrders: pendingOrders?.count || 0,
+        revenue: revenue?.total || 0,
+        totalInvoices: totalInvoices?.count || 0,
+        paidInvoices: paidInvoices?.count || 0,
+        unpaidInvoices: unpaidInvoices?.count || 0,
+        totalTickets: totalTickets?.count || 0,
+        openTickets: openTickets?.count || 0,
+        closedTickets: closedTickets?.count || 0,
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load dashboard statistics." });
   }
 });
 

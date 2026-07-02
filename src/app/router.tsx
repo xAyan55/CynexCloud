@@ -29,17 +29,12 @@ const DashboardHome = lazy(() => import('@/pages/dashboard/DashboardHome'))
 const Services = lazy(() => import('@/pages/dashboard/Services'))
 const ServiceDetail = lazy(() => import('@/pages/dashboard/ServiceDetail'))
 const Deploy = lazy(() => import('@/pages/dashboard/Deploy'))
-const Backups = lazy(() => import('@/pages/dashboard/Backups'))
-const Databases = lazy(() => import('@/pages/dashboard/Databases'))
-const Schedules = lazy(() => import('@/pages/dashboard/Schedules'))
-const Subusers = lazy(() => import('@/pages/dashboard/Subusers'))
 const Invoices = lazy(() => import('@/pages/dashboard/Invoices'))
 const PaymentHistory = lazy(() => import('@/pages/dashboard/PaymentHistory'))
 const Tickets = lazy(() => import('@/pages/dashboard/Tickets'))
 const CreateTicket = lazy(() => import('@/pages/dashboard/CreateTicket'))
 const TicketDetail = lazy(() => import('@/pages/dashboard/TicketDetail'))
 const Announcements = lazy(() => import('@/pages/dashboard/Announcements'))
-const Knowledgebase = lazy(() => import('@/pages/dashboard/Knowledgebase'))
 const Profile = lazy(() => import('@/pages/dashboard/Profile'))
 const Security = lazy(() => import('@/pages/dashboard/Security'))
 const ApiKeys = lazy(() => import('@/pages/dashboard/ApiKeys'))
@@ -121,17 +116,12 @@ export default function AppRouter() {
         { path: 'services', element: <Services /> },
         { path: 'services/:id', element: <ServiceDetail /> },
         { path: 'deploy', element: <Deploy /> },
-        { path: 'backups', element: <Backups /> },
-        { path: 'databases', element: <Databases /> },
-        { path: 'schedules', element: <Schedules /> },
-        { path: 'subusers', element: <Subusers /> },
         { path: 'invoices', element: <Invoices /> },
         { path: 'payment-history', element: <PaymentHistory /> },
         { path: 'support', element: <Tickets /> },
         { path: 'support/create', element: <CreateTicket /> },
         { path: 'support/:id', element: <TicketDetail /> },
         { path: 'announcements', element: <Announcements /> },
-        { path: 'knowledge-base', element: <Knowledgebase /> },
         { path: 'profile', element: <Profile /> },
         { path: 'security', element: <Security /> },
         { path: 'api-keys', element: <ApiKeys /> },
