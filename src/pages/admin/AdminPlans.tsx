@@ -139,43 +139,62 @@ export default function AdminPlans() {
           </DialogContent>
         </Dialog>
       </div>
-      <Card className="border-border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>RAM</TableHead>
-              <TableHead>CPU</TableHead>
-              <TableHead>Storage</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8"><Loader2 className="w-5 h-5 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
-            ) : plans.length === 0 ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No plans configured</TableCell></TableRow>
-            ) : plans.map(p => (
-              <TableRow key={p.id}>
-                <TableCell className="font-medium">{p.name}</TableCell>
-                <TableCell><Badge variant="secondary">{p.category}</Badge></TableCell>
-                <TableCell>{p.price || p.price_numeric}</TableCell>
-                <TableCell className="text-muted-foreground">{p.ram || "-"}</TableCell>
-                <TableCell className="text-muted-foreground">{p.cpu || "-"}</TableCell>
-                <TableCell className="text-muted-foreground">{p.storage || "-"}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-1">
-                    <Button variant="ghost" size="sm" onClick={() => openEdit(p)}><Pencil className="w-4 h-4" /></Button>
-                    <Button variant="ghost" size="sm" onClick={() => deletePlan(p.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Card>
+      {loading ? (
+        <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
+      ) : plans.length === 0 ? (
+        <Card className="border-border">
+          <CardContent className="flex flex-col items-center py-16">
+            <p className="text-foreground font-medium mb-2">No plans configured</p>
+            <p className="text-muted-foreground text-sm">Add hosting plans to display on the pricing page.</p>
+          </CardContent>
+        </Card>
+      ) : (() => {
+        const categories = [
+          { key: "minecraft", label: "Minecraft Hosting" },
+          { key: "vps", label: "VPS Hosting" },
+          { key: "discord", label: "Discord Bot Hosting" },
+        ]
+        return categories.map(cat => {
+          const catPlans = plans.filter(p => p.category === cat.key)
+          if (catPlans.length === 0) return null
+          return (
+            <div key={cat.key} className="mb-8">
+              <h2 className="text-lg font-semibold font-heading tracking-tight mb-3">{cat.label}</h2>
+              <Card className="border-border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Price</TableHead>
+                      <TableHead>RAM</TableHead>
+                      <TableHead>CPU</TableHead>
+                      <TableHead>Storage</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {catPlans.map(p => (
+                      <TableRow key={p.id}>
+                        <TableCell className="font-medium">{p.name}</TableCell>
+                        <TableCell>{p.price || p.price_numeric}</TableCell>
+                        <TableCell className="text-muted-foreground">{p.ram || "-"}</TableCell>
+                        <TableCell className="text-muted-foreground">{p.cpu || "-"}</TableCell>
+                        <TableCell className="text-muted-foreground">{p.storage || "-"}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button variant="ghost" size="sm" onClick={() => openEdit(p)}><Pencil className="w-4 h-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => deletePlan(p.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Card>
+            </div>
+          )
+        })
+      })()}
     </div>
   )
 }
