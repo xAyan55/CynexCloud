@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, ComponentType } from 'react'
 import { createBrowserRouter, RouterProvider, Navigate, useRouteError, isRouteErrorResponse } from 'react-router-dom'
 import { Toaster } from '@/components/ui/sonner'
 
@@ -21,53 +21,69 @@ const RouteErrorBoundary = () => {
   )
 }
 
-const DashboardLayout = lazy(() => import('@/components/layout/DashboardLayout'))
-const AppLayout = lazy(() => import('@/components/layout/AppLayout'))
-const Login = lazy(() => import('@/pages/auth/Login'))
-const Register = lazy(() => import('@/pages/auth/Register'))
-const ForgotPassword = lazy(() => import('@/pages/auth/ForgotPassword'))
-const ResetPassword = lazy(() => import('@/pages/auth/ResetPassword'))
-const VerifyEmail = lazy(() => import('@/pages/auth/VerifyEmail'))
+const RouteLoadError = () => (
+  <div className="min-h-screen bg-black flex flex-col items-center justify-center text-zinc-400 gap-4 p-8">
+    <div className="w-12 h-12 rounded-full border border-zinc-800 flex items-center justify-center">
+      <span className="text-xl">!</span>
+    </div>
+    <p className="text-sm text-center max-w-md">This page could not be loaded.</p>
+    <p className="text-xs text-zinc-600 text-center max-w-sm">A new version may have been deployed. Please refresh.</p>
+    <button
+      onClick={() => window.location.reload()}
+      className="text-xs text-zinc-500 hover:text-zinc-300 underline underline-offset-4 transition-colors"
+    >
+      Reload page
+    </button>
+  </div>
+)
 
-// Public pages
-const Home = lazy(() => import('@/pages/public/Home'))
-const MinecraftPlans = lazy(() => import('@/pages/public/MinecraftPlans'))
-const VPSPlans = lazy(() => import('@/pages/public/VPSPlans'))
-const DiscordBotPlans = lazy(() => import('@/pages/public/DiscordBotPlans'))
-const SelectCategory = lazy(() => import('@/pages/public/SelectCategory'))
-const Features = lazy(() => import('@/pages/public/Features'))
-const Support = lazy(() => import('@/pages/public/Support'))
-const About = lazy(() => import('@/pages/public/About'))
-const Contact = lazy(() => import('@/pages/public/Contact'))
-const Terms = lazy(() => import('@/pages/public/Terms'))
-const Privacy = lazy(() => import('@/pages/public/Privacy'))
-const KnowledgeBase = lazy(() => import('@/pages/public/KnowledgeBase'))
+function lazyRetry<T extends ComponentType<any>>(importFn: () => Promise<{ default: T }>) {
+  return lazy(() => importFn().catch(() => ({ default: RouteLoadError as unknown as T })))
+}
 
-// Dashboard pages
-const DashboardHome = lazy(() => import('@/pages/dashboard/DashboardHome'))
-const Services = lazy(() => import('@/pages/dashboard/Services'))
-const ServiceDetail = lazy(() => import('@/pages/dashboard/ServiceDetail'))
-const Deploy = lazy(() => import('@/pages/dashboard/Deploy'))
-const Invoices = lazy(() => import('@/pages/dashboard/Invoices'))
-const PaymentHistory = lazy(() => import('@/pages/dashboard/PaymentHistory'))
-const Tickets = lazy(() => import('@/pages/dashboard/Tickets'))
-const CreateTicket = lazy(() => import('@/pages/dashboard/CreateTicket'))
-const TicketDetail = lazy(() => import('@/pages/dashboard/TicketDetail'))
-const Announcements = lazy(() => import('@/pages/dashboard/Announcements'))
-const Profile = lazy(() => import('@/pages/dashboard/Profile'))
-const Security = lazy(() => import('@/pages/dashboard/Security'))
-const ApiKeys = lazy(() => import('@/pages/dashboard/ApiKeys'))
-const Settings = lazy(() => import('@/pages/dashboard/Settings'))
+const DashboardLayout = lazyRetry(() => import('@/components/layout/DashboardLayout'))
+const AppLayout = lazyRetry(() => import('@/components/layout/AppLayout'))
+const Login = lazyRetry(() => import('@/pages/auth/Login'))
+const Register = lazyRetry(() => import('@/pages/auth/Register'))
+const ForgotPassword = lazyRetry(() => import('@/pages/auth/ForgotPassword'))
+const ResetPassword = lazyRetry(() => import('@/pages/auth/ResetPassword'))
+const VerifyEmail = lazyRetry(() => import('@/pages/auth/VerifyEmail'))
 
-// Admin pages
-const PanelConfig = lazy(() => import('@/pages/admin/PanelConfig'))
-const AdminPlans = lazy(() => import('@/pages/admin/AdminPlans'))
-const AdminTickets = lazy(() => import('@/pages/admin/AdminTickets'))
-const AdminTicketDetail = lazy(() => import('@/pages/admin/AdminTicketDetail'))
-const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers'))
+const Home = lazyRetry(() => import('@/pages/public/Home'))
+const MinecraftPlans = lazyRetry(() => import('@/pages/public/MinecraftPlans'))
+const VPSPlans = lazyRetry(() => import('@/pages/public/VPSPlans'))
+const DiscordBotPlans = lazyRetry(() => import('@/pages/public/DiscordBotPlans'))
+const SelectCategory = lazyRetry(() => import('@/pages/public/SelectCategory'))
+const Features = lazyRetry(() => import('@/pages/public/Features'))
+const Support = lazyRetry(() => import('@/pages/public/Support'))
+const About = lazyRetry(() => import('@/pages/public/About'))
+const Contact = lazyRetry(() => import('@/pages/public/Contact'))
+const Terms = lazyRetry(() => import('@/pages/public/Terms'))
+const Privacy = lazyRetry(() => import('@/pages/public/Privacy'))
+const KnowledgeBase = lazyRetry(() => import('@/pages/public/KnowledgeBase'))
 
-// Checkout
-const Checkout = lazy(() => import('@/pages/Checkout'))
+const DashboardHome = lazyRetry(() => import('@/pages/dashboard/DashboardHome'))
+const Services = lazyRetry(() => import('@/pages/dashboard/Services'))
+const ServiceDetail = lazyRetry(() => import('@/pages/dashboard/ServiceDetail'))
+const Deploy = lazyRetry(() => import('@/pages/dashboard/Deploy'))
+const Invoices = lazyRetry(() => import('@/pages/dashboard/Invoices'))
+const PaymentHistory = lazyRetry(() => import('@/pages/dashboard/PaymentHistory'))
+const Tickets = lazyRetry(() => import('@/pages/dashboard/Tickets'))
+const CreateTicket = lazyRetry(() => import('@/pages/dashboard/CreateTicket'))
+const TicketDetail = lazyRetry(() => import('@/pages/dashboard/TicketDetail'))
+const Announcements = lazyRetry(() => import('@/pages/dashboard/Announcements'))
+const Profile = lazyRetry(() => import('@/pages/dashboard/Profile'))
+const Security = lazyRetry(() => import('@/pages/dashboard/Security'))
+const ApiKeys = lazyRetry(() => import('@/pages/dashboard/ApiKeys'))
+const Settings = lazyRetry(() => import('@/pages/dashboard/Settings'))
+
+const PanelConfig = lazyRetry(() => import('@/pages/admin/PanelConfig'))
+const AdminPlans = lazyRetry(() => import('@/pages/admin/AdminPlans'))
+const AdminTickets = lazyRetry(() => import('@/pages/admin/AdminTickets'))
+const AdminTicketDetail = lazyRetry(() => import('@/pages/admin/AdminTicketDetail'))
+const AdminUsers = lazyRetry(() => import('@/pages/admin/AdminUsers'))
+
+const Checkout = lazyRetry(() => import('@/pages/Checkout'))
 
 const FallbackLoader = () => (
   <div className="min-h-screen bg-black flex items-center justify-center text-zinc-500 font-semibold gap-3 select-none">
