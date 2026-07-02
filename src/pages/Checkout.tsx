@@ -461,9 +461,9 @@ export default function Checkout() {
                   <Checkbox checked={agreeTerms} onCheckedChange={c => setAgreeTerms(c as boolean)} className="mt-0.5" />
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     I agree to the{" "}
-                    <Link to="/terms" className="text-foreground hover:underline">Terms of Service</Link>{" "}
+                    <Link to="/terms" target="_blank" rel="noopener noreferrer" className="text-foreground hover:underline">Terms of Service</Link>{" "}
                     and{" "}
-                    <Link to="/privacy" className="text-foreground hover:underline">Privacy Policy</Link>
+                    <Link to="/privacy" target="_blank" rel="noopener noreferrer" className="text-foreground hover:underline">Privacy Policy</Link>
                   </p>
                 </label>
 
