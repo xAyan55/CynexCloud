@@ -26,12 +26,12 @@ const DEFAULT_SOFTWARE = [
 ];
 
 const DEFAULT_ADDONS = [
-  { id: "add-ram", name: "Extra RAM (+1GB)", price: 150, description: "Adds 1GB of premium ECC DDR4 Memory allocation.", active: true },
-  { id: "add-storage", name: "Additional Storage (+10GB)", price: 50, description: "10GB extra NVMe disk storage space.", active: true },
-  { id: "add-port", name: "Dedicated Port (25565)", price: 250, description: "Guarantees default Minecraft port allocation.", active: true },
-  { id: "add-ddos", name: "DDoS Premium Shield", price: 200, description: "Advanced L4/L7 custom scrubbing mapping.", active: true },
-  { id: "add-priority", name: "Priority SLA Support", price: 100, description: "Fastest response ticket queues (under 30 mins).", active: true },
-  { id: "add-backups", name: "Automatic Backups", price: 100, description: "Daily off-site snapshots retained for 7 days.", active: true }
+  { id: "add-ram", name: "Extra RAM (+1GB)", price_pct: 25, description: "Adds 1GB of premium ECC DDR4 Memory allocation.", active: true },
+  { id: "add-storage", name: "Additional Storage (+10GB)", price_pct: 15, description: "10GB extra NVMe disk storage space.", active: true },
+  { id: "add-cpu", name: "+100% CPU", price_pct: 30, description: "Doubles your CPU allocation for heavy workloads.", active: true },
+  { id: "add-ddos", name: "DDoS Premium Shield", price_pct: 20, description: "Advanced L4/L7 custom scrubbing mapping.", active: true },
+  { id: "add-priority", name: "Priority SLA Support", price_pct: 10, description: "Fastest response ticket queues (under 30 mins).", active: true },
+  { id: "add-backups", name: "Automatic Backups", price_pct: 10, description: "Daily off-site snapshots retained for 7 days.", active: true }
 ];
 
 const DEFAULT_CYCLES = [
@@ -172,13 +172,15 @@ export default function createCheckoutRouter(db: any) {
       const months = cycle.months;
       const baseSubtotal = basePrice * months;
 
-      // 3. Fetch add-ons price
+      // 3. Fetch add-ons price (percentage-based)
+      const calcAddonPrice = (addon: any) => addon.price_pct ? Math.round(basePrice * addon.price_pct / 100) : (addon.price || 0);
+
       const allAddons = await getOrSeedCollection("checkout_addons", DEFAULT_ADDONS);
       let addonsTotal = 0;
       (selectedAddons || []).forEach((addonId: string) => {
         const add = allAddons.find((a: any) => a.id === addonId);
         if (add) {
-          addonsTotal += add.price * months;
+          addonsTotal += calcAddonPrice(add) * months;
         }
       });
 
@@ -191,9 +193,9 @@ export default function createCheckoutRouter(db: any) {
       if (coupon) {
         const normalizedCoupon = coupon.toUpperCase().trim();
         if (normalizedCoupon === "CYNEX20") {
-          couponDiscountPct = 0.20; // 20%
+          couponDiscountPct = 0.20;
         } else if (normalizedCoupon === "START10") {
-          couponDiscountPct = 0.10; // 10%
+          couponDiscountPct = 0.10;
         }
       }
       
@@ -204,6 +206,11 @@ export default function createCheckoutRouter(db: any) {
       const taxableAmount = Math.max(0, subtotal - totalDiscount);
       const taxAmount = Math.round(taxableAmount * 0.18 * 100) / 100;
       const total = taxableAmount + taxAmount;
+
+      const recurringPrice = basePrice + (selectedAddons || []).map((addonId: string) => {
+        const add = allAddons.find((a: any) => a.id === addonId);
+        return add ? calcAddonPrice(add) : 0;
+      }).reduce((acc: number, curr: number) => acc + curr, 0);
 
       res.json({
         success: true,
@@ -219,9 +226,7 @@ export default function createCheckoutRouter(db: any) {
           discountPct: (cycle.discount * 100) + (couponDiscountPct * 100),
           taxAmount,
           total,
-          recurringPrice: basePrice + (selectedAddons || []).map((addonId: string) => {
-            return allAddons.find((a: any) => a.id === addonId)?.price || 0;
-          }).reduce((acc: number, curr: number) => acc + curr, 0)
+          recurringPrice
         }
       });
     } catch (err: any) {
@@ -266,15 +271,18 @@ export default function createCheckoutRouter(db: any) {
       const months = cycle.months;
       const baseSubtotal = basePrice * months;
 
-      // 3. Validate and calculate add-ons
+      // 3. Validate and calculate add-ons (percentage-based)
+      const calcAddonPrice = (addon: any) => addon.price_pct ? Math.round(basePrice * addon.price_pct / 100) : (addon.price || 0);
+
       const allAddons = await getOrSeedCollection("checkout_addons", DEFAULT_ADDONS);
       let addonsTotal = 0;
       const verifiedAddons: any[] = [];
       (selectedAddons || []).forEach((addonId: string) => {
         const add = allAddons.find((a: any) => a.id === addonId);
         if (add) {
-          addonsTotal += add.price * months;
-          verifiedAddons.push({ id: add.id, name: add.name, price: add.price });
+          const addonPrice = calcAddonPrice(add);
+          addonsTotal += addonPrice * months;
+          verifiedAddons.push({ id: add.id, name: add.name, price: addonPrice });
         }
       });
 

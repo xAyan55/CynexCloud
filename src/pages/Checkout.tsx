@@ -7,9 +7,8 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Check, ChevronLeft, Globe, Server, Cpu, HardDrive, AlertCircle, ExternalLink } from "lucide-react"
+import { Check, ChevronLeft, Globe, Server, Cpu, HardDrive, AlertCircle, ExternalLink, Wifi } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
 
 interface Plan {
@@ -35,7 +34,7 @@ interface Cycle {
 }
 
 interface Addon {
-  id: string; name: string; price: number; description?: string
+  id: string; name: string; price?: number; price_pct?: number; description?: string
 }
 
 export default function Checkout() {
@@ -112,14 +111,17 @@ export default function Checkout() {
   const months = selectedCycle?.months || 1
   const subTotal = basePrice * months
 
+  const calcAddonPrice = (addon: Addon) =>
+    addon.price_pct ? Math.round(basePrice * addon.price_pct / 100) : (addon.price || 0)
+
   const addonsTotal = useMemo(() => {
     let total = 0
     selectedAddons.forEach(addonId => {
       const addon = addons.find(a => a.id === addonId)
-      if (addon) total += addon.price * months
+      if (addon) total += calcAddonPrice(addon) * months
     })
     return total
-  }, [selectedAddons, addons, months])
+  }, [selectedAddons, addons, months, basePrice])
 
   const cycleDiscountRate = selectedCycle?.discount || 0
   const cycleDiscount = subTotal * cycleDiscountRate
@@ -240,33 +242,52 @@ export default function Checkout() {
 
                 <div>
                   <Label>Location / Node</Label>
-                  <Select value={locationId} onValueChange={setLocationId} disabled={configError !== ""}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select a location..." />
-                    </SelectTrigger>
-                    <SelectContent>
+                  {configError ? (
+                    <p className="text-xs text-destructive mt-1">{configError}</p>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-2 mt-1">
                       {locations.filter(l => l.isOnline !== false).map(loc => (
-                        <SelectItem key={loc.id} value={String(loc.id)}>
-                          <span className="flex items-center gap-2">
-                            <Globe className="w-3.5 h-3.5" />
-                            {loc.flag && <span>{loc.flag}</span>}
-                            {loc.name}{loc.country ? ` — ${loc.country}` : ""}
-                            {loc.ping ? ` (${loc.ping})` : ""}
-                          </span>
-                        </SelectItem>
+                        <label
+                          key={loc.id}
+                          className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                            String(locationId) === String(loc.id)
+                              ? "border-primary bg-primary/10"
+                              : "border-border hover:bg-accent/30"
+                          }`}
+                          onClick={() => setLocationId(String(loc.id))}
+                        >
+                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                            String(locationId) === String(loc.id) ? "border-primary" : "border-zinc-600"
+                          }`}>
+                            {String(locationId) === String(loc.id) && (
+                              <div className="w-2 h-2 rounded-full bg-primary" />
+                            )}
+                          </div>
+                          <Wifi className="w-4 h-4 text-muted-foreground shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              {loc.flag && <span className="text-sm">{loc.flag}</span>}
+                              <span className="text-sm font-medium">{loc.name}</span>
+                              {loc.country && <span className="text-xs text-muted-foreground">— {loc.country}</span>}
+                            </div>
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                              {loc.ping && <span>{loc.ping} ping</span>}
+                              {loc.availableRam !== undefined && <span>{Math.round(loc.availableRam / 1024)}GB RAM free</span>}
+                            </div>
+                          </div>
+                        </label>
                       ))}
-                    </SelectContent>
-                  </Select>
-                  {configError && <p className="text-xs text-destructive mt-1">{configError}</p>}
+                    </div>
+                  )}
                 </div>
 
                 <div>
                   <Label>Server Software</Label>
                   <Select value={softwareId} onValueChange={v => { setSoftwareId(v); setVersion("") }} disabled={configError !== ""}>
-                    <SelectTrigger className="mt-1">
+                    <SelectTrigger className="mt-1 w-full">
                       <SelectValue placeholder="Select software..." />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="min-w-[200px]">
                       {softwareList.map(sw => (
                         <SelectItem key={sw.id} value={sw.id}>{sw.name}</SelectItem>
                       ))}
@@ -317,29 +338,32 @@ export default function Checkout() {
                 {addons.length > 0 && (
                   <div className="space-y-3">
                     <Label>Add-ons</Label>
-                    {addons.map(addon => (
-                      <label
-                        key={addon.id}
-                        className="flex items-start gap-3 p-3 rounded-lg border border-border cursor-pointer hover:bg-accent/30 transition-colors"
-                      >
-                        <Checkbox
-                          checked={selectedAddons.includes(addon.id)}
-                          onCheckedChange={checked => {
-                            setSelectedAddons(prev =>
-                              checked ? [...prev, addon.id] : prev.filter(id => id !== addon.id)
-                            )
-                          }}
-                          className="mt-0.5"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium">{addon.name}</p>
-                          {addon.description && (
-                            <p className="text-xs text-muted-foreground mt-0.5">{addon.description}</p>
-                          )}
-                        </div>
-                        <p className="text-sm font-medium whitespace-nowrap">₹{addon.price}<span className="text-xs text-muted-foreground font-normal">/mo</span></p>
-                      </label>
-                    ))}
+                    {addons.map(addon => {
+                      const addonPrice = calcAddonPrice(addon)
+                      return (
+                        <label
+                          key={addon.id}
+                          className="flex items-start gap-3 p-3 rounded-lg border border-border cursor-pointer hover:bg-accent/30 transition-colors"
+                        >
+                          <Checkbox
+                            checked={selectedAddons.includes(addon.id)}
+                            onCheckedChange={checked => {
+                              setSelectedAddons(prev =>
+                                checked ? [...prev, addon.id] : prev.filter(id => id !== addon.id)
+                              )
+                            }}
+                            className="mt-0.5"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium">{addon.name}</p>
+                            {addon.description && (
+                              <p className="text-xs text-muted-foreground mt-0.5">{addon.description}</p>
+                            )}
+                          </div>
+                          <p className="text-sm font-medium whitespace-nowrap">+₹{addonPrice}<span className="text-xs text-muted-foreground font-normal">/mo</span></p>
+                        </label>
+                      )
+                    })}
                   </div>
                 )}
 
@@ -357,16 +381,6 @@ export default function Checkout() {
                 </div>
               </CardContent>
             </Card>
-
-            <label className="flex items-start gap-3 cursor-pointer">
-              <Checkbox checked={agreeTerms} onCheckedChange={c => setAgreeTerms(c as boolean)} className="mt-0.5" />
-              <p className="text-sm text-muted-foreground">
-                I agree to the{" "}
-                <Link to="/terms" className="text-foreground hover:underline">Terms of Service</Link>{" "}
-                and{" "}
-                <Link to="/privacy" className="text-foreground hover:underline">Privacy Policy</Link>
-              </p>
-            </label>
           </div>
 
           <div className="lg:col-span-3">
@@ -442,6 +456,16 @@ export default function Checkout() {
                   <span className="text-sm text-muted-foreground">Total</span>
                   <span className="text-xl font-bold">₹{total}<span className="text-sm font-normal text-muted-foreground"> for {months}mo</span></span>
                 </div>
+
+                <label className="flex items-start gap-3 cursor-pointer pt-1">
+                  <Checkbox checked={agreeTerms} onCheckedChange={c => setAgreeTerms(c as boolean)} className="mt-0.5" />
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    I agree to the{" "}
+                    <Link to="/terms" className="text-foreground hover:underline">Terms of Service</Link>{" "}
+                    and{" "}
+                    <Link to="/privacy" className="text-foreground hover:underline">Privacy Policy</Link>
+                  </p>
+                </label>
 
                 {error && (
                   <div className="text-sm text-destructive text-center p-2 rounded bg-destructive/10">{error}</div>
