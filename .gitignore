@@ -6,3 +6,5 @@ coverage/
 *.log
 .env*
 !.env.example
+cynex.db*
+ui-rewamp.md
