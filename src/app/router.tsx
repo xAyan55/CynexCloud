@@ -1,10 +1,14 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import { Toaster } from '@/components/ui/sonner'
 
 const DashboardLayout = lazy(() => import('@/components/layout/DashboardLayout'))
 const AppLayout = lazy(() => import('@/components/layout/AppLayout'))
-const AuthPage = lazy(() => import('@/pages/auth/AuthPage'))
+const Login = lazy(() => import('@/pages/auth/Login'))
+const Register = lazy(() => import('@/pages/auth/Register'))
+const ForgotPassword = lazy(() => import('@/pages/auth/ForgotPassword'))
+const ResetPassword = lazy(() => import('@/pages/auth/ResetPassword'))
+const VerifyEmail = lazy(() => import('@/pages/auth/VerifyEmail'))
 
 // Public pages
 const Home = lazy(() => import('@/pages/public/Home'))
@@ -62,17 +66,13 @@ export default function AppRouter() {
   const router = createBrowserRouter([
     {
       path: '/auth',
-      element: (
-        <Suspense fallback={<FallbackLoader />}>
-          <AuthPage />
-        </Suspense>
-      ),
+      element: <Navigate to="/login" replace />,
     },
     {
       path: '/login',
       element: (
         <Suspense fallback={<FallbackLoader />}>
-          <AuthPage />
+          <Login />
         </Suspense>
       ),
     },
@@ -80,15 +80,7 @@ export default function AppRouter() {
       path: '/register',
       element: (
         <Suspense fallback={<FallbackLoader />}>
-          <AuthPage />
-        </Suspense>
-      ),
-    },
-    {
-      path: '/verify-email',
-      element: (
-        <Suspense fallback={<FallbackLoader />}>
-          <AuthPage />
+          <Register />
         </Suspense>
       ),
     },
@@ -96,7 +88,7 @@ export default function AppRouter() {
       path: '/forgot-password',
       element: (
         <Suspense fallback={<FallbackLoader />}>
-          <AuthPage />
+          <ForgotPassword />
         </Suspense>
       ),
     },
@@ -104,7 +96,15 @@ export default function AppRouter() {
       path: '/reset-password',
       element: (
         <Suspense fallback={<FallbackLoader />}>
-          <AuthPage />
+          <ResetPassword />
+        </Suspense>
+      ),
+    },
+    {
+      path: '/verify-email',
+      element: (
+        <Suspense fallback={<FallbackLoader />}>
+          <VerifyEmail />
         </Suspense>
       ),
     },
