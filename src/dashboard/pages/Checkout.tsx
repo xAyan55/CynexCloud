@@ -366,10 +366,18 @@ export default function Checkout() {
             <>
               {/* Plan Information Card */}
               <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-6 space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-800 text-white">
-                    <Server className="w-5 h-5" />
-                  </div>
+                <div className="flex items-center gap-3.5">
+                  {planDetails?.image ? (
+                    <img 
+                      src={planDetails.image} 
+                      alt={planDetails.name} 
+                      className="w-12 h-12 object-contain rounded-xl bg-zinc-900 border border-zinc-800 p-1 shrink-0"
+                    />
+                  ) : (
+                    <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-800 text-white shrink-0">
+                      <Server className="w-5 h-5" />
+                    </div>
+                  )}
                   <div>
                     <h3 className="text-sm font-bold text-white uppercase tracking-wider">{planDetails?.name}</h3>
                     <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">Base Package Specifications</p>
@@ -437,7 +445,15 @@ export default function Checkout() {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2.5">
-                            <span className="text-xl">{loc.flag || "🌐"}</span>
+                            {loc.isOnline ? (
+                              <img 
+                                src="/images/main-imgs/green-dot.gif" 
+                                alt="Online" 
+                                className="w-3 h-3 object-contain shrink-0"
+                              />
+                            ) : (
+                              <div className="w-2.5 h-2.5 rounded-full bg-zinc-700 shrink-0" />
+                            )}
                             <div>
                               <span className="text-xs font-bold block text-white">{loc.name}</span>
                               <span className="text-[9px] font-semibold text-zinc-550 uppercase tracking-wider">

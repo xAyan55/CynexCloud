@@ -1,4 +1,5 @@
 import axios from "axios";
+import net from "net";
 import { queryGet } from "../db/database";
 
 interface PanelConfig {
@@ -145,6 +146,39 @@ export const getServerWebSocketDetails = async (serverIdentifier: string) => {
 };
 
 /**
+ * Measure TCP RTT latency to a host and daemon port
+ */
+const measureTcpPing = (host: string, port: number, timeout = 1000): Promise<number> => {
+  return new Promise((resolve) => {
+    const start = process.hrtime();
+    const socket = new net.Socket();
+    
+    socket.setTimeout(timeout);
+    
+    const onConnect = () => {
+      const diff = process.hrtime(start);
+      const timeMs = Math.round((diff[0] * 1000) + (diff[1] / 1000000));
+      socket.destroy();
+      resolve(timeMs);
+    };
+
+    socket.connect(port, host, onConnect);
+
+    socket.on("error", () => {
+      const diff = process.hrtime(start);
+      const timeMs = Math.round((diff[0] * 1000) + (diff[1] / 1000000));
+      socket.destroy();
+      resolve(timeMs);
+    });
+
+    socket.on("timeout", () => {
+      socket.destroy();
+      resolve(999);
+    });
+  });
+};
+
+/**
  * Fetch real Pterodactyl nodes and locations, and calculate resource allocations
  */
 export const getPterodactylNodesForCheckout = async () => {
@@ -192,8 +226,8 @@ export const getPterodactylNodesForCheckout = async () => {
     });
   });
 
-  // Process nodes
-  return nodes.map((node: any) => {
+  // Process nodes in parallel
+  return Promise.all(nodes.map(async (node: any) => {
     const attr = node.attributes;
     const loc = locationsMap.get(attr.location_id) || { short: "US", long: "United States" };
     
@@ -220,8 +254,19 @@ export const getPterodactylNodesForCheckout = async () => {
     // Determine online status: active and not in maintenance mode
     const isOnline = attr.active && !attr.maintenance_mode;
 
-    // Ping estimate based on location
-    const ping = loc.short === "RO" ? "15ms" : loc.short === "DE" ? "25ms" : loc.short === "IN" ? "55ms" : loc.short === "SG" ? "140ms" : "95ms";
+    // Real RTT/latency check via TCP ping to the node's daemon port
+    let ping = "95ms";
+    if (isOnline && attr.fqdn) {
+      try {
+        const pingTime = await measureTcpPing(attr.fqdn, attr.daemon_listen || 8080, 1000);
+        if (pingTime !== 999) {
+          ping = `${pingTime}ms`;
+        }
+      } catch (err: any) {
+        console.warn(`[Node Ping] Failed to ping ${attr.fqdn}:`, err.message);
+      }
+    }
+
     const flag = loc.short === "RO" ? "🇷🇴" : loc.short === "DE" ? "🇩🇪" : loc.short === "US" ? "🇺🇸" : loc.short === "SG" ? "🇸🇬" : loc.short === "IN" ? "🇮🇳" : "🌐";
 
     return {
@@ -238,8 +283,7 @@ export const getPterodactylNodesForCheckout = async () => {
       locationId: attr.location_id,
       flag
     };
-  });
-};
+  }));
 
 /**
  * Fetch nests and eggs from Pterodactyl dynamically to map Game -> Software -> Version
