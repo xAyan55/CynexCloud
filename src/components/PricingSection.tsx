@@ -21,7 +21,7 @@ interface PricingSectionProps {
 
 export default function PricingSection({ title, description, plans, id = "pricing", columns = 3 }: PricingSectionProps) {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, authFetch } = useAuth();
   const [provisioningId, setProvisioningId] = useState<string | null>(null);
   const [successPlan, setSuccessPlan] = useState<PricingPlan | null>(null);
   const [activeTab, setActiveTab] = useState<"presets" | "custom">("presets");
@@ -85,7 +85,7 @@ export default function PricingSection({ title, description, plans, id = "pricin
     setOrderError(null);
 
     try {
-      const res = await fetch("/api/orders", {
+      const res = await authFetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
