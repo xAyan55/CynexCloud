@@ -252,7 +252,7 @@ export const getPterodactylNodesForCheckout = async () => {
     const availableStorageMb = Math.max(0, totalDiskLimit - allocations.disk);
     
     // Determine online status: active and not in maintenance mode
-    const isActive = attr.active === true || attr.active === 1 || String(attr.active).toLowerCase() === "true" || String(attr.active) === "1";
+    const isActive = attr.active === undefined || attr.active === true || attr.active === 1 || String(attr.active).toLowerCase() === "true" || String(attr.active) === "1";
     const isMaintenance = attr.maintenance_mode === true || attr.maintenance_mode === 1 || String(attr.maintenance_mode).toLowerCase() === "true" || String(attr.maintenance_mode) === "1";
     const isOnline = isActive && !isMaintenance;
 
