@@ -145,26 +145,26 @@ export default function AppRouter() {
     },
 
     {
-      path: '*',
+      path: '/',
       element: (
         <Suspense fallback={<FallbackLoader />}>
           <AppLayout />
         </Suspense>
       ),
       children: [
-        { path: '/', element: <Home /> },
-        { path: '/minecraft', element: <MinecraftPlans /> },
-        { path: '/vps', element: <VPSPlans /> },
-        { path: '/discord-bot', element: <DiscordBotPlans /> },
-        { path: '/select-category', element: <SelectCategory /> },
-        { path: '/features', element: <Features /> },
-        { path: '/support', element: <Support /> },
-        { path: '/about', element: <About /> },
-        { path: '/contact', element: <Contact /> },
-        { path: '/terms', element: <Terms /> },
-        { path: '/privacy', element: <Privacy /> },
-        { path: '/knowledge-base', element: <KnowledgeBase /> },
-        { path: '/checkout/minecraft/:planId', element: <Checkout /> },
+        { index: true, element: <Home /> },
+        { path: 'minecraft', element: <MinecraftPlans /> },
+        { path: 'vps', element: <VPSPlans /> },
+        { path: 'discord-bot', element: <DiscordBotPlans /> },
+        { path: 'select-category', element: <SelectCategory /> },
+        { path: 'features', element: <Features /> },
+        { path: 'support', element: <Support /> },
+        { path: 'about', element: <About /> },
+        { path: 'contact', element: <Contact /> },
+        { path: 'terms', element: <Terms /> },
+        { path: 'privacy', element: <Privacy /> },
+        { path: 'knowledge-base', element: <KnowledgeBase /> },
+        { path: 'checkout/minecraft/:planId', element: <Checkout /> },
       ],
     },
   ])
