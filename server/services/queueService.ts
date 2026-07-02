@@ -103,10 +103,10 @@ export const processProvisioningJob = async (jobId: string): Promise<void> => {
       throw new Error(`Plan details for planId '${service.planId}' not found.`);
     }
 
-    // Read technical mappings from plan JSON object
-    const nestId = parseInt(plan.nestId || plan.nest_id || "1", 10);
-    const eggId = parseInt(plan.eggId || plan.egg_id || "1", 10);
-    const locationId = parseInt(plan.locationId || plan.location_id || "1", 10);
+    // Read technical mappings: prioritize values from service record (customized during checkout), fall back to plan defaults
+    const nestId = service.nestId ? parseInt(service.nestId, 10) : parseInt(plan.nestId || plan.nest_id || "1", 10);
+    const eggId = service.eggId ? parseInt(service.eggId, 10) : parseInt(plan.eggId || plan.egg_id || "1", 10);
+    const locationId = service.locationId ? parseInt(service.locationId, 10) : parseInt(plan.locationId || plan.location_id || "1", 10);
     const ramMb = plan.ram_mb || 1024;
     const cpuPct = plan.cpu_pct || 100;
     const diskMb = plan.disk_mb || 5120;
@@ -115,7 +115,13 @@ export const processProvisioningJob = async (jobId: string): Promise<void> => {
     const allocationLimit = plan.allocations || 1;
     const dockerImage = plan.dockerImage || "ghcr.io/pterodactyl/yolks:java_17";
     const startup = plan.startup || "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}";
+    
     const envVars = typeof plan.environment === "string" ? JSON.parse(plan.environment) : (plan.environment || {});
+    if (service.version) {
+      envVars["MINECRAFT_VERSION"] = service.version;
+      envVars["VERSION"] = service.version;
+      envVars["SERVER_JARFILE"] = "server.jar";
+    }
 
     // 4. Resolve Pterodactyl user by email. Create account if not exists.
     let pterodactylUser: any = null;

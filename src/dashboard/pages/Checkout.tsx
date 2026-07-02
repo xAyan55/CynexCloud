@@ -10,21 +10,30 @@ import {
   ArrowRight, 
   ShieldAlert, 
   Coins, 
-  Loader2 
+  Loader2,
+  Tag
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface LocationOption {
-  id: string;
+  id: string | number;
   name: string;
-  countryCode: string;
-  flag: string;
+  country: string;
+  city: string;
   ping: string;
-  availability: string;
+  flag: string;
+  totalRam: number;
+  availableRam: number;
+  totalDisk: number;
+  availableDisk: number;
+  isOnline: boolean;
 }
 
 interface SoftwareOption {
   id: string;
+  eggId: number;
+  nestId: number;
+  game: string;
   name: string;
   versions: string[];
 }
@@ -49,8 +58,11 @@ interface CalculationResult {
   baseSubtotal: number;
   addonsTotal: number;
   subtotal: number;
+  cycleDiscountAmount: number;
+  couponDiscountAmount: number;
   discountAmount: number;
   discountPct: number;
+  taxAmount: number;
   total: number;
   recurringPrice: number;
 }
@@ -71,12 +83,18 @@ export default function Checkout() {
   // Customer choices
   const [step, setStep] = useState(1); // 1 = Config, 2 = Review
   const [serverName, setServerName] = useState("");
+  const [selectedGame, setSelectedGame] = useState<string>("");
   const [selectedLoc, setSelectedLoc] = useState<string>("");
   const [selectedSoftware, setSelectedSoftware] = useState<string>("");
   const [selectedVersion, setSelectedVersion] = useState<string>("");
   const [selectedCycle, setSelectedCycle] = useState<string>("monthly");
   const [activeAddons, setActiveAddons] = useState<string[]>([]);
   const [agreeTerms, setAgreeTerms] = useState(false);
+
+  // Coupon state
+  const [couponInput, setCouponInput] = useState("");
+  const [activeCoupon, setActiveCoupon] = useState("");
+  const [couponMessage, setCouponMessage] = useState("");
 
   // Live calculation details
   const [calc, setCalc] = useState<CalculationResult | null>(null);
@@ -109,10 +127,22 @@ export default function Checkout() {
           setCycles(configData.cycles || []);
 
           // Set default selections
-          if (configData.locations.length > 0) setSelectedLoc(configData.locations[0].id);
+          if (configData.locations.length > 0) {
+            setSelectedLoc(String(configData.locations[0].id));
+          }
+
           if (configData.software.length > 0) {
-            setSelectedSoftware(configData.software[0].id);
-            setSelectedVersion(configData.software[0].versions[0]);
+            // Find unique games
+            const uniqueGames = Array.from(new Set(configData.software.map((s: any) => s.game || "Minecraft")));
+            const defaultGame = uniqueGames[0] || "Minecraft";
+            setSelectedGame(defaultGame);
+
+            // Filter software list by game
+            const gameSoftwares = configData.software.filter((s: any) => (s.game || "Minecraft") === defaultGame);
+            if (gameSoftwares.length > 0) {
+              setSelectedSoftware(gameSoftwares[0].id);
+              setSelectedVersion(gameSoftwares[0].versions[0]);
+            }
           }
         }
       } catch (err) {
@@ -126,7 +156,7 @@ export default function Checkout() {
     initCheckout();
   }, [planId]);
 
-  // Recalculate price whenever cycle or add-ons change
+  // Recalculate price whenever cycle, add-ons or active coupon change
   useEffect(() => {
     if (loadingConfig || !planId) return;
 
@@ -139,7 +169,8 @@ export default function Checkout() {
           body: JSON.stringify({
             planId,
             billingCycle: selectedCycle,
-            selectedAddons: activeAddons
+            selectedAddons: activeAddons,
+            coupon: activeCoupon
           })
         });
         const data = await res.json();
@@ -154,9 +185,22 @@ export default function Checkout() {
     };
 
     runPriceCalculation();
-  }, [selectedCycle, activeAddons, planId, loadingConfig]);
+  }, [selectedCycle, activeAddons, planId, loadingConfig, activeCoupon]);
 
-  // Handle software change (resets default version)
+  // Handle Game selection change
+  const handleGameChange = (game: string) => {
+    setSelectedGame(game);
+    const gameSoftwares = softwareList.filter((s) => (s.game || "Minecraft") === game);
+    if (gameSoftwares.length > 0) {
+      setSelectedSoftware(gameSoftwares[0].id);
+      setSelectedVersion(gameSoftwares[0].versions[0]);
+    } else {
+      setSelectedSoftware("");
+      setSelectedVersion("");
+    }
+  };
+
+  // Handle Software change (resets default version)
   const handleSoftwareChange = (swId: string) => {
     setSelectedSoftware(swId);
     const sw = softwareList.find((s) => s.id === swId);
@@ -172,6 +216,27 @@ export default function Checkout() {
         ? prev.filter((id) => id !== addonId) 
         : [...prev, addonId]
     );
+  };
+
+  // Handle Applying Coupon
+  const handleApplyCoupon = () => {
+    setCouponMessage("");
+    const normalized = couponInput.toUpperCase().trim();
+    if (!normalized) {
+      setActiveCoupon("");
+      return;
+    }
+
+    if (normalized === "CYNEX20") {
+      setActiveCoupon("CYNEX20");
+      setCouponMessage("Coupon applied: 20% discount on entire cart total!");
+    } else if (normalized === "START10") {
+      setActiveCoupon("START10");
+      setCouponMessage("Coupon applied: 10% discount!");
+    } else {
+      setActiveCoupon("");
+      setCouponMessage("Invalid promo code.");
+    }
   };
 
   const handleNextStep = () => {
@@ -191,7 +256,6 @@ export default function Checkout() {
 
     // Check authentication
     if (!user) {
-      // Redirect to login page and preserve configuration parameters
       const params = new URLSearchParams({
         redirect: window.location.pathname + window.location.search
       });
@@ -223,7 +287,8 @@ export default function Checkout() {
           locationId: selectedLoc,
           softwareId: selectedSoftware,
           version: selectedVersion,
-          selectedAddons: activeAddons
+          selectedAddons: activeAddons,
+          coupon: activeCoupon
         })
       });
 
@@ -252,18 +317,23 @@ export default function Checkout() {
     }
   };
 
-  if (loadingConfig) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <Loader2 className="w-10 h-10 animate-spin text-white" />
-        <p className="text-zinc-550 text-xs font-bold uppercase tracking-wider">Loading checkout configurations...</p>
-      </div>
-    );
-  }
-
-  const selectedLocDetails = locations.find(l => l.id === selectedLoc);
+  const selectedLocDetails = locations.find(l => String(l.id) === String(selectedLoc));
   const selectedSoftwareDetails = softwareList.find(s => s.id === selectedSoftware);
   const selectedCycleDetails = cycles.find(c => c.id === selectedCycle);
+
+  // Extract unique games for the first dropdown filter
+  const uniqueGames = Array.from(new Set(softwareList.map(s => s.game || "Minecraft")));
+  
+  // Filter software options based on the selected game
+  const filteredSoftwareOptions = softwareList.filter(s => (s.game || "Minecraft") === selectedGame);
+
+  // Check if configuration is complete to enable Continue button
+  const isConfigComplete = 
+    serverName.trim() !== "" && 
+    selectedLoc !== "" && 
+    selectedSoftware !== "" && 
+    selectedVersion !== "" && 
+    selectedCycle !== "";
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 font-sans select-none text-zinc-300">
@@ -272,7 +342,7 @@ export default function Checkout() {
       <div className="flex items-center justify-between mb-10 border-b border-zinc-900 pb-6">
         <div>
           <h2 className="text-2xl font-black text-white uppercase tracking-tight">Checkout</h2>
-          <p className="text-xs text-zinc-500 font-semibold uppercase tracking-wider">Premium Minecraft Hosting Portal</p>
+          <p className="text-xs text-zinc-500 font-semibold uppercase tracking-wider">Premium Cloud Provisioning Pipeline</p>
         </div>
         <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider">
           <span className={step === 1 ? "text-white" : "text-zinc-500"}>1. Configure</span>
@@ -311,7 +381,7 @@ export default function Checkout() {
                     <Layers className="w-4 h-4 text-zinc-550 shrink-0" />
                     <div>
                       <span className="text-[9px] font-bold text-zinc-550 uppercase tracking-widest block">Memory</span>
-                      <span className="text-xs font-bold text-white">{planDetails?.ram} ECC RAM</span>
+                      <span className="text-xs font-bold text-white">{planDetails?.ram}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -325,7 +395,7 @@ export default function Checkout() {
                     <HardDrive className="w-4 h-4 text-zinc-550 shrink-0" />
                     <div>
                       <span className="text-[9px] font-bold text-zinc-550 uppercase tracking-widest block">Storage</span>
-                      <span className="text-xs font-bold text-white">{planDetails?.storage || "NVMe SSD"}</span>
+                      <span className="text-xs font-bold text-white">{planDetails?.storage || planDetails?.disk}</span>
                     </div>
                   </div>
                 </div>
@@ -353,26 +423,56 @@ export default function Checkout() {
                   <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">Select a node location closest to your target players</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  {locations.map((loc) => (
-                    <div
-                      key={loc.id}
-                      onClick={() => setSelectedLoc(loc.id)}
-                      className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${
-                        selectedLoc === loc.id
-                          ? "bg-white/[0.02] border-white text-white"
-                          : "bg-zinc-900/40 border-zinc-850 text-zinc-400 hover:border-zinc-800"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{loc.flag}</span>
-                        <div>
-                          <span className="text-xs font-bold block">{loc.name}</span>
-                          <span className="text-[9px] font-semibold text-zinc-500 uppercase tracking-wider">Avg. Ping: {loc.ping}</span>
+                  {locations.map((loc) => {
+                    const isSelected = selectedLoc === String(loc.id);
+                    return (
+                      <div
+                        key={loc.id}
+                        onClick={() => setSelectedLoc(String(loc.id))}
+                        className={`flex flex-col p-4 rounded-xl border transition-all cursor-pointer gap-2.5 ${
+                          isSelected
+                            ? "bg-white/[0.02] border-white text-white"
+                            : "bg-zinc-900/40 border-zinc-850 text-zinc-400 hover:border-zinc-800"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <span className="text-xl">{loc.flag || "🌐"}</span>
+                            <div>
+                              <span className="text-xs font-bold block text-white">{loc.name}</span>
+                              <span className="text-[9px] font-semibold text-zinc-550 uppercase tracking-wider">
+                                {loc.city}, {loc.country}
+                              </span>
+                            </div>
+                          </div>
+                          <span className="text-[9px] font-bold text-zinc-450 bg-zinc-900 px-2.5 py-0.5 rounded-full border border-zinc-850 font-mono">
+                            {loc.ping}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-zinc-900 text-[10px] font-semibold">
+                          <div>
+                            <span className="text-[8px] font-bold text-zinc-550 uppercase tracking-widest block mb-0.5">Available RAM</span>
+                            <span className="text-zinc-300 font-mono">
+                              {loc.availableRam ? `${(loc.availableRam / 1024).toFixed(1)} GB` : "Unlimited"}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[8px] font-bold text-zinc-550 uppercase tracking-widest block mb-0.5">Node Status</span>
+                            <span className={loc.isOnline ? "text-emerald-400" : "text-amber-500"}>
+                              {loc.isOnline ? "Online" : "Maintenance"}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[8px] font-bold text-zinc-550 uppercase tracking-widest block mb-0.5">Free Storage</span>
+                            <span className="text-zinc-300 font-mono">
+                              {loc.availableDisk ? `${(loc.availableDisk / 1024).toFixed(0)} GB` : "Unlimited"}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                      {selectedLoc === loc.id && <Check className="w-4 h-4 text-white shrink-0" />}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
@@ -383,22 +483,35 @@ export default function Checkout() {
                   <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">Specify your deployment engine and version tag</p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Select Software</label>
+                    <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">1. Select Game</label>
+                    <select
+                      value={selectedGame}
+                      onChange={(e) => handleGameChange(e.target.value)}
+                      className="w-full bg-zinc-900 border border-zinc-800 focus:border-zinc-700 rounded-xl px-3.5 py-3 text-xs font-bold text-zinc-300 focus:outline-none transition-colors cursor-pointer"
+                    >
+                      {uniqueGames.map((game) => (
+                        <option key={game} value={game}>{game}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">2. Select Software</label>
                     <select
                       value={selectedSoftware}
                       onChange={(e) => handleSoftwareChange(e.target.value)}
                       className="w-full bg-zinc-900 border border-zinc-800 focus:border-zinc-700 rounded-xl px-3.5 py-3 text-xs font-bold text-zinc-300 focus:outline-none transition-colors cursor-pointer"
                     >
-                      {softwareList.map((sw) => (
+                      {filteredSoftwareOptions.map((sw) => (
                         <option key={sw.id} value={sw.id}>{sw.name}</option>
                       ))}
                     </select>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Version Tag</label>
+                    <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">3. Version Tag</label>
                     <select
                       value={selectedVersion}
                       onChange={(e) => setSelectedVersion(e.target.value)}
@@ -500,7 +613,7 @@ export default function Checkout() {
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-zinc-900/40">
                   <span className="text-zinc-500 uppercase tracking-wider text-[10px]">Location Node</span>
-                  <span className="text-white font-bold">{selectedLocDetails?.name}</span>
+                  <span className="text-white font-bold">{selectedLocDetails?.name} ({selectedLocDetails?.city})</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-zinc-900/40">
                   <span className="text-zinc-500 uppercase tracking-wider text-[10px]">Server Engine</span>
@@ -508,7 +621,7 @@ export default function Checkout() {
                 </div>
                 <div className="flex justify-between items-center py-2">
                   <span className="text-zinc-500 uppercase tracking-wider text-[10px]">Billing Cycle</span>
-                  <span className="text-white font-bold">{selectedCycleDetails?.name} ({selectedCycleDetails?.months} Months)</span>
+                  <span className="text-white font-bold">{selectedCycleDetails?.name} ({selectedCycleDetails?.months} Month(s))</span>
                 </div>
               </div>
 
@@ -583,6 +696,33 @@ export default function Checkout() {
                   )}
                 </div>
 
+                {/* Promo Code Input Card */}
+                <div className="space-y-2 pt-2 border-b border-zinc-900 pb-4">
+                  <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block">Promo / Coupon Code</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="e.g. CYNEX20"
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                      className="bg-zinc-900 border border-zinc-800 focus:border-zinc-700 text-white rounded-lg px-2.5 py-1.5 text-[10px] font-semibold focus:outline-none transition-colors w-full uppercase"
+                    />
+                    <button
+                      onClick={handleApplyCoupon}
+                      className="bg-white text-zinc-950 hover:bg-zinc-200 font-bold px-3 py-1.5 rounded-lg text-[9px] uppercase tracking-wider transition-colors cursor-pointer"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                  {couponMessage && (
+                    <span className={`text-[9px] font-bold block mt-1 ${
+                      activeCoupon ? "text-emerald-400" : "text-red-400"
+                    }`}>
+                      {couponMessage}
+                    </span>
+                  )}
+                </div>
+
                 {/* Subtotal / calculations panel */}
                 {calc && (
                   <div className="space-y-2 text-xs border-b border-zinc-900 pb-4">
@@ -594,12 +734,22 @@ export default function Checkout() {
                       <span className="text-zinc-500 font-medium">Subtotal</span>
                       <span className="text-zinc-300 font-bold font-mono">₹{calc.subtotal.toFixed(2)}</span>
                     </div>
-                    {calc.discountAmount > 0 && (
-                      <div className="flex justify-between text-emerald-400 font-bold">
-                        <span>Cycle Discount (-{calc.discountPct}%)</span>
-                        <span className="font-mono">-₹{calc.discountAmount.toFixed(2)}</span>
+                    {calc.cycleDiscountAmount > 0 && (
+                      <div className="flex justify-between text-emerald-400 font-semibold">
+                        <span>Cycle Discount</span>
+                        <span className="font-mono">-₹{calc.cycleDiscountAmount.toFixed(2)}</span>
                       </div>
                     )}
+                    {calc.couponDiscountAmount > 0 && (
+                      <div className="flex justify-between text-emerald-400 font-semibold">
+                        <span>Coupon Discount</span>
+                        <span className="font-mono">-₹{calc.couponDiscountAmount.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-zinc-400 font-medium">
+                      <span>GST Tax (18%)</span>
+                      <span className="font-mono">₹{calc.taxAmount.toFixed(2)}</span>
+                    </div>
                   </div>
                 )}
 
@@ -607,7 +757,7 @@ export default function Checkout() {
                 <div className="flex items-end justify-between py-1">
                   <div>
                     <span className="text-[9px] font-bold text-zinc-555 uppercase tracking-widest block">Billed Total</span>
-                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">Due Now</span>
+                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block font-sans">Due Now</span>
                   </div>
                   <div className="text-right">
                     {loadingCalc ? (
@@ -630,7 +780,8 @@ export default function Checkout() {
                   {step === 1 ? (
                     <Button
                       onClick={handleNextStep}
-                      className="w-full bg-white text-zinc-950 hover:bg-zinc-200 font-black py-3 px-6 h-auto text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer"
+                      disabled={!isConfigComplete}
+                      className="w-full bg-white text-zinc-950 hover:bg-zinc-200 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:opacity-40 disabled:cursor-not-allowed font-black py-3 px-6 h-auto text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <span>Continue to Review</span>
                       <ArrowRight className="w-3.5 h-3.5 font-bold" />

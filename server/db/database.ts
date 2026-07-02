@@ -254,7 +254,10 @@ export const dbInit = () => {
     { name: "location", type: "TEXT" },
     { name: "software", type: "TEXT" },
     { name: "version", type: "TEXT" },
-    { name: "addons", type: "TEXT" }
+    { name: "addons", type: "TEXT" },
+    { name: "locationId", type: "INTEGER" },
+    { name: "nestId", type: "INTEGER" },
+    { name: "eggId", type: "INTEGER" }
   ];
 
   serviceCols.forEach(col => {

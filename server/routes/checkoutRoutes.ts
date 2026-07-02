@@ -1,9 +1,12 @@
 import { Router, Response } from "express";
 import crypto from "crypto";
+import fs from "fs";
+import path from "path";
 import { queryRun } from "../db/database";
 import { requireAuth } from "./authRoutes";
+import { getPterodactylNodesForCheckout, getPterodactylSoftwareForCheckout } from "../services/pterodactylService";
 
-// Default values to seed if Firestore collections are empty
+// Default values to seed if Firestore collections are empty or unreachable
 const DEFAULT_LOCATIONS = [
   { id: "loc-de", name: "Germany", countryCode: "DE", flag: "🇩🇪", ping: "25ms", availability: "100%", active: true },
   { id: "loc-ro", name: "Romania", countryCode: "RO", flag: "🇷🇴", ping: "15ms", availability: "99.9%", active: true },
@@ -48,26 +51,56 @@ export default function createCheckoutRouter(db: any) {
    * Helper to ensure a collection is seeded with defaults if empty
    */
   async function getOrSeedCollection<T>(collectionName: string, defaults: T[]): Promise<T[]> {
-    const snapshot = await db.collection(collectionName).get();
-    if (snapshot.empty) {
-      const batch = db.batch();
-      defaults.forEach((item: any) => {
-        const docRef = db.collection(collectionName).doc(item.id);
-        batch.set(docRef, item);
-      });
-      await batch.commit();
+    try {
+      const snapshot = await db.collection(collectionName).get();
+      if (snapshot.empty) {
+        try {
+          const batch = db.batch();
+          defaults.forEach((item: any) => {
+            const docRef = db.collection(collectionName).doc(item.id);
+            batch.set(docRef, item);
+          });
+          await batch.commit();
+        } catch (err: any) {
+          console.warn(`[Checkout DB] Failed to seed ${collectionName}:`, err.message);
+        }
+        return defaults;
+      }
+      return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as any));
+    } catch (err: any) {
+      console.warn(`[Checkout DB] Failed to read collection ${collectionName}, falling back to defaults:`, err.message);
       return defaults;
     }
-    return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as any));
   }
 
   /**
    * Helper to find a plan by ID from the plans collection
    */
   async function findPlanById(planId: string): Promise<any | null> {
-    const snapshot = await db.collection("plans").get();
-    const plans = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-    return plans.find((p: any) => p.id === planId) || null;
+    try {
+      const snapshot = await db.collection("plans").get();
+      const plans = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      const found = plans.find((p: any) => p.id === planId);
+      if (found) return found;
+    } catch (err: any) {
+      console.warn(`[Checkout DB] Failed to read plans from database, falling back to local config:`, err.message);
+    }
+    
+    // Fallback to local config.json plans
+    try {
+      const config = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'src', 'config.json'), 'utf8'));
+      const minecraftPlans = (config.minecraftPlans || []).map((p: any) => ({
+        ...p,
+        category: 'minecraft',
+        storage: p.disk,
+        price_numeric: parseFloat(p.price.match(/[0-9.]+/)?.[0] || "0")
+      }));
+      const foundPlan = minecraftPlans.find((p: any) => p.id === planId);
+      if (foundPlan) return foundPlan;
+    } catch (readErr: any) {
+      console.error("[Checkout Config] Failed to read config.json fallback:", readErr.message);
+    }
+    return null;
   }
 
   /**
@@ -76,15 +109,32 @@ export default function createCheckoutRouter(db: any) {
    */
   router.get("/config", async (req, res) => {
     try {
-      const locations = await getOrSeedCollection("checkout_locations", DEFAULT_LOCATIONS);
-      const software = await getOrSeedCollection("checkout_software", DEFAULT_SOFTWARE);
+      // 1. Load locations/nodes dynamically from Pterodactyl, fallback to DB/defaults
+      let locations;
+      try {
+        locations = await getPterodactylNodesForCheckout();
+      } catch (err: any) {
+        console.warn("[Checkout Nodes] Failed to fetch Pterodactyl nodes, falling back to database/defaults:", err.message);
+        locations = await getOrSeedCollection("checkout_locations", DEFAULT_LOCATIONS);
+      }
+
+      // 2. Load software/nests/eggs dynamically from Pterodactyl, fallback to DB/defaults
+      let software;
+      try {
+        software = await getPterodactylSoftwareForCheckout();
+      } catch (err: any) {
+        console.warn("[Checkout Software] Failed to fetch Pterodactyl software, falling back to database/defaults:", err.message);
+        software = await getOrSeedCollection("checkout_software", DEFAULT_SOFTWARE);
+      }
+
+      // 3. Load add-ons and cycles
       const addons = await getOrSeedCollection("checkout_addons", DEFAULT_ADDONS);
       const cycles = await getOrSeedCollection("checkout_cycles", DEFAULT_CYCLES);
 
       res.json({
         success: true,
-        locations: locations.filter((l: any) => l.active),
-        software: software.filter((s: any) => s.active),
+        locations: locations.filter((l: any) => l.isOnline ?? l.active ?? true),
+        software: software.filter((s: any) => s.active ?? true),
         addons: addons.filter((a: any) => a.active),
         cycles
       });
@@ -99,7 +149,7 @@ export default function createCheckoutRouter(db: any) {
    * Recalculate price on the server to prevent customer-side price spoofing
    */
   router.post("/calculate", async (req, res) => {
-    const { planId, billingCycle, selectedAddons } = req.body;
+    const { planId, billingCycle, selectedAddons, coupon } = req.body;
     if (!planId || !billingCycle) {
       return res.status(400).json({ error: "planId and billingCycle are required." });
     }
@@ -132,10 +182,28 @@ export default function createCheckoutRouter(db: any) {
         }
       });
 
-      // 4. Calculate total
+      // 4. Calculate pricing discounts & taxes (GST 18%)
       const subtotal = baseSubtotal + addonsTotal;
-      const discountAmount = baseSubtotal * cycle.discount;
-      const total = subtotal - discountAmount;
+      const cycleDiscountAmount = baseSubtotal * cycle.discount;
+
+      // Coupon discount
+      let couponDiscountPct = 0;
+      if (coupon) {
+        const normalizedCoupon = coupon.toUpperCase().trim();
+        if (normalizedCoupon === "CYNEX20") {
+          couponDiscountPct = 0.20; // 20%
+        } else if (normalizedCoupon === "START10") {
+          couponDiscountPct = 0.10; // 10%
+        }
+      }
+      
+      const couponDiscountAmount = Math.round((subtotal - cycleDiscountAmount) * couponDiscountPct * 100) / 100;
+      const totalDiscount = cycleDiscountAmount + couponDiscountAmount;
+
+      // Tax (18%)
+      const taxableAmount = Math.max(0, subtotal - totalDiscount);
+      const taxAmount = Math.round(taxableAmount * 0.18 * 100) / 100;
+      const total = taxableAmount + taxAmount;
 
       res.json({
         success: true,
@@ -145,8 +213,11 @@ export default function createCheckoutRouter(db: any) {
           baseSubtotal,
           addonsTotal,
           subtotal,
-          discountAmount,
-          discountPct: cycle.discount * 100,
+          cycleDiscountAmount,
+          couponDiscountAmount,
+          discountAmount: totalDiscount,
+          discountPct: (cycle.discount * 100) + (couponDiscountPct * 100),
+          taxAmount,
           total,
           recurringPrice: basePrice + (selectedAddons || []).map((addonId: string) => {
             return allAddons.find((a: any) => a.id === addonId)?.price || 0;
@@ -154,6 +225,7 @@ export default function createCheckoutRouter(db: any) {
         }
       });
     } catch (err: any) {
+      console.error("[Checkout Calculate] Error:", err.message);
       res.status(500).json({ error: "Price verification failed: " + err.message });
     }
   });
@@ -170,7 +242,8 @@ export default function createCheckoutRouter(db: any) {
       locationId, 
       softwareId, 
       version, 
-      selectedAddons 
+      selectedAddons,
+      coupon
     } = req.body;
 
     if (!planId || !serverName || !billingCycle || !locationId || !softwareId || !version) {
@@ -206,29 +279,58 @@ export default function createCheckoutRouter(db: any) {
       });
 
       // 4. Validate location & software options
-      const locations = await getOrSeedCollection("checkout_locations", DEFAULT_LOCATIONS);
-      const targetLocation = locations.find((l: any) => l.id === locationId);
+      let locations;
+      try {
+        locations = await getPterodactylNodesForCheckout();
+      } catch (err: any) {
+        locations = await getOrSeedCollection("checkout_locations", DEFAULT_LOCATIONS);
+      }
+      const targetLocation = locations.find((l: any) => String(l.id) === String(locationId));
       if (!targetLocation) return res.status(400).json({ error: "Invalid location selection." });
 
-      const softwares = await getOrSeedCollection("checkout_software", DEFAULT_SOFTWARE);
-      const targetSoftware = softwares.find((s: any) => s.id === softwareId);
+      let softwares;
+      try {
+        softwares = await getPterodactylSoftwareForCheckout();
+      } catch (err: any) {
+        softwares = await getOrSeedCollection("checkout_software", DEFAULT_SOFTWARE);
+      }
+      const targetSoftware = softwares.find((s: any) => String(s.id) === String(softwareId));
       if (!targetSoftware) return res.status(400).json({ error: "Invalid software selection." });
       if (!targetSoftware.versions.includes(version)) return res.status(400).json({ error: "Invalid version selection." });
 
       // 5. Finalize calculation
       const subtotal = baseSubtotal + addonsTotal;
-      const discountAmount = baseSubtotal * cycle.discount;
-      const finalPrice = subtotal - discountAmount;
+      const cycleDiscountAmount = baseSubtotal * cycle.discount;
 
-      // Generate unique record keys
+      let couponDiscountPct = 0;
+      if (coupon) {
+        const normalizedCoupon = coupon.toUpperCase().trim();
+        if (normalizedCoupon === "CYNEX20") {
+          couponDiscountPct = 0.20;
+        } else if (normalizedCoupon === "START10") {
+          couponDiscountPct = 0.10;
+        }
+      }
+      const couponDiscountAmount = Math.round((subtotal - cycleDiscountAmount) * couponDiscountPct * 100) / 100;
+      const totalDiscount = cycleDiscountAmount + couponDiscountAmount;
+
+      const taxableAmount = Math.max(0, subtotal - totalDiscount);
+      const taxAmount = Math.round(taxableAmount * 0.18 * 100) / 100;
+      const finalPrice = taxableAmount + taxAmount;
+
+      // Generate unique keys
       const orderId = "ORD-" + crypto.randomUUID().substring(0, 8);
       const invoiceId = "INV-" + crypto.randomUUID().substring(0, 8);
       const serviceId = "SRV-" + crypto.randomUUID().substring(0, 8);
 
+      // Extract software Egg/Nest IDs
+      const eggId = targetSoftware.eggId || 1;
+      const nestId = targetSoftware.nestId || 1;
+
       // 6. Save service configuration record (Pending Payment)
       await queryRun(
-        `INSERT INTO services (id, userId, planId, name, status, price, billingCycle, location, software, version, addons) 
-         VALUES (?, ?, ?, ?, 'Pending Payment', ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO services (id, userId, planId, name, status, price, billingCycle, location, software, version, addons, locationId, nestId, eggId) 
+         VALUES (?, ?, ?, ?, 'Pending Payment', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           serviceId, 
           req.user.userId, 
@@ -239,7 +341,10 @@ export default function createCheckoutRouter(db: any) {
           targetLocation.name, 
           targetSoftware.name, 
           version, 
-          JSON.stringify(verifiedAddons)
+          JSON.stringify(verifiedAddons),
+          parseInt(targetLocation.id, 10) || 1,
+          parseInt(nestId, 10) || 1,
+          parseInt(eggId, 10) || 1
         ]
       );
 
