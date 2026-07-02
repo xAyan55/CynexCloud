@@ -30,7 +30,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [csrfToken, setCsrfToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Perform silent token refresh on app load
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -39,7 +38,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const data = await res.json();
           setAccessToken(data.accessToken);
           setUser(data.user);
-          // Set simple CSRF header token from cookie or extract from payload if returned
           setCsrfToken(data.csrfToken || "csrf_placeholder");
         }
       } catch (err) {
@@ -51,7 +49,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initAuth();
   }, []);
 
-  // Periodic Refresh Token Renewal (Every 12 minutes before the 15m Access Token expires)
   useEffect(() => {
     if (!accessToken) return;
 
@@ -63,7 +60,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setAccessToken(data.accessToken);
           setUser(data.user);
         } else {
-          // Token expired or revoked
           setAccessToken(null);
           setUser(null);
         }
@@ -167,21 +163,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Custom fetch wrapper that appends JWT token & handles silent automatic retries on 401
   const authFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
     const headers = new Headers(options.headers || {});
-    
+
     if (accessToken) {
       headers.set("Authorization", `Bearer ${accessToken}`);
     }
     if (csrfToken) {
       headers.set("X-CSRF-Token", csrfToken);
     }
-    
+
     const updatedOptions = { ...options, headers };
     let res = await fetch(url, updatedOptions);
 
-    // If access token expired, try to renew using refresh token and retry the query
     if (res.status === 401) {
       try {
         const refreshRes = await fetch("/api/auth/refresh", { method: "POST" });
@@ -189,8 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const data = await refreshRes.json();
           setAccessToken(data.accessToken);
           setUser(data.user);
-          
-          // Retry original request
+
           headers.set("Authorization", `Bearer ${data.accessToken}`);
           if (data.csrfToken) {
             headers.set("X-CSRF-Token", data.csrfToken);
@@ -198,7 +191,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
           res = await fetch(url, { ...options, headers });
         } else {
-          // Refresh failed, clean session
           setAccessToken(null);
           setUser(null);
         }

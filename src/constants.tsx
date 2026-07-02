@@ -1,10 +1,10 @@
 import * as React from "react";
-import { 
-  Zap, 
-  ShieldCheck, 
-  Cpu, 
-  Server, 
-  Globe, 
+import {
+  Zap,
+  ShieldCheck,
+  Cpu,
+  Server,
+  Globe,
   Headset,
   Terminal,
   Bot
@@ -13,8 +13,8 @@ import { Feature, PricingPlan, FAQ, NavLink } from "./types";
 import config from "./config.json";
 
 export const NAV_LINKS: NavLink[] = [
-  { 
-    name: "Services", 
+  {
+    name: "Services",
     href: "#",
     subLinks: [
       { name: "Minecraft Hosting", href: "/minecraft" },
