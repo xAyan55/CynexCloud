@@ -8,6 +8,9 @@ export interface OxaPayRequestPayload {
   callbackUrl: string;
   returnUrl: string;
   description?: string;
+  email?: string;
+  lifeTime?: number;
+  feePaidByPayer?: number;
 }
 
 export interface OxaPayInquiryPayload {
@@ -15,10 +18,16 @@ export interface OxaPayInquiryPayload {
   trackId: string;
 }
 
-const API_URL = process.env.OXAPAY_API_URL || "https://api.oxapay.com";
+const API_BASE = process.env.OXAPAY_API_URL || "https://api.oxapay.com";
+
+function maskKey(key: string): string {
+  if (key.length <= 8) return "***";
+  return key.substring(0, 4) + "****" + key.substring(key.length - 4);
+}
 
 /**
- * Calls OxaPay Merchants Request API to generate a crypto checkout URL
+ * Calls OxaPay Merchant API to generate a crypto checkout URL.
+ * Endpoint: POST /merchants/request
  */
 export const createOxaPayInvoice = async (
   merchantKey: string,
@@ -26,7 +35,9 @@ export const createOxaPayInvoice = async (
   amount: number,
   currency: string,
   callbackUrl: string,
-  returnUrl: string
+  returnUrl: string,
+  email?: string,
+  lifeTimeMinutes: number = 30
 ) => {
   const payload: OxaPayRequestPayload = {
     merchant: merchantKey,
@@ -35,18 +46,61 @@ export const createOxaPayInvoice = async (
     orderId: invoiceId,
     callbackUrl,
     returnUrl,
-    description: `CynexCloud Subscription Invoice ${invoiceId}`
+    description: `CynexCloud Subscription Invoice ${invoiceId}`,
+    lifeTime: lifeTimeMinutes,
+    feePaidByPayer: 0
   };
 
-  const response = await axios.post(`${API_URL}/api/v2/merchants/request`, payload, {
-    headers: { "Content-Type": "application/json" }
-  });
+  if (email) {
+    payload.email = email;
+  }
 
-  return response.data;
+  const endpoint = `${API_BASE}/merchants/request`;
+
+  console.log(`[OxaPay] Creating invoice...
+    Endpoint: ${endpoint}
+    InvoiceId: ${invoiceId}
+    Amount: ${amount} ${currency}
+    Merchant: ${maskKey(merchantKey)}
+    Callback: ${callbackUrl}
+    Return: ${returnUrl}
+    Email: ${email || "not provided"}
+    LifeTime: ${lifeTimeMinutes}min`);
+
+  try {
+    const response = await axios.post(endpoint, payload, {
+      headers: { "Content-Type": "application/json" },
+      timeout: 15000
+    });
+
+    console.log(`[OxaPay] Invoice response status: ${response.status}
+    Body: ${JSON.stringify(response.data)}`);
+
+    return response.data;
+  } catch (err: any) {
+    if (err.response) {
+      console.error(`[OxaPay Error] HTTP ${err.response.status}
+        Endpoint: ${endpoint}
+        Request body keys: ${Object.keys(payload).join(", ")}
+        Merchant prefix: ${maskKey(merchantKey)}
+        Response status: ${err.response.status}
+        Response headers: ${JSON.stringify(err.response.headers)}
+        Response body: ${JSON.stringify(err.response.data)}`);
+    } else if (err.request) {
+      console.error(`[OxaPay Error] No response received
+        Endpoint: ${endpoint}
+        Error: ${err.message}`);
+    } else {
+      console.error(`[OxaPay Error] Request setup failed: ${err.message}`);
+    }
+
+    throw err;
+  }
 };
 
 /**
- * Queries OxaPay Merchants Inquiry API to verify transaction status directly from source
+ * Queries OxaPay Merchant API to verify transaction status.
+ * Endpoint: POST /merchants/inquiry
  */
 export const verifyOxaPayTransaction = async (merchantKey: string, trackId: string) => {
   const payload: OxaPayInquiryPayload = {
@@ -54,9 +108,38 @@ export const verifyOxaPayTransaction = async (merchantKey: string, trackId: stri
     trackId
   };
 
-  const response = await axios.post(`${API_URL}/api/v2/merchants/inquiry`, payload, {
-    headers: { "Content-Type": "application/json" }
-  });
+  const endpoint = `${API_BASE}/merchants/inquiry`;
 
-  return response.data;
+  console.log(`[OxaPay] Verifying transaction...
+    Endpoint: ${endpoint}
+    TrackId: ${trackId}
+    Merchant: ${maskKey(merchantKey)}`);
+
+  try {
+    const response = await axios.post(endpoint, payload, {
+      headers: { "Content-Type": "application/json" },
+      timeout: 15000
+    });
+
+    console.log(`[OxaPay] Inquiry response status: ${response.status}
+    Body: ${JSON.stringify(response.data)}`);
+
+    return response.data;
+  } catch (err: any) {
+    if (err.response) {
+      console.error(`[OxaPay Inquiry Error] HTTP ${err.response.status}
+        Endpoint: ${endpoint}
+        TrackId: ${trackId}
+        Response status: ${err.response.status}
+        Response body: ${JSON.stringify(err.response.data)}`);
+    } else if (err.request) {
+      console.error(`[OxaPay Inquiry Error] No response received
+        Endpoint: ${endpoint}
+        Error: ${err.message}`);
+    } else {
+      console.error(`[OxaPay Inquiry Error] Request setup failed: ${err.message}`);
+    }
+
+    throw err;
+  }
 };

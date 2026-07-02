@@ -17,6 +17,11 @@ const getOxaPayCredentials = async () => {
   const callbackUrl = process.env.OXAPAY_CALLBACK_URL || "https://cynexcloud.eu.cc/api/payments/oxapay/callback";
   const returnUrl = process.env.OXAPAY_RETURN_URL || "https://cynexcloud.eu.cc/dashboard/invoices";
 
+  console.log(`[OxaPay Credentials] merchantKey: ${merchantKey ? "set (" + merchantKey.substring(0, 4) + "****)" : "MISSING"}, callbackUrl: ${callbackUrl}, returnUrl: ${returnUrl}`);
+  if (!merchantKey) {
+    console.warn("[OxaPay Credentials] Merchant key is empty. Check OXAPAY_MERCHANT_KEY env var or oxapay_merchant_key in settings table.");
+  }
+
   return { merchantKey, webhookSecret, callbackUrl, returnUrl };
 };
 
@@ -70,19 +75,22 @@ router.post("/oxapay/create", checkAuth, async (req: any, res: Response) => {
 
     console.log(`[Payment] Creating OxaPay invoice for Cynex invoice ${invoiceId} (Amount: ${invoice.amount} INR)...`);
 
-    // Call OxaPay Merchants API
-    // OxaPay expects amount in cryptocurrency or fiat conversion base
+    // Call OxaPay Merchant API — correct endpoint: POST /merchants/request
     const response = await createOxaPayInvoice(
       creds.merchantKey,
       invoiceId,
       invoice.amount,
       "INR",
       creds.callbackUrl,
-      creds.returnUrl
+      creds.returnUrl,
+      req.user.email,
+      30
     );
 
     if (response.result !== 100) {
-      throw new Error(response.message || "Failed to request invoice session from provider.");
+      const errMsg = response.message || response.error?.message || "OxaPay rejected the invoice request";
+      console.error(`[Payment] OxaPay invoice rejected: result=${response.result}, message=${errMsg}`);
+      throw new Error(errMsg);
     }
 
     const expiryTime = new Date(Date.now() + 30 * 60 * 1000).toISOString(); // 30 mins lifetime
@@ -112,8 +120,31 @@ router.post("/oxapay/create", checkAuth, async (req: any, res: Response) => {
       invoiceId
     });
   } catch (err: any) {
-    console.error(`[Payment Error] Checkout failed:`, err.message);
-    res.status(500).json({ error: err.message || "OxaPay gateway connection failed." });
+    const httpStatus = err.response?.status;
+    const oxaPayMessage = err.response?.data?.message || err.response?.data?.error?.message || "";
+    const axiosMessage = err.message || "";
+
+    console.error(`[Payment Error] Checkout failed:
+      HTTP Status: ${httpStatus || "N/A"}
+      OxaPay message: ${oxaPayMessage}
+      Axios error: ${axiosMessage}
+      InvoiceId: ${invoiceId}`);
+
+    // Build a user-friendly message without exposing raw API errors
+    let userMessage: string;
+    if (httpStatus === 401) {
+      userMessage = "Unable to create a payment invoice because the payment provider rejected the authentication request. Please verify your OxaPay merchant key is correct and active.";
+    } else if (httpStatus === 404) {
+      userMessage = "The payment provider endpoint could not be reached. Please verify the OxaPay API URL configuration.";
+    } else if (httpStatus === 422) {
+      userMessage = "The payment request was rejected due to invalid parameters. Please contact support.";
+    } else if (oxaPayMessage) {
+      userMessage = `Payment provider error: ${oxaPayMessage}`;
+    } else {
+      userMessage = "The payment gateway could not be reached. Please try again later.";
+    }
+
+    res.status(500).json({ error: userMessage });
   }
 });
 
