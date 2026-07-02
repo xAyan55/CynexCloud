@@ -252,7 +252,9 @@ export const getPterodactylNodesForCheckout = async () => {
     const availableStorageMb = Math.max(0, totalDiskLimit - allocations.disk);
     
     // Determine online status: active and not in maintenance mode
-    const isOnline = attr.active && !attr.maintenance_mode;
+    const isActive = attr.active === true || attr.active === 1 || String(attr.active).toLowerCase() === "true" || String(attr.active) === "1";
+    const isMaintenance = attr.maintenance_mode === true || attr.maintenance_mode === 1 || String(attr.maintenance_mode).toLowerCase() === "true" || String(attr.maintenance_mode) === "1";
+    const isOnline = isActive && !isMaintenance;
 
     // Real RTT/latency check via TCP ping to the node's daemon port
     let ping = "95ms";
