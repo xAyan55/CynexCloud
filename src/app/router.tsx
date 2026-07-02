@@ -1,6 +1,25 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, Navigate, useRouteError, isRouteErrorResponse } from 'react-router-dom'
 import { Toaster } from '@/components/ui/sonner'
+
+const RouteErrorBoundary = () => {
+  const error = useRouteError()
+  const message = isRouteErrorResponse(error) ? error.statusText : error instanceof Error ? error.message : 'Page failed to load'
+  return (
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center text-zinc-400 gap-4 p-8">
+      <div className="w-12 h-12 rounded-full border border-zinc-800 flex items-center justify-center">
+        <span className="text-xl">!</span>
+      </div>
+      <p className="text-sm text-center max-w-md">{message}</p>
+      <button
+        onClick={() => window.location.reload()}
+        className="text-xs text-zinc-500 hover:text-zinc-300 underline underline-offset-4 transition-colors"
+      >
+        Reload page
+      </button>
+    </div>
+  )
+}
 
 const DashboardLayout = lazy(() => import('@/components/layout/DashboardLayout'))
 const AppLayout = lazy(() => import('@/components/layout/AppLayout'))
@@ -65,6 +84,7 @@ export default function AppRouter() {
     },
     {
       path: '/login',
+      errorElement: <RouteErrorBoundary />,
       element: (
         <Suspense fallback={<FallbackLoader />}>
           <Login />
@@ -73,6 +93,7 @@ export default function AppRouter() {
     },
     {
       path: '/register',
+      errorElement: <RouteErrorBoundary />,
       element: (
         <Suspense fallback={<FallbackLoader />}>
           <Register />
@@ -81,6 +102,7 @@ export default function AppRouter() {
     },
     {
       path: '/forgot-password',
+      errorElement: <RouteErrorBoundary />,
       element: (
         <Suspense fallback={<FallbackLoader />}>
           <ForgotPassword />
@@ -89,6 +111,7 @@ export default function AppRouter() {
     },
     {
       path: '/reset-password',
+      errorElement: <RouteErrorBoundary />,
       element: (
         <Suspense fallback={<FallbackLoader />}>
           <ResetPassword />
@@ -97,6 +120,7 @@ export default function AppRouter() {
     },
     {
       path: '/verify-email',
+      errorElement: <RouteErrorBoundary />,
       element: (
         <Suspense fallback={<FallbackLoader />}>
           <VerifyEmail />
@@ -106,6 +130,7 @@ export default function AppRouter() {
 
     {
       path: '/dashboard',
+      errorElement: <RouteErrorBoundary />,
       element: (
         <Suspense fallback={<FallbackLoader />}>
           <DashboardLayout />
@@ -136,6 +161,7 @@ export default function AppRouter() {
 
     {
       path: '/',
+      errorElement: <RouteErrorBoundary />,
       element: (
         <Suspense fallback={<FallbackLoader />}>
           <AppLayout />
