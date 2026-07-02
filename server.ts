@@ -13,7 +13,7 @@ import ticketRouter from "./server/routes/ticketRoutes";
 import apiKeyRouter from "./server/routes/apiKeyRoutes";
 import adminRouter from "./server/routes/adminRoutes";
 import paymentRouter from "./server/routes/paymentRoutes";
-import checkoutRouter from "./server/routes/checkoutRoutes";
+import createCheckoutRouter from "./server/routes/checkoutRoutes";
 import { securityHeaders, sanitizeInput } from "./server/middleware/security";
 import { queryGet, queryRun, queryAll } from "./server/db/database";
 import { enqueueProvisioningJob } from "./server/services/queueService";
@@ -141,7 +141,7 @@ async function startServer() {
   app.use("/api/api-keys", apiKeyRouter);
   app.use("/api/admin", adminRouter);
   app.use("/api/payments", paymentRouter);
-  app.use("/api/checkout", checkoutRouter);
+  app.use("/api/checkout", createCheckoutRouter(db));
   
   app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
