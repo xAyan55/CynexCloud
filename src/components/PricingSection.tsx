@@ -68,6 +68,11 @@ export default function PricingSection({ title, description, plans, id = "pricin
   };
 
   const handleProvision = (plan: PricingPlan) => {
+    if (plan.category === "minecraft" || plan.id.startsWith("mc-") || plan.id === "dirt" || plan.id === "grass") {
+      navigate(`/checkout/minecraft/${plan.id}`);
+      return;
+    }
+
     if (!user) {
       sessionStorage.setItem("selectedPlanId", plan.id);
       navigate("/auth");

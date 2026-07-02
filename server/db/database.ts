@@ -250,6 +250,23 @@ export const dbInit = () => {
     }
   });
 
+  const serviceCols = [
+    { name: "location", type: "TEXT" },
+    { name: "software", type: "TEXT" },
+    { name: "version", type: "TEXT" },
+    { name: "addons", type: "TEXT" }
+  ];
+
+  serviceCols.forEach(col => {
+    try {
+      db.prepare(`ALTER TABLE services ADD COLUMN ${col.name} ${col.type}`).run();
+    } catch (err: any) {
+      if (!err.message.includes("duplicate column name")) {
+        console.warn(`[Migration] Failed to add services column ${col.name}:`, err.message);
+      }
+    }
+  });
+
   console.log("SQLite database initialized successfully at", dbPath);
 };
 

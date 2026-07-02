@@ -17,6 +17,8 @@ import DesignSystem from "./pages/DesignSystem";
 import Auth from "./pages/Auth";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 
+const Checkout = lazy(() => import("./dashboard/pages/Checkout"));
+
 // Dashboard Lazy Route Imports
 const DashboardLayout = lazy(() => import("./dashboard/DashboardLayout"));
 const DashboardHome = lazy(() => import("./dashboard/pages/DashboardHome"));
@@ -119,6 +121,7 @@ export default function App() {
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/knowledge-base" element={<KnowledgeBase />} />
                   <Route path="/design-system" element={<DesignSystem />} />
+                  <Route path="/checkout/minecraft/:planId" element={<Checkout />} />
                 </Routes>
               </Layout>
             } />
