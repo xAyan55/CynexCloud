@@ -14,23 +14,25 @@ const requireAdmin = (req: any, res: Response, next: NextFunction) => {
   next();
 };
 
-// Retrieve Pterodactyl Panel configurations (Admin only)
+// Retrieve panel configurations (Admin only)
 router.get("/settings", requireAuth, requireAdmin, async (req: any, res: Response) => {
   try {
-    const url = await queryGet<{ value: string }>("SELECT value FROM settings WHERE key = 'pterodactyl_url'");
-    const appKey = await queryGet<{ value: string }>("SELECT value FROM settings WHERE key = 'pterodactyl_app_key'");
-    const clientKey = await queryGet<{ value: string }>("SELECT value FROM settings WHERE key = 'pterodactyl_client_key'");
-    const oxaKey = await queryGet<{ value: string }>("SELECT value FROM settings WHERE key = 'oxapay_merchant_key'");
+    const getVal = async (key: string) => {
+      const row = await queryGet<{ value: string }>("SELECT value FROM settings WHERE key = ?", [key]);
+      return row?.value || "";
+    };
 
-    res.json({
-      success: true,
-      settings: {
-        pterodactyl_url: url?.value || "",
-        pterodactyl_app_key: appKey?.value || "",
-        pterodactyl_client_key: clientKey?.value || "",
-        oxapay_merchant_key: oxaKey?.value || ""
-      }
-    });
+    const settings = {
+      pterodactyl_url: await getVal("pterodactyl_url"),
+      pterodactyl_app_key: await getVal("pterodactyl_app_key"),
+      pterodactyl_client_key: await getVal("pterodactyl_client_key"),
+      oxapay_merchant_key: await getVal("oxapay_merchant_key"),
+      social_login_provider: await getVal("social_login_provider"),
+      discord_client_id: await getVal("discord_client_id"),
+      discord_client_secret: await getVal("discord_client_secret")
+    };
+
+    res.json({ success: true, settings });
   } catch (err) {
     res.status(500).json({ error: "Failed to load administrative settings." });
   }
@@ -38,7 +40,7 @@ router.get("/settings", requireAuth, requireAdmin, async (req: any, res: Respons
 
 // Update settings (Admin only)
 router.put("/settings", requireAuth, requireAdmin, async (req: any, res: Response) => {
-  const { pterodactyl_url, pterodactyl_app_key, pterodactyl_client_key, oxapay_merchant_key } = req.body;
+  const { pterodactyl_url, pterodactyl_app_key, pterodactyl_client_key, oxapay_merchant_key, social_login_provider, discord_client_id, discord_client_secret } = req.body;
 
   try {
     const insertSetting = async (key: string, val: string) => {
@@ -49,10 +51,19 @@ router.put("/settings", requireAuth, requireAdmin, async (req: any, res: Respons
       );
     };
 
-    if (pterodactyl_url !== undefined) await insertSetting("pterodactyl_url", pterodactyl_url);
-    if (pterodactyl_app_key !== undefined) await insertSetting("pterodactyl_app_key", pterodactyl_app_key);
-    if (pterodactyl_client_key !== undefined) await insertSetting("pterodactyl_client_key", pterodactyl_client_key);
-    if (oxapay_merchant_key !== undefined) await insertSetting("oxapay_merchant_key", oxapay_merchant_key);
+    const fields: Record<string, string | undefined> = {
+      pterodactyl_url: pterodactyl_url,
+      pterodactyl_app_key: pterodactyl_app_key,
+      pterodactyl_client_key: pterodactyl_client_key,
+      oxapay_merchant_key: oxapay_merchant_key,
+      social_login_provider: social_login_provider,
+      discord_client_id: discord_client_id,
+      discord_client_secret: discord_client_secret
+    };
+
+    for (const [key, val] of Object.entries(fields)) {
+      if (val !== undefined) await insertSetting(key, val);
+    }
 
     res.json({ success: true, message: "Settings saved successfully." });
   } catch (err) {

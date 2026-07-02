@@ -143,6 +143,31 @@ async function startServer() {
   app.use("/api/payments", paymentRouter);
   app.use("/api/checkout", createCheckoutRouter(db));
   
+  // Public settings (no auth required)
+  app.get("/api/settings/public", async (req, res) => {
+    try {
+      const social = await queryGet<{ value: string }>("SELECT value FROM settings WHERE key = 'social_login_provider'");
+      res.json({ social_login_provider: social?.value || "none" });
+    } catch {
+      res.json({ social_login_provider: "none" });
+    }
+  });
+
+  // Discord OAuth redirect
+  app.get("/api/auth/discord", async (req, res) => {
+    try {
+      const clientId = await queryGet<{ value: string }>("SELECT value FROM settings WHERE key = 'discord_client_id'");
+      if (!clientId?.value) {
+        return res.redirect("/login?error=discord_not_configured");
+      }
+      const redirectUri = `${req.protocol}://${req.get("host")}/api/auth/discord/callback`;
+      const url = `https://discord.com/api/oauth2/authorize?client_id=${clientId.value}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify%20email`;
+      res.redirect(url);
+    } catch {
+      res.redirect("/login?error=discord_error");
+    }
+  });
+
   app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
