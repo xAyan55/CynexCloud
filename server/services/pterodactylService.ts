@@ -284,6 +284,7 @@ export const getPterodactylNodesForCheckout = async () => {
       flag
     };
   }));
+};
 
 /**
  * Fetch nests and eggs from Pterodactyl dynamically to map Game -> Software -> Version
