@@ -1,23 +1,5 @@
 import axios from "axios";
 
-export interface OxaPayRequestPayload {
-  merchant: string;
-  amount: number;
-  currency: string;
-  orderId: string;
-  callbackUrl: string;
-  returnUrl: string;
-  description?: string;
-  email?: string;
-  lifeTime?: number;
-  feePaidByPayer?: number;
-}
-
-export interface OxaPayInquiryPayload {
-  merchant: string;
-  trackId: string;
-}
-
 const API_BASE = process.env.OXAPAY_API_URL || "https://api.oxapay.com";
 
 function maskKey(key: string): string {
@@ -26,8 +8,9 @@ function maskKey(key: string): string {
 }
 
 /**
- * Calls OxaPay Merchant API to generate a crypto checkout URL.
- * Endpoint: POST /merchants/request
+ * Creates an OxaPay invoice via the V1 Payment API.
+ * Endpoint: POST /v1/payment/invoice
+ * Auth: merchant_api_key header
  */
 export const createOxaPayInvoice = async (
   merchantKey: string,
@@ -39,23 +22,22 @@ export const createOxaPayInvoice = async (
   email?: string,
   lifeTimeMinutes: number = 30
 ) => {
-  const payload: OxaPayRequestPayload = {
-    merchant: merchantKey,
+  const payload: Record<string, any> = {
     amount,
     currency,
-    orderId: invoiceId,
-    callbackUrl,
-    returnUrl,
+    order_id: invoiceId,
+    callback_url: callbackUrl,
+    return_url: returnUrl,
     description: `CynexCloud Subscription Invoice ${invoiceId}`,
-    lifeTime: lifeTimeMinutes,
-    feePaidByPayer: 0
+    lifetime: lifeTimeMinutes,
+    fee_paid_by_payer: 0
   };
 
   if (email) {
     payload.email = email;
   }
 
-  const endpoint = `${API_BASE}/merchants/request`;
+  const endpoint = `${API_BASE}/v1/payment/invoice`;
 
   console.log(`[OxaPay] Creating invoice...
     Endpoint: ${endpoint}
@@ -69,7 +51,10 @@ export const createOxaPayInvoice = async (
 
   try {
     const response = await axios.post(endpoint, payload, {
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        merchant_api_key: merchantKey
+      },
       timeout: 15000
     });
 
@@ -99,16 +84,12 @@ export const createOxaPayInvoice = async (
 };
 
 /**
- * Queries OxaPay Merchant API to verify transaction status.
- * Endpoint: POST /merchants/inquiry
+ * Verifies an OxaPay transaction via the V1 Payment API.
+ * Endpoint: GET /v1/payment/{track_id}
+ * Auth: merchant_api_key header
  */
 export const verifyOxaPayTransaction = async (merchantKey: string, trackId: string) => {
-  const payload: OxaPayInquiryPayload = {
-    merchant: merchantKey,
-    trackId
-  };
-
-  const endpoint = `${API_BASE}/merchants/inquiry`;
+  const endpoint = `${API_BASE}/v1/payment/${trackId}`;
 
   console.log(`[OxaPay] Verifying transaction...
     Endpoint: ${endpoint}
@@ -116,8 +97,11 @@ export const verifyOxaPayTransaction = async (merchantKey: string, trackId: stri
     Merchant: ${maskKey(merchantKey)}`);
 
   try {
-    const response = await axios.post(endpoint, payload, {
-      headers: { "Content-Type": "application/json" },
+    const response = await axios.get(endpoint, {
+      headers: {
+        "Content-Type": "application/json",
+        merchant_api_key: merchantKey
+      },
       timeout: 15000
     });
 

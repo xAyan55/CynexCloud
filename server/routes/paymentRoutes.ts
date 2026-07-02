@@ -75,7 +75,7 @@ router.post("/oxapay/create", checkAuth, async (req: any, res: Response) => {
 
     console.log(`[Payment] Creating OxaPay invoice for Cynex invoice ${invoiceId} (Amount: ${invoice.amount} INR)...`);
 
-    // Call OxaPay Merchant API — correct endpoint: POST /merchants/request
+    // Call OxaPay V1 Payment API — endpoint: POST /v1/payment/invoice
     const response = await createOxaPayInvoice(
       creds.merchantKey,
       invoiceId,
@@ -87,9 +87,9 @@ router.post("/oxapay/create", checkAuth, async (req: any, res: Response) => {
       30
     );
 
-    if (response.result !== 100) {
+    if (response.status !== 200 || !response.data?.payment_url) {
       const errMsg = response.message || response.error?.message || "OxaPay rejected the invoice request";
-      console.error(`[Payment] OxaPay invoice rejected: result=${response.result}, message=${errMsg}`);
+      console.error(`[Payment] OxaPay invoice rejected: status=${response.status}, message=${errMsg}`);
       throw new Error(errMsg);
     }
 
@@ -105,16 +105,16 @@ router.post("/oxapay/create", checkAuth, async (req: any, res: Response) => {
            paymentAmount = ?, 
            expiresAt = ? 
        WHERE id = ?`,
-      [response.trackId, "INR", invoice.amount, expiryTime, invoiceId]
+      [response.data.track_id, "INR", invoice.amount, expiryTime, invoiceId]
     );
 
     // Write real log
-    console.log(`[Payment] OxaPay payment request created. InvoiceID: ${invoiceId}, TrackID: ${response.trackId}`);
+    console.log(`[Payment] OxaPay payment request created. InvoiceID: ${invoiceId}, TrackID: ${response.data.track_id}`);
 
     res.json({
       success: true,
-      payUrl: response.payUrl,
-      paymentId: response.trackId,
+      payUrl: response.data.payment_url,
+      paymentId: response.data.track_id,
       amount: invoice.amount,
       currency: "INR",
       invoiceId
@@ -197,13 +197,13 @@ const handleWebhook = async (req: any, res: Response) => {
 
     // Double-check: Query status directly from OxaPay API to prevent payload spoofing
     const inquiry = await verifyOxaPayTransaction(creds.merchantKey, trackId);
-    if (inquiry.result !== 100) {
+    if (inquiry.status !== 200 || !inquiry.data) {
       console.warn(`[Payment Warning] Inquiry verification failed for trackId ${trackId}: ${inquiry.message}`);
       return res.status(400).send("Verification inquiry failed");
     }
 
-    const verifiedStatus = inquiry.status; // Paid, Confirming, Waiting, Expired, Cancelled, Failed, Refunded
-    const blockchainTx = inquiry.txId || txId || "";
+    const verifiedStatus = inquiry.data.status; // Paid, Confirming, Waiting, Expired, Cancelled, Failed, Refunded
+    const blockchainTx = inquiry.data?.txs?.[0]?.tx_hash || txId || "";
 
     console.log(`[Payment] Verified payment status for invoice ${invoiceId}: ${verifiedStatus}`);
 
@@ -215,7 +215,7 @@ const handleWebhook = async (req: any, res: Response) => {
            lastWebhookEvent = ?, 
            confirmationCount = ? 
        WHERE id = ?`,
-      [verifiedStatus, blockchainTx, JSON.stringify(payload), inquiry.confirmations || 0, invoiceId]
+      [verifiedStatus, blockchainTx, JSON.stringify(payload), inquiry.data?.confirmations || 0, invoiceId]
     );
 
     // If payment is fully completed
