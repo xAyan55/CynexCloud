@@ -85,31 +85,29 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       />
 
       {/* Search Input Dialog Card */}
-      <div className="bg-zinc-950 border border-zinc-800 rounded-xl w-full max-w-lg shadow-2xl overflow-hidden relative z-10 animate-scale-in">
-        {/* Search header bar */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
-          <Search className="w-4 h-4 text-zinc-500 shrink-0" />
+      <div className="bg-zinc-950 border border-zinc-800 rounded-xl w-full max-w-xl shadow-2xl overflow-hidden relative z-10">
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-zinc-800">
+          <Search className="w-5 h-5 text-zinc-500 shrink-0" />
           <input
             ref={inputRef}
             type="text"
-            placeholder="Type a page or action to search..."
+            placeholder="Search pages and actions..."
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
               setActiveIndex(0);
             }}
-            className="w-full bg-transparent text-white placeholder-zinc-500 border-none outline-none focus:ring-0 text-sm h-8"
+            className="w-full bg-transparent text-white placeholder-zinc-500 border-none outline-none focus:ring-0 text-base h-9"
           />
           <button 
             onClick={onClose}
-            className="p-1 rounded-md hover:bg-zinc-900 text-zinc-500 hover:text-white transition-colors cursor-pointer"
+            className="p-1.5 rounded-md hover:bg-zinc-900 text-zinc-500 hover:text-white transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Results Timeline Feed */}
-        <div className="max-h-80 overflow-y-auto p-2 space-y-1">
+        <div className="max-h-80 overflow-y-auto p-2 space-y-0.5">
           {filteredItems.length > 0 ? (
             filteredItems.map((item, index) => {
               const active = index === activeIndex;
@@ -120,19 +118,19 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   key={index}
                   onClick={() => handleSelect(item.path)}
                   onMouseEnter={() => setActiveIndex(index)}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all cursor-pointer ${
+                  className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-left transition-all cursor-pointer ${
                     active ? "bg-white/[0.04] text-white" : "text-zinc-400"
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <Icon className={`w-4 h-4 shrink-0 ${active ? "text-white" : "text-zinc-500"}`} />
                     <div>
-                      <span className="text-xs font-semibold block">{item.label}</span>
-                      <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">{item.category}</span>
+                      <span className="text-sm font-medium block">{item.label}</span>
+                      <span className="text-[10px] font-medium text-zinc-600">{item.category}</span>
                     </div>
                   </div>
                   {active && (
-                    <span className="text-[10px] text-zinc-500 font-bold bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded">
+                    <span className="text-[10px] text-zinc-500 font-medium bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded">
                       Enter
                     </span>
                   )}
@@ -140,9 +138,9 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
               );
             })
           ) : (
-            <div className="text-center py-8 text-zinc-500">
-              <p className="text-xs font-semibold">No results found for "{query}"</p>
-              <p className="text-[10px] text-zinc-600 mt-1">Try searching for "Servers", "Invoices", or "API".</p>
+            <div className="text-center py-10 text-zinc-500">
+              <p className="text-sm font-medium">No results found for "{query}"</p>
+              <p className="text-xs text-zinc-600 mt-1">Try searching for "Servers", "Invoices", or "API".</p>
             </div>
           )}
         </div>

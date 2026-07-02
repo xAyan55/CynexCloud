@@ -95,12 +95,11 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
 
   const sidebarContent = (
     <div className="flex flex-col h-full bg-zinc-950 border-r border-zinc-800 text-zinc-400 select-none">
-      {/* Sidebar Header Logo */}
-      <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-800">
-        <Link to="/" className="flex items-center gap-2.5">
-          <img src="/images/main-imgs/cynex-tp.png" alt="Logo" className="w-6 h-6 object-contain" />
+      <div className="flex items-center justify-between px-6 py-6 border-b border-zinc-800">
+        <Link to="/" className="flex items-center gap-3">
+          <img src="/images/main-imgs/cynex-tp.png" alt="Logo" className="w-7 h-7 object-contain" />
           {!collapsed && (
-            <span className="font-heading font-bold text-white text-sm tracking-wider uppercase">
+            <span className="font-heading font-bold text-white text-base tracking-tight">
               Cynex<span className="text-zinc-400">Cloud</span>
             </span>
           )}
@@ -115,16 +114,15 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
         )}
       </div>
 
-      {/* Navigation Group Items */}
-      <div className="flex-1 overflow-y-auto py-6 px-3 space-y-7 scrollbar-none">
+      <div className="flex-1 overflow-y-auto py-6 px-3 space-y-8 scrollbar-none">
         {menuGroups.map((group, groupIdx) => (
-          <div key={groupIdx} className="space-y-1.5">
+          <div key={groupIdx} className="space-y-2">
             {!collapsed && (
-              <h4 className="px-3 text-[10px] font-bold tracking-widest text-zinc-600 uppercase">
+              <h4 className="px-3 text-[11px] font-semibold tracking-wider text-zinc-600 uppercase">
                 {group.title}
               </h4>
             )}
-            <ul className="space-y-1">
+            <ul className="space-y-0.5">
               {group.items.map((item, itemIdx) => {
                 const active = isActive(item.path);
                 const Icon = item.icon;
@@ -134,13 +132,12 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
                     <Link
                       to={item.path}
                       onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all relative group cursor-pointer ${
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all relative group cursor-pointer ${
                         active 
                           ? "bg-white/[0.04] text-white" 
                           : "hover:bg-white/[0.02] text-zinc-500 hover:text-zinc-300"
                       }`}
                     >
-                      {/* Left border active indicator */}
                       {active && (
                         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-white rounded-r" />
                       )}
@@ -151,9 +148,8 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
                         <span>{item.label}</span>
                       )}
 
-                      {/* Tooltip in collapsed mode */}
                       {collapsed && (
-                        <div className="absolute left-14 top-1/2 -translate-y-1/2 bg-zinc-900 border border-zinc-800 text-white text-[10px] font-bold py-1.5 px-3 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                        <div className="absolute left-14 top-1/2 -translate-y-1/2 bg-zinc-900 border border-zinc-800 text-white text-xs font-medium py-1.5 px-3 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
                           {item.label}
                         </div>
                       )}
@@ -166,7 +162,6 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
         ))}
       </div>
 
-      {/* Sidebar Footer (Collapse Toggle & Logout) */}
       <div className="p-3 border-t border-zinc-800 space-y-1">
         {collapsed && (
           <button 
@@ -178,12 +173,12 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
         )}
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold tracking-wide text-zinc-500 hover:text-red-400 hover:bg-red-500/[0.04] transition-all relative group cursor-pointer"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-red-400 hover:bg-red-500/[0.04] transition-all relative group cursor-pointer"
         >
           <LogOut className="w-4 h-4 shrink-0 text-zinc-500 group-hover:text-red-400" />
           {!collapsed && <span>Logout</span>}
           {collapsed && (
-            <div className="absolute left-14 top-1/2 -translate-y-1/2 bg-zinc-900 border border-zinc-800 text-red-400 text-[10px] font-bold py-1.5 px-3 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+            <div className="absolute left-14 top-1/2 -translate-y-1/2 bg-zinc-900 border border-zinc-800 text-red-400 text-xs font-medium py-1.5 px-3 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
               Logout
             </div>
           )}

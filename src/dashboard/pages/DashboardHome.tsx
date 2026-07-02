@@ -110,18 +110,16 @@ export default function DashboardHome() {
   const maxDisk = 102400; // 100 GB
 
   return (
-    <div className="space-y-8 select-none text-zinc-300 font-sans">
-      {/* Welcome Greeting Row */}
-      <div className="space-y-1.5">
-        <h2 className="text-xl font-bold text-white tracking-tight">
+    <div className="space-y-8 select-none text-zinc-300">
+      <div>
+        <h1 className="text-2xl font-semibold text-white tracking-tight">
           Welcome back, {user?.username}
-        </h2>
-        <p className="text-xs text-zinc-500 font-medium">
-          CynexCloud account status is verified and active.
+        </h1>
+        <p className="text-sm text-zinc-500 mt-1">
+          Account status is verified and active.
         </p>
       </div>
 
-      {/* Stats Cards Row Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatCard label="Active Services" value={stats.services} icon={Gamepad2} />
         <StatCard label="Open Tickets" value={stats.tickets} icon={HelpCircle} />
@@ -129,24 +127,22 @@ export default function DashboardHome() {
         <StatCard label="Account Balance" value={stats.balance} icon={Wallet} />
       </div>
 
-      {/* Quick Action Controls Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left column: Quick Actions & Usage */}
         <div className="lg:col-span-2 space-y-6">
-          <DashboardCard title="Quick Actions" subtitle="Configure and deploy services">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4.5 pt-2">
+          <DashboardCard title="Quick Actions">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {quickActions.map((act, idx) => {
                 const Icon = act.icon;
                 return (
                   <button
                     key={idx}
                     onClick={() => navigate(act.path)}
-                    className="w-full flex flex-col items-center justify-center p-5 rounded-xl border border-zinc-800 bg-zinc-950/60 hover:bg-white/[0.02] hover:border-zinc-700 text-center transition-all cursor-pointer group gap-3"
+                    className="w-full flex flex-col items-center justify-center p-5 rounded-lg border border-zinc-800 bg-zinc-950/60 hover:bg-white/[0.02] hover:border-zinc-700 text-center transition-all cursor-pointer gap-3"
                   >
-                    <div className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-500 group-hover:text-white transition-colors">
+                    <div className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-500 group-hover:text-white">
                       <Icon className="w-5 h-5" />
                     </div>
-                    <span className="text-xs font-semibold text-zinc-400 group-hover:text-white transition-colors">
+                    <span className="text-sm font-medium text-zinc-400">
                       {act.label}
                     </span>
                   </button>
@@ -155,61 +151,57 @@ export default function DashboardHome() {
             </div>
           </DashboardCard>
 
-          {/* Core Resource Metrics */}
-          <DashboardCard title="Aggregated Resource Usage" subtitle="Total purchased compute allocation details">
-            <div className="space-y-4.5 pt-2">
-              <ProgressBar value={resources.cpu} max={maxCpu} label="CPU Core Allocation" sublabel={`${(resources.cpu / 100).toFixed(1)} / 8.0 Cores`} />
-              <ProgressBar value={resources.ram} max={maxRam} label="Memory Allocation" sublabel={`${(resources.ram / 1024).toFixed(1)} / 8.0 GB`} />
-              <ProgressBar value={resources.disk} max={maxDisk} label="NVMe Storage Space" sublabel={`${(resources.disk / 1024).toFixed(1)} / 100.0 GB`} />
+          <DashboardCard title="Resource Usage">
+            <div className="space-y-5">
+              <ProgressBar value={resources.cpu} max={maxCpu} label="CPU" sublabel={`${(resources.cpu / 100).toFixed(1)} / 8.0 Cores`} />
+              <ProgressBar value={resources.ram} max={maxRam} label="Memory" sublabel={`${(resources.ram / 1024).toFixed(1)} / 8.0 GB`} />
+              <ProgressBar value={resources.disk} max={maxDisk} label="Storage" sublabel={`${(resources.disk / 1024).toFixed(1)} / 100.0 GB`} />
             </div>
           </DashboardCard>
         </div>
 
-        {/* Right column: Activity & Announcements */}
         <div className="space-y-6">
-          {/* Timeline Activity list */}
-          <DashboardCard title="Recent Activity" subtitle="User account security log events">
-            <div className="space-y-4 pt-2">
+          <DashboardCard title="Recent Activity" subtitle="Account activity log">
+            <div className="space-y-4">
               {activity.length > 0 ? (
                 activity.slice(0, 5).map((act, idx) => (
-                  <div key={idx} className="flex gap-3 text-xs leading-normal">
-                    <div className="p-1.5 h-fit rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-500 shrink-0">
+                  <div key={idx} className="flex gap-3 text-sm">
+                    <div className="p-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-500 shrink-0 h-fit">
                       <Clock className="w-3.5 h-3.5" />
                     </div>
-                    <div className="space-y-0.5 flex-1">
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-white uppercase tracking-wider text-[9px]">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-sm font-medium text-white truncate">
                           {act.action.replace(/_/g, " ")}
                         </span>
-                        <span className="text-[9px] font-semibold text-zinc-655">
+                        <span className="text-xs text-zinc-500 shrink-0">
                           {new Date(act.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
-                      <p className="text-[10px] text-zinc-500 font-semibold">Security event logged successfully</p>
+                      <p className="text-sm text-zinc-500 mt-0.5">Security event logged</p>
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="text-center py-6 text-zinc-655 text-xs font-semibold">No recent log history.</p>
+                <p className="text-center py-6 text-zinc-500 text-sm">No recent activity.</p>
               )}
             </div>
           </DashboardCard>
 
-          {/* Announcements block */}
-          <DashboardCard title="System Announcements" subtitle="Latest status alerts & system changes" headerAction={<Megaphone className="w-4 h-4 text-zinc-500" />}>
-            <div className="space-y-4 pt-2">
+          <DashboardCard title="Announcements" headerAction={<Megaphone className="w-4 h-4 text-zinc-500" />}>
+            <div className="space-y-4">
               {announcements.length > 0 ? (
                 announcements.slice(0, 3).map((ann, idx) => (
-                  <div key={idx} className="space-y-1.5 border-b border-zinc-800/40 last:border-0 pb-3 last:pb-0 text-xs">
-                    <div className="flex justify-between items-center">
-                      <h5 className="text-xs font-bold text-white">{ann.title}</h5>
-                      <span className="text-[9px] bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded text-zinc-550 font-bold uppercase tracking-wider">{new Date(ann.createdAt).toLocaleDateString()}</span>
+                  <div key={idx} className="space-y-1.5 border-b border-zinc-800/40 last:border-0 pb-3 last:pb-0">
+                    <div className="flex justify-between items-center gap-2">
+                      <h5 className="text-sm font-medium text-white">{ann.title}</h5>
+                      <span className="text-xs text-zinc-500 bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded shrink-0">{new Date(ann.createdAt).toLocaleDateString()}</span>
                     </div>
-                    <p className="text-[11px] text-zinc-500 leading-normal">{ann.content}</p>
+                    <p className="text-sm text-zinc-500 leading-relaxed">{ann.content}</p>
                   </div>
                 ))
               ) : (
-                <p className="text-center py-6 text-zinc-655 text-xs font-semibold">No recent announcements.</p>
+                <p className="text-center py-6 text-zinc-500 text-sm">No recent announcements.</p>
               )}
             </div>
           </DashboardCard>

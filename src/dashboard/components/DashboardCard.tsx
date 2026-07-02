@@ -19,18 +19,17 @@ export default function DashboardCard({
   className = "" 
 }: DashboardCardProps) {
   return (
-    <div className={`bg-zinc-900/60 border border-zinc-800 rounded-xl p-5 md:p-6 select-none transition-all duration-300 hover:translate-y-[-1px] ${className}`}>
-      {/* Card Header */}
+    <div className={`bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 md:p-7 select-none transition-all duration-200 ${className}`}>
       {(title || headerAction) && (
-        <div className="flex items-center justify-between gap-4 border-b border-zinc-800/80 pb-4 mb-4">
-          <div className="space-y-0.5">
+        <div className="flex items-center justify-between gap-4 border-b border-zinc-800/80 pb-5 mb-5">
+          <div className="space-y-1">
             {title && (
-              <h4 className="text-sm font-bold text-white tracking-tight leading-none">
+              <h4 className="text-sm font-semibold text-white tracking-tight">
                 {title}
               </h4>
             )}
             {subtitle && (
-              <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest leading-none">
+              <p className="text-[11px] font-medium text-zinc-500">
                 {subtitle}
               </p>
             )}

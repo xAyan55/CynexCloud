@@ -104,7 +104,7 @@ export default function TopNav({ setMobileOpen, onSearchOpen }: TopNavProps) {
   };
 
   return (
-    <header className="sticky top-0 z-20 h-16 border-b border-zinc-850 bg-zinc-950/80 backdrop-blur-md flex items-center justify-between px-6 select-none">
+    <header className="sticky top-0 z-20 h-14 border-b border-zinc-850 bg-zinc-950/80 backdrop-blur-md flex items-center justify-between px-6 select-none">
       {/* Mobile Toggle & Breadcrumbs */}
       <div className="flex items-center gap-4">
         <button 
@@ -121,16 +121,16 @@ export default function TopNav({ setMobileOpen, onSearchOpen }: TopNavProps) {
       {/* Global Actions */}
       <div className="flex items-center gap-4">
         {/* Search Launcher */}
-        <button 
-          onClick={onSearchOpen}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800/80 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700 transition-all text-xs font-semibold w-32 sm:w-44 cursor-pointer"
-        >
-          <Search className="w-3.5 h-3.5" />
-          <span className="flex-1 text-left">Search...</span>
-          <span className="hidden md:inline-block text-[9px] bg-zinc-950 border border-zinc-800 px-1.5 py-0.5 rounded text-zinc-600 font-mono font-bold">
-            ⌘K
-          </span>
-        </button>
+          <button 
+            onClick={onSearchOpen}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800/80 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700 transition-all text-sm font-medium w-36 sm:w-48 cursor-pointer"
+          >
+            <Search className="w-4 h-4" />
+            <span className="flex-1 text-left">Search...</span>
+            <span className="hidden md:inline-block text-[10px] bg-zinc-950 border border-zinc-800 px-1.5 py-0.5 rounded text-zinc-600 font-mono font-medium">
+              ⌘K
+            </span>
+          </button>
 
         {/* Notifications */}
         <div className="relative" ref={notificationsRef}>
@@ -140,7 +140,7 @@ export default function TopNav({ setMobileOpen, onSearchOpen }: TopNavProps) {
           >
             <Bell className="w-4 h-4" />
             {notifications.some(n => !n.read) && (
-              <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-white rounded-full" />
+              <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-white rounded-full" />
             )}
           </button>
 

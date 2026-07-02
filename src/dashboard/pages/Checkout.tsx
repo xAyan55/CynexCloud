@@ -336,152 +336,137 @@ export default function Checkout() {
     selectedCycle !== "";
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 font-sans select-none text-zinc-300">
+    <div className="max-w-6xl mx-auto px-6 py-10 select-none text-zinc-300">
       
-      {/* Checkout Navigation Steps bar */}
-      <div className="flex items-center justify-between mb-10 border-b border-zinc-900 pb-6">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-2xl font-black text-white uppercase tracking-tight">Checkout</h2>
-          <p className="text-xs text-zinc-500 font-semibold uppercase tracking-wider">Premium Cloud Provisioning Pipeline</p>
+          <h1 className="text-2xl font-semibold text-white tracking-tight">Checkout</h1>
+          <p className="text-sm text-zinc-500 mt-1">Configure and review your order</p>
         </div>
-        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider">
-          <span className={step === 1 ? "text-white" : "text-zinc-500"}>1. Configure</span>
-          <ArrowRight className="w-3.5 h-3.5 text-zinc-650" />
-          <span className={step === 2 ? "text-white" : "text-zinc-500"}>2. Review & Pay</span>
+        <div className="flex items-center gap-2 text-sm">
+          <span className={step === 1 ? "text-white font-medium" : "text-zinc-500"}>Configure</span>
+          <ArrowRight className="w-4 h-4 text-zinc-600" />
+          <span className={step === 2 ? "text-white font-medium" : "text-zinc-500"}>Review & Pay</span>
         </div>
       </div>
 
       {checkoutError && (
-        <div className="mb-6 p-4 rounded-xl border border-red-500/10 bg-red-950/20 text-red-400 text-xs font-semibold flex items-center gap-2">
+        <div className="mb-6 p-4 rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 text-sm flex items-center gap-2.5">
           <ShieldAlert className="w-4 h-4 shrink-0" />
           <span>{checkoutError}</span>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         
-        {/* Left Side: Checkout Configuration Panel */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-3 space-y-6">
           {step === 1 ? (
             <>
-              {/* Plan Information Card */}
-              <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-6 space-y-4">
-                <div className="flex items-center gap-3.5">
+              <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 space-y-5">
+                <div className="flex items-center gap-4">
                   {planDetails?.image ? (
                     <img 
                       src={planDetails.image} 
                       alt={planDetails.name} 
-                      className="w-12 h-12 object-contain rounded-xl bg-zinc-900 border border-zinc-800 p-1 shrink-0"
+                      className="w-12 h-12 object-contain rounded-lg bg-zinc-900 border border-zinc-800 p-1 shrink-0"
                     />
                   ) : (
-                    <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-800 text-white shrink-0">
+                    <div className="p-2.5 bg-zinc-900 rounded-lg border border-zinc-800 text-white shrink-0">
                       <Server className="w-5 h-5" />
                     </div>
                   )}
                   <div>
-                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">{planDetails?.name}</h3>
-                    <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">Base Package Specifications</p>
+                    <h3 className="text-base font-semibold text-white">{planDetails?.name}</h3>
+                    <p className="text-sm text-zinc-500">Base Package</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 pt-2 border-t border-zinc-900">
-                  <div className="flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-zinc-550 shrink-0" />
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-zinc-800">
+                  <div className="flex items-center gap-2.5">
+                    <Layers className="w-4 h-4 text-zinc-500 shrink-0" />
                     <div>
-                      <span className="text-[9px] font-bold text-zinc-550 uppercase tracking-widest block">Memory</span>
-                      <span className="text-xs font-bold text-white">{planDetails?.ram}</span>
+                      <span className="text-xs text-zinc-500">Memory</span>
+                      <p className="text-sm font-medium text-white">{planDetails?.ram}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Cpu className="w-4 h-4 text-zinc-550 shrink-0" />
+                  <div className="flex items-center gap-2.5">
+                    <Cpu className="w-4 h-4 text-zinc-500 shrink-0" />
                     <div>
-                      <span className="text-[9px] font-bold text-zinc-555 uppercase tracking-widest block">Processor</span>
-                      <span className="text-xs font-bold text-white">{planDetails?.cpu || "Epyc vCores"}</span>
+                      <span className="text-xs text-zinc-500">Processor</span>
+                      <p className="text-sm font-medium text-white">{planDetails?.cpu || "Epyc vCores"}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <HardDrive className="w-4 h-4 text-zinc-550 shrink-0" />
+                  <div className="flex items-center gap-2.5">
+                    <HardDrive className="w-4 h-4 text-zinc-500 shrink-0" />
                     <div>
-                      <span className="text-[9px] font-bold text-zinc-550 uppercase tracking-widest block">Storage</span>
-                      <span className="text-xs font-bold text-white">{planDetails?.storage || planDetails?.disk}</span>
+                      <span className="text-xs text-zinc-500">Storage</span>
+                      <p className="text-sm font-medium text-white">{planDetails?.storage || planDetails?.disk}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Server Name input card */}
-              <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-6 space-y-4">
+              <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 space-y-4">
                 <div>
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">1. Identify Server</h4>
-                  <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">Specify a friendly identifier for the control panel</p>
+                  <h4 className="text-sm font-semibold text-white">Server Name</h4>
+                  <p className="text-sm text-zinc-500 mt-0.5">Choose a name to identify your server</p>
                 </div>
                 <input
                   type="text"
                   placeholder="e.g. My Survival Server"
                   value={serverName}
                   onChange={(e) => setServerName(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-800 focus:border-zinc-700 text-white rounded-xl px-4 py-3 text-xs font-semibold focus:outline-none transition-colors"
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-zinc-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none transition-colors"
                 />
               </div>
 
-              {/* Locations Grid Card */}
-              <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-6 space-y-4">
+              <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 space-y-4">
                 <div>
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">2. Server Location</h4>
-                  <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">Select a node location closest to your target players</p>
+                  <h4 className="text-sm font-semibold text-white">Server Location</h4>
+                  <p className="text-sm text-zinc-500 mt-0.5">Select the closest node to your players</p>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {locations.map((loc) => {
                     const isSelected = selectedLoc === String(loc.id);
                     return (
                       <div
                         key={loc.id}
                         onClick={() => setSelectedLoc(String(loc.id))}
-                        className={`flex flex-col p-4 rounded-xl border transition-all cursor-pointer gap-2.5 ${
+                        className={`flex flex-col p-4 rounded-lg border transition-all cursor-pointer gap-3 ${
                           isSelected
-                            ? "bg-white/[0.02] border-white text-white"
-                            : "bg-zinc-900/40 border-zinc-850 text-zinc-400 hover:border-zinc-800"
+                            ? "border-white bg-white/[0.03]"
+                            : "border-zinc-800 bg-zinc-950/60 hover:border-zinc-700"
                         }`}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2.5">
-                            {loc.isOnline ? (
-                              <img 
-                                src="/images/main-imgs/green-dot.gif" 
-                                alt="Online" 
-                                className="w-3 h-3 object-contain shrink-0"
-                              />
-                            ) : (
-                              <div className="w-2.5 h-2.5 rounded-full bg-zinc-700 shrink-0" />
-                            )}
+                            <div className={`w-2 h-2 rounded-full shrink-0 ${loc.isOnline ? "bg-emerald-500" : "bg-zinc-600"}`} />
                             <div>
-                              <span className="text-xs font-bold block text-white">{loc.name}</span>
-                              <span className="text-[9px] font-semibold text-zinc-550 uppercase tracking-wider">
-                                {loc.city}, {loc.country}
-                              </span>
+                              <span className="text-sm font-medium text-white">{loc.name}</span>
+                              <p className="text-xs text-zinc-500">{loc.city}, {loc.country}</p>
                             </div>
                           </div>
-                          <span className="text-[9px] font-bold text-zinc-450 bg-zinc-900 px-2.5 py-0.5 rounded-full border border-zinc-850 font-mono">
+                          <span className="text-xs text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded font-mono">
                             {loc.ping}
                           </span>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-zinc-900 text-[10px] font-semibold">
+                        <div className="grid grid-cols-3 gap-3 pt-3 border-t border-zinc-800 text-xs">
                           <div>
-                            <span className="text-[8px] font-bold text-zinc-550 uppercase tracking-widest block mb-0.5">Available RAM</span>
-                            <span className="text-zinc-300 font-mono">
+                            <span className="text-zinc-500 block mb-0.5">RAM</span>
+                            <span className="text-zinc-300 font-medium">
                               {loc.availableRam ? `${(loc.availableRam / 1024).toFixed(1)} GB` : "Unlimited"}
                             </span>
                           </div>
                           <div>
-                            <span className="text-[8px] font-bold text-zinc-550 uppercase tracking-widest block mb-0.5">Node Status</span>
+                            <span className="text-zinc-500 block mb-0.5">Status</span>
                             <span className={loc.isOnline ? "text-emerald-400" : "text-amber-500"}>
                               {loc.isOnline ? "Online" : "Maintenance"}
                             </span>
                           </div>
                           <div>
-                            <span className="text-[8px] font-bold text-zinc-550 uppercase tracking-widest block mb-0.5">Free Storage</span>
-                            <span className="text-zinc-300 font-mono">
+                            <span className="text-zinc-500 block mb-0.5">Storage</span>
+                            <span className="text-zinc-300 font-medium">
                               {loc.availableDisk ? `${(loc.availableDisk / 1024).toFixed(0)} GB` : "Unlimited"}
                             </span>
                           </div>
@@ -492,20 +477,19 @@ export default function Checkout() {
                 </div>
               </div>
 
-              {/* Software & Version Map Selection Card */}
-              <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-6 space-y-4">
+              <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 space-y-4">
                 <div>
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">3. Server software template</h4>
-                  <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">Specify your deployment engine and version tag</p>
+                  <h4 className="text-sm font-semibold text-white">Software</h4>
+                  <p className="text-sm text-zinc-500 mt-0.5">Choose your server software and version</p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">1. Select Game</label>
+                    <label className="text-xs text-zinc-500">Game</label>
                     <select
                       value={selectedGame}
                       onChange={(e) => handleGameChange(e.target.value)}
-                      className="w-full bg-zinc-900 border border-zinc-800 focus:border-zinc-700 rounded-xl px-3.5 py-3 text-xs font-bold text-zinc-300 focus:outline-none transition-colors cursor-pointer"
+                      className="w-full bg-zinc-950 border border-zinc-800 focus:border-zinc-700 rounded-lg px-3.5 py-2.5 text-sm text-zinc-300 focus:outline-none transition-colors cursor-pointer"
                     >
                       {uniqueGames.map((game) => (
                         <option key={game} value={game}>{game}</option>
@@ -514,11 +498,11 @@ export default function Checkout() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">2. Select Software</label>
+                    <label className="text-xs text-zinc-500">Software</label>
                     <select
                       value={selectedSoftware}
                       onChange={(e) => handleSoftwareChange(e.target.value)}
-                      className="w-full bg-zinc-900 border border-zinc-800 focus:border-zinc-700 rounded-xl px-3.5 py-3 text-xs font-bold text-zinc-300 focus:outline-none transition-colors cursor-pointer"
+                      className="w-full bg-zinc-950 border border-zinc-800 focus:border-zinc-700 rounded-lg px-3.5 py-2.5 text-sm text-zinc-300 focus:outline-none transition-colors cursor-pointer"
                     >
                       {filteredSoftwareOptions.map((sw) => (
                         <option key={sw.id} value={sw.id}>{sw.name}</option>
@@ -527,11 +511,11 @@ export default function Checkout() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">3. Version Tag</label>
+                    <label className="text-xs text-zinc-500">Version</label>
                     <select
                       value={selectedVersion}
                       onChange={(e) => setSelectedVersion(e.target.value)}
-                      className="w-full bg-zinc-900 border border-zinc-800 focus:border-zinc-700 rounded-xl px-3.5 py-3 text-xs font-bold text-zinc-300 focus:outline-none transition-colors cursor-pointer"
+                      className="w-full bg-zinc-950 border border-zinc-800 focus:border-zinc-700 rounded-lg px-3.5 py-2.5 text-sm text-zinc-300 focus:outline-none transition-colors cursor-pointer"
                     >
                       {selectedSoftwareDetails?.versions.map((ver) => (
                         <option key={ver} value={ver}>{ver}</option>
@@ -541,67 +525,65 @@ export default function Checkout() {
                 </div>
               </div>
 
-              {/* Billing Cycle Option Buttons */}
-              <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-6 space-y-4">
+              <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 space-y-4">
                 <div>
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">4. Billing Cycle</h4>
-                  <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">Commit longer for higher discount percentages</p>
+                  <h4 className="text-sm font-semibold text-white">Billing Cycle</h4>
+                  <p className="text-sm text-zinc-500 mt-0.5">Commit longer for discounts</p>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {cycles.map((cy) => (
                     <div
                       key={cy.id}
                       onClick={() => setSelectedCycle(cy.id)}
-                      className={`flex flex-col items-center justify-center p-4 rounded-xl border text-center transition-all cursor-pointer ${
+                      className={`flex flex-col items-center justify-center p-4 rounded-lg border text-center transition-all cursor-pointer ${
                         selectedCycle === cy.id
-                          ? "bg-white/[0.02] border-white text-white"
-                          : "bg-zinc-900/40 border-zinc-850 text-zinc-400 hover:border-zinc-800"
+                          ? "border-white bg-white/[0.03]"
+                          : "border-zinc-800 bg-zinc-950/60 hover:border-zinc-700"
                       }`}
                     >
-                      <span className="text-xs font-bold block">{cy.name}</span>
+                      <span className="text-sm font-medium text-white">{cy.name}</span>
                       {cy.discount > 0 ? (
-                        <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full mt-1.5 uppercase tracking-wider">
+                        <span className="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded mt-2">
                           -{cy.discount * 100}%
                         </span>
                       ) : (
-                        <span className="text-[9px] font-semibold text-zinc-550 mt-1.5 uppercase tracking-wider">Base Price</span>
+                        <span className="text-xs text-zinc-500 mt-2">Base Price</span>
                       )}
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Optional Addons */}
-              <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-6 space-y-4">
+              <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 space-y-4">
                 <div>
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">5. Optional Add-ons</h4>
-                  <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">Customize and scale your hosting environment features</p>
+                  <h4 className="text-sm font-semibold text-white">Add-ons</h4>
+                  <p className="text-sm text-zinc-500 mt-0.5">Customize your hosting</p>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {addonsList.map((addon) => {
                     const isChecked = activeAddons.includes(addon.id);
                     return (
                       <div
                         key={addon.id}
                         onClick={() => handleToggleAddon(addon.id)}
-                        className={`flex items-start justify-between p-4 rounded-xl border transition-all cursor-pointer ${
+                        className={`flex items-start justify-between p-4 rounded-lg border transition-all cursor-pointer ${
                           isChecked
-                            ? "bg-white/[0.02] border-white text-white"
-                            : "bg-zinc-900/40 border-zinc-850 text-zinc-400 hover:border-zinc-800"
+                            ? "border-white bg-white/[0.03]"
+                            : "border-zinc-800 bg-zinc-950/60 hover:border-zinc-700"
                         }`}
                       >
                         <div className="flex gap-3">
-                          <div className={`w-4.5 h-4.5 rounded border flex items-center justify-center mt-0.5 transition-all shrink-0 ${
-                            isChecked ? "bg-white border-white text-zinc-950" : "border-zinc-700"
+                          <div className={`w-5 h-5 rounded border flex items-center justify-center mt-0.5 transition-all shrink-0 ${
+                            isChecked ? "bg-white border-white text-black" : "border-zinc-700"
                           }`}>
-                            {isChecked && <Check className="w-3.5 h-3.5 font-bold" />}
+                            {isChecked && <Check className="w-3.5 h-3.5" />}
                           </div>
                           <div>
-                            <span className="text-xs font-bold block">{addon.name}</span>
-                            <span className="text-[10px] text-zinc-500 font-medium block leading-normal mt-0.5">{addon.description}</span>
+                            <span className="text-sm font-medium text-white">{addon.name}</span>
+                            <p className="text-xs text-zinc-500 mt-0.5">{addon.description}</p>
                           </div>
                         </div>
-                        <span className="text-xs font-bold font-mono text-zinc-300 shrink-0 ml-4">
+                        <span className="text-sm font-medium text-zinc-300 shrink-0 ml-4">
                           +₹{addon.price}/mo
                         </span>
                       </div>
@@ -611,38 +593,36 @@ export default function Checkout() {
               </div>
             </>
           ) : (
-            /* Step 2 — Order Review Details */
-            <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-8 space-y-6">
+            <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-8 space-y-6">
               <div>
-                <h3 className="text-base font-black text-white uppercase tracking-tight">Review Your Configuration</h3>
-                <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">Please confirm server specifics before order submission</p>
+                <h3 className="text-lg font-semibold text-white">Review Your Order</h3>
+                <p className="text-sm text-zinc-500 mt-1">Please confirm before submitting</p>
               </div>
 
-              <div className="space-y-4 border-b border-zinc-900 pb-6 text-xs font-medium">
-                <div className="flex justify-between items-center py-2 border-b border-zinc-900/40">
-                  <span className="text-zinc-500 uppercase tracking-wider text-[10px]">Client Email</span>
-                  <span className="text-white font-semibold">{user?.email}</span>
+              <div className="space-y-4 border-b border-zinc-800 pb-6">
+                <div className="flex justify-between items-center py-2 border-b border-zinc-800/50">
+                  <span className="text-sm text-zinc-500">Email</span>
+                  <span className="text-sm font-medium text-white">{user?.email}</span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-zinc-900/40">
-                  <span className="text-zinc-500 uppercase tracking-wider text-[10px]">Server Name</span>
-                  <span className="text-white font-bold">{serverName}</span>
+                <div className="flex justify-between items-center py-2 border-b border-zinc-800/50">
+                  <span className="text-sm text-zinc-500">Server Name</span>
+                  <span className="text-sm font-medium text-white">{serverName}</span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-zinc-900/40">
-                  <span className="text-zinc-500 uppercase tracking-wider text-[10px]">Location Node</span>
-                  <span className="text-white font-bold">{selectedLocDetails?.name} ({selectedLocDetails?.city})</span>
+                <div className="flex justify-between items-center py-2 border-b border-zinc-800/50">
+                  <span className="text-sm text-zinc-500">Location</span>
+                  <span className="text-sm font-medium text-white">{selectedLocDetails?.name} ({selectedLocDetails?.city})</span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-zinc-900/40">
-                  <span className="text-zinc-500 uppercase tracking-wider text-[10px]">Server Engine</span>
-                  <span className="text-white font-bold">{selectedSoftwareDetails?.name} (v{selectedVersion})</span>
+                <div className="flex justify-between items-center py-2 border-b border-zinc-800/50">
+                  <span className="text-sm text-zinc-500">Software</span>
+                  <span className="text-sm font-medium text-white">{selectedSoftwareDetails?.name} v{selectedVersion}</span>
                 </div>
                 <div className="flex justify-between items-center py-2">
-                  <span className="text-zinc-500 uppercase tracking-wider text-[10px]">Billing Cycle</span>
-                  <span className="text-white font-bold">{selectedCycleDetails?.name} ({selectedCycleDetails?.months} Month(s))</span>
+                  <span className="text-sm text-zinc-500">Billing Cycle</span>
+                  <span className="text-sm font-medium text-white">{selectedCycleDetails?.name} ({selectedCycleDetails?.months}m)</span>
                 </div>
               </div>
 
-              {/* Terms Checkbox */}
-              <div className="p-4 bg-zinc-900/40 border border-zinc-850 rounded-xl space-y-3">
+              <div className="p-4 bg-zinc-950/60 border border-zinc-800 rounded-lg">
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
                     type="checkbox"
@@ -650,61 +630,58 @@ export default function Checkout() {
                     onChange={(e) => setAgreeTerms(e.target.checked)}
                     className="w-4 h-4 rounded border-zinc-700 bg-zinc-950 focus:ring-0 text-white mt-0.5 cursor-pointer"
                   />
-                  <span className="text-[11px] text-zinc-400 font-medium leading-relaxed">
-                    I agree to the <span className="text-white underline font-semibold">Terms of Service</span>, <span className="text-white underline font-semibold">Privacy Policy</span>, and <span className="text-white underline font-semibold">Refund Policy</span>. Billed amounts will renew automatically.
+                  <span className="text-sm text-zinc-400 leading-relaxed">
+                    I agree to the <span className="text-white underline">Terms of Service</span> and <span className="text-white underline">Privacy Policy</span>.
                   </span>
                 </label>
               </div>
 
               <div className="flex justify-between pt-2">
-                <button
+                <Button
+                  variant="outline"
                   onClick={() => setStep(1)}
-                  className="px-6 py-2.5 rounded-xl border border-zinc-850 hover:border-zinc-800 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
                 >
-                  Back to Config
-                </button>
+                  Back
+                </Button>
               </div>
             </div>
           )}
         </div>
 
-        {/* Right Side: Sticky Checkout Pricing Summary */}
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-2">
           <div className="sticky top-24 space-y-6">
-            <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-6">
-              <div className="border-b border-zinc-900 pb-4 mb-4">
-                <h4 className="text-sm font-bold text-white tracking-tight">Order Summary</h4>
-                <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest">Billing breakdown</p>
+            <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6">
+              <div className="border-b border-zinc-800 pb-4 mb-4">
+                <h4 className="text-base font-semibold text-white">Order Summary</h4>
               </div>
-              <div className="space-y-4 pt-2">
+              <div className="space-y-4">
                 
-                {/* Configuration items summary */}
-                <div className="space-y-2.5 text-[11px] text-zinc-500 font-medium border-b border-zinc-900 pb-4">
+                <div className="space-y-3 text-sm border-b border-zinc-800 pb-4">
                   <div className="flex justify-between">
-                    <span>{planDetails?.name}</span>
-                    <span className="text-white font-bold font-mono">₹{planDetails?.price_numeric}</span>
+                    <span className="text-zinc-500">{planDetails?.name}</span>
+                    <span className="text-white font-medium">₹{planDetails?.price_numeric}</span>
                   </div>
                   {selectedLocDetails && (
                     <div className="flex justify-between">
-                      <span>Node: {selectedLocDetails.name}</span>
-                      <span className="text-zinc-400">Included</span>
+                      <span className="text-zinc-500">Location</span>
+                      <span className="text-zinc-400">{selectedLocDetails.name}</span>
                     </div>
                   )}
                   {selectedSoftwareDetails && (
                     <div className="flex justify-between">
-                      <span>Engine: {selectedSoftwareDetails.name} ({selectedVersion})</span>
-                      <span className="text-zinc-400">Included</span>
+                      <span className="text-zinc-500">Software</span>
+                      <span className="text-zinc-400">{selectedSoftwareDetails.name}</span>
                     </div>
                   )}
                   {activeAddons.length > 0 && (
-                    <div className="space-y-1.5 pt-1">
-                      <span className="text-[9px] font-bold text-zinc-550 uppercase tracking-widest block">Selected Add-ons:</span>
+                    <div className="space-y-2 pt-1">
+                      <span className="text-xs text-zinc-500 font-medium">Add-ons</span>
                       {activeAddons.map(addonId => {
                         const addon = addonsList.find(a => a.id === addonId);
                         return addon ? (
-                          <div key={addon.id} className="flex justify-between pl-2 border-l border-zinc-900 text-[10px]">
-                            <span>+ {addon.name}</span>
-                            <span className="text-zinc-300 font-mono">₹{addon.price}</span>
+                          <div key={addon.id} className="flex justify-between text-sm pl-3 border-l border-zinc-800">
+                            <span className="text-zinc-400">{addon.name}</span>
+                            <span className="text-zinc-300">₹{addon.price}</span>
                           </div>
                         ) : null;
                       })}
@@ -712,26 +689,25 @@ export default function Checkout() {
                   )}
                 </div>
 
-                {/* Promo Code Input Card */}
-                <div className="space-y-2 pt-2 border-b border-zinc-900 pb-4">
-                  <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block">Promo / Coupon Code</label>
+                <div className="space-y-2 border-b border-zinc-800 pb-4">
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      placeholder="e.g. CYNEX20"
+                      placeholder="Coupon code"
                       value={couponInput}
                       onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                      className="bg-zinc-900 border border-zinc-800 focus:border-zinc-700 text-white rounded-lg px-2.5 py-1.5 text-[10px] font-semibold focus:outline-none transition-colors w-full uppercase"
+                      className="bg-zinc-950 border border-zinc-800 focus:border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none transition-colors w-full uppercase"
                     />
-                    <button
+                    <Button
                       onClick={handleApplyCoupon}
-                      className="bg-white text-zinc-950 hover:bg-zinc-200 font-bold px-3 py-1.5 rounded-lg text-[9px] uppercase tracking-wider transition-colors cursor-pointer"
+                      variant="secondary"
+                      size="sm"
                     >
                       Apply
-                    </button>
+                    </Button>
                   </div>
                   {couponMessage && (
-                    <span className={`text-[9px] font-bold block mt-1 ${
+                    <span className={`text-xs block ${
                       activeCoupon ? "text-emerald-400" : "text-red-400"
                     }`}>
                       {couponMessage}
@@ -739,84 +715,80 @@ export default function Checkout() {
                   )}
                 </div>
 
-                {/* Subtotal / calculations panel */}
                 {calc && (
-                  <div className="space-y-2 text-xs border-b border-zinc-900 pb-4">
+                  <div className="space-y-2 text-sm border-b border-zinc-800 pb-4">
                     <div className="flex justify-between">
-                      <span className="text-zinc-500 font-medium">Billed Months</span>
-                      <span className="text-white font-bold">{calc.months} Month(s)</span>
+                      <span className="text-zinc-500">Months</span>
+                      <span className="text-white font-medium">{calc.months}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-zinc-500 font-medium">Subtotal</span>
-                      <span className="text-zinc-300 font-bold font-mono">₹{calc.subtotal.toFixed(2)}</span>
+                      <span className="text-zinc-500">Subtotal</span>
+                      <span className="text-zinc-300 font-medium">₹{calc.subtotal.toFixed(2)}</span>
                     </div>
                     {calc.cycleDiscountAmount > 0 && (
-                      <div className="flex justify-between text-emerald-400 font-semibold">
+                      <div className="flex justify-between text-emerald-400">
                         <span>Cycle Discount</span>
-                        <span className="font-mono">-₹{calc.cycleDiscountAmount.toFixed(2)}</span>
+                        <span>-₹{calc.cycleDiscountAmount.toFixed(2)}</span>
                       </div>
                     )}
                     {calc.couponDiscountAmount > 0 && (
-                      <div className="flex justify-between text-emerald-400 font-semibold">
+                      <div className="flex justify-between text-emerald-400">
                         <span>Coupon Discount</span>
-                        <span className="font-mono">-₹{calc.couponDiscountAmount.toFixed(2)}</span>
+                        <span>-₹{calc.couponDiscountAmount.toFixed(2)}</span>
                       </div>
                     )}
-                    <div className="flex justify-between text-zinc-400 font-medium">
-                      <span>GST Tax (18%)</span>
-                      <span className="font-mono">₹{calc.taxAmount.toFixed(2)}</span>
+                    <div className="flex justify-between text-zinc-400">
+                      <span>Tax (18%)</span>
+                      <span>₹{calc.taxAmount.toFixed(2)}</span>
                     </div>
                   </div>
                 )}
 
-                {/* Final Total */}
-                <div className="flex items-end justify-between py-1">
+                <div className="flex items-end justify-between pt-1">
                   <div>
-                    <span className="text-[9px] font-bold text-zinc-555 uppercase tracking-widest block">Billed Total</span>
-                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block font-sans">Due Now</span>
+                    <p className="text-xs text-zinc-500">Total Due</p>
                   </div>
                   <div className="text-right">
                     {loadingCalc ? (
-                      <Loader2 className="w-5 h-5 animate-spin text-white ml-auto mb-1" />
+                      <Loader2 className="w-5 h-5 animate-spin text-white ml-auto" />
                     ) : (
                       <>
-                        <span className="text-xl font-bold text-white font-mono block">
+                        <p className="text-xl font-semibold text-white">
                           ₹{calc?.total.toFixed(2) || "0.00"}
-                        </span>
-                        <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider block mt-0.5">
-                          Renewing at ₹{calc?.recurringPrice.toFixed(2)}/mo
-                        </span>
+                        </p>
+                        <p className="text-xs text-zinc-500 mt-0.5">
+                          then ₹{calc?.recurringPrice.toFixed(2)}/mo
+                        </p>
                       </>
                     )}
                   </div>
                 </div>
 
-                {/* Checkout Trigger Actions */}
-                <div className="pt-2 print:hidden">
+                <div className="pt-2">
                   {step === 1 ? (
                     <Button
                       onClick={handleNextStep}
                       disabled={!isConfigComplete}
-                      className="w-full bg-white text-zinc-950 hover:bg-zinc-200 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:opacity-40 disabled:cursor-not-allowed font-black py-3 px-6 h-auto text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full"
                     >
-                      <span>Continue to Review</span>
-                      <ArrowRight className="w-3.5 h-3.5 font-bold" />
+                      Continue to Review
+                      <ArrowRight className="w-4 h-4" />
                     </Button>
                   ) : (
                     <Button
                       onClick={handleCreateCheckoutOrder}
                       disabled={submittingOrder}
-                      className="w-full bg-white text-zinc-950 hover:bg-zinc-200 font-black py-3 px-6 h-auto text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full"
                     >
                       {submittingOrder ? (
                         <>
-                          <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-950" />
-                          <span>Routing order...</span>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Processing...
                         </>
                       ) : (
                         <>
-                          <Coins className="w-3.5 h-3.5" />
-                          <span>Proceed to Payment</span>
+                          <Coins className="w-4 h-4" />
+                          Pay Now
                         </>
                       )}
                     </Button>

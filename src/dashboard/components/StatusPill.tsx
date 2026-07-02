@@ -20,8 +20,8 @@ export default function StatusPill({ status }: StatusPillProps) {
   const pill = config[currentStatus] || { label: status, dot: "bg-zinc-400" };
 
   return (
-    <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-zinc-950 border border-zinc-800 text-[10px] font-bold text-zinc-300 select-none uppercase tracking-wider">
-      <span className={`w-1.5 h-1.5 rounded-full ${pill.dot}`} />
+    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-950 border border-zinc-800 text-[11px] font-semibold text-zinc-300 select-none">
+      <span className={`w-2 h-2 rounded-full ${pill.dot}`} />
       <span>{pill.label}</span>
     </div>
   );
