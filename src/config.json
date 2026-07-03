@@ -2,13 +2,13 @@
   "brand": {
     "name": "Cynex",
     "suffix": "Cloud",
-    "logoUrl": "https://i.imgur.com/htv4fVV.jpeg",
+    "logoUrl": "/images/main-imgs/cynex-tp.png",
     "description": "Premium high-performance hosting solutions for Minecraft, VPS, and Discord Bots. Experience the power of Ryzen™ 9 nodes with enterprise NVMe storage."
   },
   "seo": {
     "title": "Cynex Cloud | Premium High-Performance Hosting",
     "description": "Cynex Cloud offers high-performance Minecraft, VPS, and Discord Bot hosting with instant setup and 24/7 support.",
-    "faviconUrl": "https://picsum.photos/seed/cynex/32/32"
+    "faviconUrl": "/images/main-imgs/cynex-tp.png"
   },
   "contact": {
     "email": "support@yourdomain.com",

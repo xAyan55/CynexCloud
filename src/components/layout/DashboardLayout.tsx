@@ -77,7 +77,19 @@ export default function DashboardLayout() {
         )}>
           <div className="flex items-center justify-between p-3 h-14 border-b border-border">
             {!collapsed && (
-              <span className="text-sm font-bold font-heading">{config.brand.name}</span>
+              <Link to="/" className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-md overflow-hidden shrink-0">
+                  <img src={config.brand.logoUrl} alt={config.brand.name} className="w-full h-full object-contain" />
+                </div>
+                <span className="text-sm font-bold font-heading">{config.brand.name}</span>
+              </Link>
+            )}
+            {collapsed && (
+              <Link to="/" className="mx-auto">
+                <div className="w-6 h-6 rounded-md overflow-hidden">
+                  <img src={config.brand.logoUrl} alt={config.brand.name} className="w-full h-full object-contain" />
+                </div>
+              </Link>
             )}
             <Button
               variant="ghost"

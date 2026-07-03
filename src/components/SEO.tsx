@@ -12,7 +12,7 @@ interface SEOProps {
 const SITE_URL = "https://cynexcloud.eu.cc"
 const DEFAULT_TITLE = config.seo.title
 const DEFAULT_DESC = config.seo.description
-const DEFAULT_IMAGE = config.brand.logoUrl
+const DEFAULT_IMAGE = `${SITE_URL}/images/main-imgs/cynex-tp.png`
 
 export default function SEO({
   title,
