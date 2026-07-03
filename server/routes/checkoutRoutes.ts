@@ -112,6 +112,20 @@ export default function createCheckoutRouter(db: any) {
     } catch (readErr: any) {
       console.error("[Checkout Config] Failed to read config.json fallback:", readErr.message);
     }
+
+    // Fallback to VPS plans (from constants, hardcoded here as inline seed)
+    const vpsPlans = [
+      { id: "bronze", name: "Bronze", price: "₹99", price_numeric: 99, ram: "4GB", cpu: "1 Core", storage: "20GB SSD", cpuCores: 1, memoryMb: 4096, storageGb: 20, description: "Entry-level VPS for lightweight tasks and personal projects.", image: "/images/vps-imgs/bronze.png", features: ["KVM Virtualization", "Root Access", "Dedicated IP", "SSD Storage"], popular: false, category: "vps" },
+      { id: "silver", name: "Silver", price: "₹199", price_numeric: 199, ram: "8GB", cpu: "2 Core", storage: "40GB SSD", cpuCores: 2, memoryMb: 8192, storageGb: 40, description: "Great value for small websites and development environments.", image: "/images/vps-imgs/silver.png", features: ["KVM Virtualization", "Root Access", "Dedicated IP", "SSD Storage"], popular: false, category: "vps" },
+      { id: "platinum", name: "Platinum", price: "₹299", price_numeric: 299, ram: "12GB", cpu: "3 Core", storage: "60GB SSD", cpuCores: 3, memoryMb: 12288, storageGb: 60, description: "Balanced performance for growing applications.", image: "/images/vps-imgs/platinum.png", features: ["KVM Virtualization", "Root Access", "Dedicated IP", "Snapshot Backups"], popular: false, category: "vps" },
+      { id: "gold", name: "Gold", price: "₹399", price_numeric: 399, ram: "16GB", cpu: "4 Core", storage: "80GB SSD", cpuCores: 4, memoryMb: 16384, storageGb: 80, description: "High-performance VPS for production workloads.", image: "/images/vps-imgs/gold.png", features: ["KVM Virtualization", "Root Access", "Dedicated IP", "Snapshot Backups"], popular: true, category: "vps" },
+      { id: "diamond", name: "Diamond", price: "₹499", price_numeric: 499, ram: "20GB", cpu: "5 Core", storage: "100GB SSD", cpuCores: 5, memoryMb: 20480, storageGb: 100, description: "Premium resources for demanding applications.", image: "/images/vps-imgs/diamond.png", features: ["KVM Virtualization", "Root Access", "Dedicated IP", "Daily Backups"], popular: false, category: "vps" },
+      { id: "crystal", name: "Crystal", price: "₹599", price_numeric: 599, ram: "24GB", cpu: "6 Core", storage: "120GB SSD", cpuCores: 6, memoryMb: 24576, storageGb: 120, description: "Enterprise-grade power for high-traffic platforms.", image: "/images/vps-imgs/crystal.png", features: ["KVM Virtualization", "Root Access", "Dedicated IP", "Daily Backups", "Priority Support"], popular: false, category: "vps" },
+      { id: "amber", name: "Amber", price: "₹699", price_numeric: 699, ram: "28GB", cpu: "7 Core", storage: "140GB SSD", cpuCores: 7, memoryMb: 28672, storageGb: 140, description: "Maximum resources for the most demanding workloads.", image: "/images/vps-imgs/amber.png", features: ["KVM Virtualization", "Root Access", "Dedicated IP", "Daily Backups", "Priority Support", "10Gbps Uplink"], popular: false, category: "vps" }
+    ];
+    const foundVps = vpsPlans.find((p: any) => p.id === planId);
+    if (foundVps) return foundVps;
+
     return null;
   }
 
