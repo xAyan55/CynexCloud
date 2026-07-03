@@ -1,12 +1,10 @@
 import { Link } from "react-router-dom"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Server, Cloud, Bot } from "lucide-react"
-import config from "@/config.json"
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 const CATEGORIES = [
-  { id: "minecraft", title: "Minecraft Hosting", description: "High-performance Minecraft servers with instant setup.", icon: Server, link: "/minecraft", bg: config.images?.categories?.minecraft?.background },
-  { id: "vps", title: "VPS Hosting", description: "Virtual private servers with full root access.", icon: Cloud, link: "/vps", bg: config.images?.categories?.vps?.background },
-  { id: "discord", title: "Discord Bot Hosting", description: "Reliable hosting for Discord bots of any size.", icon: Bot, link: "/discord-bot", bg: config.images?.categories?.discord?.background },
+  { id: "minecraft", title: "Minecraft Hosting", description: "High-performance Minecraft servers with instant setup.", img: "/images/sec-imgs/mc-sec.png", link: "/minecraft" },
+  { id: "vps", title: "VPS Hosting", description: "Virtual private servers with full root access.", img: "/images/sec-imgs/vps-sec.png", link: "/vps" },
+  { id: "discord", title: "Discord Bot Hosting", description: "Reliable hosting for Discord bots of any size.", img: "/images/sec-imgs/bot-sec.png", link: "/discord-bot" },
 ]
 
 export default function SelectCategory() {
@@ -20,10 +18,10 @@ export default function SelectCategory() {
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {CATEGORIES.map((cat) => (
             <Link key={cat.id} to={cat.link}>
-              <Card className="border-border hover:border-primary/50 transition-colors cursor-pointer h-full group">
+              <Card className="border-border hover:border-primary/50 transition-colors cursor-pointer h-full group overflow-hidden">
                 <CardHeader>
-                  <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center mb-3 group-hover:bg-accent/80 transition-colors">
-                    <cat.icon className="w-6 h-6 text-accent-foreground" />
+                  <div className="mb-4 -mx-6 -mt-6 overflow-hidden">
+                    <img src={cat.img} alt={cat.title} className="w-full h-40 object-cover" />
                   </div>
                   <CardTitle className="text-xl">{cat.title}</CardTitle>
                   <CardDescription className="text-base">{cat.description}</CardDescription>
