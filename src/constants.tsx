@@ -96,7 +96,7 @@ export const VPS_PRICING: PricingPlan[] = [
     ram: "4GB",
     cpu: "1 Core",
     storage: "20GB SSD",
-    features: ["KVM Virtualization", "Root Access", "Dedicated IP", "SSD Storage"],
+    features: ["LXC Virtualization", "Root Access", "Shared IP", "SSD Storage"],
     popular: false,
     iconUrl: "/images/vps-imgs/bronze.png"
   },
@@ -109,7 +109,7 @@ export const VPS_PRICING: PricingPlan[] = [
     ram: "8GB",
     cpu: "2 Core",
     storage: "40GB SSD",
-    features: ["KVM Virtualization", "Root Access", "Dedicated IP", "SSD Storage"],
+    features: ["LXC Virtualization", "Root Access", "Shared IP", "SSD Storage"],
     popular: false,
     iconUrl: "/images/vps-imgs/silver.png"
   },
@@ -122,7 +122,7 @@ export const VPS_PRICING: PricingPlan[] = [
     ram: "12GB",
     cpu: "3 Core",
     storage: "60GB SSD",
-    features: ["KVM Virtualization", "Root Access", "Dedicated IP", "Snapshot Backups"],
+    features: ["LXC Virtualization", "Root Access", "Shared IP", "Snapshot Backups"],
     popular: false,
     iconUrl: "/images/vps-imgs/platinum.png"
   },
@@ -135,7 +135,7 @@ export const VPS_PRICING: PricingPlan[] = [
     ram: "16GB",
     cpu: "4 Core",
     storage: "80GB SSD",
-    features: ["KVM Virtualization", "Root Access", "Dedicated IP", "Snapshot Backups"],
+    features: ["LXC Virtualization", "Root Access", "Shared IP", "Snapshot Backups"],
     popular: true,
     popularText: "RECOMMENDED",
     iconUrl: "/images/vps-imgs/gold.png"
@@ -149,7 +149,7 @@ export const VPS_PRICING: PricingPlan[] = [
     ram: "20GB",
     cpu: "5 Core",
     storage: "100GB SSD",
-    features: ["KVM Virtualization", "Root Access", "Dedicated IP", "Daily Backups"],
+    features: ["LXC Virtualization", "Root Access", "Shared IP", "Daily Backups"],
     popular: false,
     iconUrl: "/images/vps-imgs/diamond.png"
   },
@@ -162,7 +162,7 @@ export const VPS_PRICING: PricingPlan[] = [
     ram: "24GB",
     cpu: "6 Core",
     storage: "120GB SSD",
-    features: ["KVM Virtualization", "Root Access", "Dedicated IP", "Daily Backups", "Priority Support"],
+    features: ["LXC Virtualization", "Root Access", "Shared IP", "Daily Backups", "Priority Support"],
     popular: false,
     iconUrl: "/images/vps-imgs/crystal.png"
   },
@@ -175,7 +175,7 @@ export const VPS_PRICING: PricingPlan[] = [
     ram: "28GB",
     cpu: "7 Core",
     storage: "140GB SSD",
-    features: ["KVM Virtualization", "Root Access", "Dedicated IP", "Daily Backups", "Priority Support", "10Gbps Uplink"],
+    features: ["LXC Virtualization", "Root Access", "Shared IP", "Daily Backups", "Priority Support", "10Gbps Uplink"],
     popular: false,
     iconUrl: "/images/vps-imgs/amber.png"
   }
