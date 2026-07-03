@@ -61,6 +61,8 @@ const Contact = lazyRetry(() => import('@/pages/public/Contact'))
 const Terms = lazyRetry(() => import('@/pages/public/Terms'))
 const Privacy = lazyRetry(() => import('@/pages/public/Privacy'))
 const KnowledgeBase = lazyRetry(() => import('@/pages/public/KnowledgeBase'))
+const KnowledgeBaseCategory = lazyRetry(() => import('@/pages/public/KnowledgeBaseCategory'))
+const KnowledgeBaseArticle = lazyRetry(() => import('@/pages/public/KnowledgeBaseArticle'))
 
 const DashboardHome = lazyRetry(() => import('@/pages/dashboard/DashboardHome'))
 const Services = lazyRetry(() => import('@/pages/dashboard/Services'))
@@ -196,6 +198,8 @@ export default function AppRouter() {
         { path: 'terms', element: <Terms /> },
         { path: 'privacy', element: <Privacy /> },
         { path: 'knowledge-base', element: <KnowledgeBase /> },
+        { path: 'knowledge-base/:category', element: <KnowledgeBaseCategory /> },
+        { path: 'knowledge-base/:category/:article', element: <KnowledgeBaseArticle /> },
         { path: 'checkout/minecraft/:planId', element: <Checkout /> },
       ],
     },

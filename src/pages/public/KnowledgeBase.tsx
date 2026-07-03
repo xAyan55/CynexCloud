@@ -1,72 +1,35 @@
 import { useState } from "react"
+import { Link } from "react-router-dom"
 import { Input } from "@/components/ui/input"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Search, Server, Cloud, Bot, HelpCircle, FileText, BookOpen } from "lucide-react"
+import { Search, Server, Cloud, Bot, HelpCircle, FileText, BookOpen, ChevronRight } from "lucide-react"
+import { CATEGORIES, ARTICLES } from "@/data/knowledgeBase"
 
-const CATEGORIES: {
-  name: string; icon: any; description: string; articles: { title: string; excerpt: string }[]
-}[] = [
-  {
-    name: "Minecraft Hosting", icon: Server, description: "Server setup, modpack installation, configuration guides",
-    articles: [
-      { title: "How to install a modpack", excerpt: "Step-by-step guide to installing any modpack on your Minecraft server." },
-      { title: "Configuring server properties", excerpt: "Optimize your server experience by configuring server.properties." },
-      { title: "Setting up permissions", excerpt: "Learn how to set up permission groups with LuckPerms." },
-    ]
-  },
-  {
-    name: "VPS Hosting", icon: Cloud, description: "Server management, security, optimization tips",
-    articles: [
-      { title: "Securing your VPS", excerpt: "Essential security measures to protect your virtual private server." },
-      { title: "Performance optimization", excerpt: "Tips to optimize your VPS for maximum performance." },
-    ]
-  },
-  {
-    name: "Discord Bots", icon: Bot, description: "Bot deployment, troubleshooting, best practices",
-    articles: [
-      { title: "Deploying your first bot", excerpt: "Get your Discord bot online in minutes with our deployment guide." },
-      { title: "Common bot errors", excerpt: "Troubleshooting frequent issues with Discord bot hosting." },
-    ]
-  },
-  {
-    name: "Billing", icon: FileText, description: "Payments, invoices, refunds, plan changes",
-    articles: [
-      { title: "Understanding your invoice", excerpt: "A breakdown of charges, taxes, and billing cycles." },
-      { title: "How to upgrade your plan", excerpt: "Easily switch to a higher tier plan from your dashboard." },
-    ]
-  },
-  {
-    name: "Getting Started", icon: BookOpen, description: "Account setup, first steps, quick start guides",
-    articles: [
-      { title: "Creating your account", excerpt: "Sign up and verify your email to get started." },
-      { title: "Your first server deployment", excerpt: "From plan selection to server online in under 60 seconds." },
-    ]
-  },
-  {
-    name: "FAQ", icon: HelpCircle, description: "Common questions and answers",
-    articles: [
-      { title: "What payment methods do you accept?", excerpt: "We accept Bitcoin, USDT, ETH, and 150+ cryptocurrencies via OxaPay." },
-      { title: "How long does provisioning take?", excerpt: "Servers are deployed automatically within seconds of payment confirmation." },
-      { title: "Can I get a refund?", excerpt: "Yes, we offer a 7-day money-back guarantee on all plans." },
-    ]
-  },
-]
+const ICONS: Record<string, any> = { Server, Cloud, Bot, FileText, BookOpen, HelpCircle }
 
 export default function KnowledgeBase() {
   const [search, setSearch] = useState("")
-  const [expanded, setExpanded] = useState<string | null>(null)
 
   const filtered = CATEGORIES.filter(c =>
     c.name.toLowerCase().includes(search.toLowerCase()) ||
     c.description.toLowerCase().includes(search.toLowerCase())
   )
 
+  const searchArticles = search.trim()
+    ? ARTICLES.filter(a =>
+        a.title.toLowerCase().includes(search.toLowerCase()) ||
+        a.excerpt.toLowerCase().includes(search.toLowerCase())
+      )
+    : []
+
   return (
     <div className="py-24">
       <div className="mx-auto max-w-7xl px-6">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold font-heading tracking-tight mb-4">Knowledge Base</h1>
-          <p className="text-muted-foreground mb-8 max-w-xl mx-auto">Find answers to common questions and learn how to get the most out of your services.</p>
+          <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Find answers to common questions and learn how to get the most out of your services.
+          </p>
           <div className="max-w-md mx-auto relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
@@ -77,37 +40,83 @@ export default function KnowledgeBase() {
             />
           </div>
         </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          {filtered.map((cat) => {
-            const isOpen = expanded === cat.name
-            return (
-              <Card
-                key={cat.name}
-                className="border-border hover:border-zinc-600 transition-colors cursor-pointer"
-                onClick={() => setExpanded(isOpen ? null : cat.name)}
-              >
-                <CardHeader>
-                  <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center mb-2">
-                    <cat.icon className="w-5 h-5 text-accent-foreground" />
+
+        {search.trim() && searchArticles.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-sm font-medium text-zinc-400 mb-4 uppercase tracking-wider">Search Results</h2>
+            <div className="space-y-1">
+              {searchArticles.slice(0, 8).map((article) => (
+                <Link
+                  key={article.slug}
+                  to={`/knowledge-base/${article.categorySlug}/${article.slug}`}
+                  className="flex items-center gap-2 p-3 rounded-lg hover:bg-accent/50 transition-colors group"
+                >
+                  <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-zinc-200">{article.title}</p>
+                    <p className="text-xs text-zinc-500">{article.categoryName}</p>
                   </div>
-                  <CardTitle className="text-base">{cat.name}</CardTitle>
-                  <CardDescription>{cat.description}</CardDescription>
-                  <span className="text-xs text-muted-foreground mt-2">{cat.articles.length} articles</span>
-                </CardHeader>
-                {isOpen && (
-                  <div className="px-6 pb-6 space-y-3">
-                    {cat.articles.map((article) => (
-                      <div key={article.title} className="p-3 rounded-lg bg-accent/40 border border-border">
-                        <p className="text-sm font-medium">{article.title}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{article.excerpt}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!search.trim() && (
+          <>
+            <div className="grid md:grid-cols-3 gap-6">
+              {filtered.map((cat) => {
+                const Icon = ICONS[cat.icon]
+                const count = ARTICLES.filter(a => a.categorySlug === cat.slug).length
+                return (
+                  <Link key={cat.slug} to={`/knowledge-base/${cat.slug}`}>
+                    <Card className="border-border hover:border-zinc-600 transition-colors h-full group">
+                      <CardHeader>
+                        <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center mb-2">
+                          <Icon className="w-5 h-5 text-accent-foreground" />
+                        </div>
+                        <CardTitle className="text-base flex items-center gap-1.5">
+                          {cat.name}
+                          <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors shrink-0" />
+                        </CardTitle>
+                        <CardDescription>{cat.description}</CardDescription>
+                        <span className="text-xs text-muted-foreground mt-2">{count} articles</span>
+                      </CardHeader>
+                    </Card>
+                  </Link>
+                )
+              })}
+            </div>
+
+            <div className="mt-16">
+              <h2 className="text-xl font-heading font-bold tracking-tight mb-6">All Articles</h2>
+              <div className="grid md:grid-cols-2 gap-3">
+                {ARTICLES.map((article) => {
+                  const cat = CATEGORIES.find(c => c.slug === article.categorySlug)
+                  const Icon = cat ? ICONS[cat.icon] : BookOpen
+                  return (
+                    <Link
+                      key={article.slug}
+                      to={`/knowledge-base/${article.categorySlug}/${article.slug}`}
+                      className="flex items-start gap-3 p-4 rounded-lg border border-zinc-800/60 hover:border-zinc-600 transition-colors group"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center shrink-0 mt-0.5">
+                        <Icon className="w-4 h-4 text-accent-foreground" />
                       </div>
-                    ))}
-                  </div>
-                )}
-              </Card>
-            )
-          })}
-        </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-zinc-200 group-hover:text-zinc-100 transition-colors truncate">
+                          {article.title}
+                        </p>
+                        <p className="text-xs text-zinc-500 mt-0.5">{article.excerpt}</p>
+                        <span className="text-[11px] text-zinc-600 mt-1 inline-block">{cat?.name}</span>
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
