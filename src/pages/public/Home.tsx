@@ -52,8 +52,9 @@ export default function Home() {
               <img
                 src="/images/main-imgs/mc-char.png"
                 alt="Minecraft character"
-                className="w-full max-w-md h-auto object-contain drop-shadow-2xl"
+                className="w-full max-w-md h-auto object-contain drop-shadow-2xl animate-float"
                 loading="eager"
+                style={{ animation: "float 3s ease-in-out infinite" }}
               />
             </div>
           </div>
