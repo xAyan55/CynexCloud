@@ -128,6 +128,7 @@ const FieldValue = {
 async function startServer() {
   await dbInit();
   const app = express();
+  app.set('trust proxy', 1);
   app.use(express.json({
     verify: (req: any, res, buf) => {
       req.rawBody = buf.toString();
@@ -163,7 +164,10 @@ async function startServer() {
       if (!clientId?.value) {
         return res.redirect("/login?error=discord_not_configured");
       }
-      const redirectUri = `${req.protocol}://${req.get("host")}/api/auth/discord/callback`;
+      const origin = req.get("origin") || "";
+      const redirectUri = origin
+        ? `${origin}/api/auth/discord/callback`
+        : `${req.protocol}://${req.get("host")}/api/auth/discord/callback`;
       const url = `https://discord.com/api/oauth2/authorize?client_id=${clientId.value}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify%20email`;
       res.redirect(url);
     } catch {
