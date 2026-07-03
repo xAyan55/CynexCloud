@@ -151,7 +151,9 @@ export default function DashboardLayout() {
           </header>
 
           <main className="flex-1 overflow-auto p-6">
-            <Outlet />
+            <div className="page-enter">
+              <Outlet />
+            </div>
           </main>
         </div>
       </div>

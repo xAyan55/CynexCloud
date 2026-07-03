@@ -18,7 +18,7 @@ export default function SelectCategory() {
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {CATEGORIES.map((cat) => (
             <Link key={cat.id} to={cat.link}>
-              <Card className="border-border hover:border-primary/50 transition-colors cursor-pointer h-full group overflow-hidden">
+              <Card className="card-hover border-border hover:border-primary/50 transition-colors cursor-pointer h-full group overflow-hidden">
                 <CardHeader>
                   <div className="mb-4 -mx-6 -mt-6 overflow-hidden">
                     <img src={cat.img} alt={cat.title} className="w-full h-40 object-cover" />

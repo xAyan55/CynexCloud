@@ -135,7 +135,9 @@ export default function AppLayout() {
       </nav>
 
       <main className="pt-20">
-        <Outlet />
+        <div className="page-enter">
+          <Outlet />
+        </div>
       </main>
 
       <footer className="py-16 bg-card border-t border-border">

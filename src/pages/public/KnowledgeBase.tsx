@@ -70,7 +70,7 @@ export default function KnowledgeBase() {
                 const count = ARTICLES.filter(a => a.categorySlug === cat.slug).length
                 return (
                   <Link key={cat.slug} to={`/knowledge-base/${cat.slug}`}>
-                    <Card className="border-border hover:border-zinc-600 transition-colors h-full group">
+                    <Card className="card-hover border-border hover:border-zinc-600 transition-colors h-full group">
                       <CardHeader>
                         <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center mb-2">
                           <Icon className="w-5 h-5 text-accent-foreground" />
