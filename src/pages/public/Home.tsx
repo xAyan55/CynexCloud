@@ -19,27 +19,39 @@ const FEATURES = [
 export default function Home() {
   return (
     <div>
-      <section className="py-24 md:py-32">
-        <div className="mx-auto max-w-7xl px-6 text-center">
-          <Badge variant="outline" className="mb-6 px-4 py-1.5 text-xs text-muted-foreground">
-            Premium High-Performance Hosting
-          </Badge>
-          <h1 className="text-4xl md:text-6xl font-bold font-heading tracking-tight mb-6">
-            Power Your Projects<br />with{" "}
-            <span className="text-foreground">{config.brand.name}</span>
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10">
-            {config.brand.description}
-          </p>
-          <div className="flex items-center justify-center gap-4">
-            <Link to="/select-category">
-              <Button size="lg">
-                Get Started <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
-            <Link to="/features">
-              <Button variant="outline" size="lg">View Features</Button>
-            </Link>
+      <section className="py-24 md:py-32 relative overflow-hidden">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            <div className="flex-1 text-center md:text-left">
+              <Badge variant="outline" className="mb-6 px-4 py-1.5 text-xs text-muted-foreground">
+                Premium High-Performance Hosting
+              </Badge>
+              <h1 className="text-4xl md:text-6xl font-bold font-heading tracking-tight mb-6">
+                Power Your Projects<br />with{" "}
+                <span className="text-foreground">{config.brand.name}</span>
+              </h1>
+              <p className="text-lg text-muted-foreground max-w-xl mb-10">
+                {config.brand.description}
+              </p>
+              <div className="flex items-center gap-4 justify-center md:justify-start">
+                <Link to="/select-category">
+                  <Button size="lg">
+                    Get Started <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+                <Link to="/features">
+                  <Button variant="outline" size="lg">View Features</Button>
+                </Link>
+              </div>
+            </div>
+            <div className="flex-1 flex justify-center md:justify-end">
+              <img
+                src="/images/main-imgs/mc-char.png"
+                alt="Minecraft character"
+                className="w-full max-w-md h-auto object-contain drop-shadow-2xl"
+                loading="eager"
+              />
+            </div>
           </div>
         </div>
       </section>
