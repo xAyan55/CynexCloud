@@ -17,6 +17,8 @@ import createCheckoutRouter from "./server/routes/checkoutRoutes";
 import { securityHeaders, sanitizeInput } from "./server/middleware/security";
 import { queryGet, queryRun, queryAll } from "./server/db/database";
 import { enqueueProvisioningJob } from "./server/services/queueService";
+import { getCynexVMConfig } from "./server/services/cynexvmService";
+import cynexvmRouter from "./server/routes/cynexvmRoutes";
 import { initializeApp as initializeClientApp } from "firebase/app";
 import { 
   getFirestore as getClientFirestore, 
@@ -142,6 +144,7 @@ async function startServer() {
   app.use("/api/admin", adminRouter);
   app.use("/api/payments", paymentRouter);
   app.use("/api/checkout", createCheckoutRouter(db));
+  app.use("/api/cynexvm", cynexvmRouter);
   
   // Public settings (no auth required)
   app.get("/api/settings/public", async (req, res) => {
@@ -228,6 +231,9 @@ async function startServer() {
             ram: "2GB",
             cpu: "1 vCore",
             storage: "40GB NVMe",
+            cpuCores: 1,
+            memoryMb: 2048,
+            storageGb: 40,
             features: ["KVM Virtualization", "Root Access", "Dedicated IP"],
             popular: false,
             discountBadge: "25% OFF",
@@ -243,6 +249,9 @@ async function startServer() {
             ram: "4GB",
             cpu: "2 vCores",
             storage: "80GB NVMe",
+            cpuCores: 2,
+            memoryMb: 4096,
+            storageGb: 80,
             features: ["KVM Virtualization", "Root Access", "Dedicated IP"],
             popular: false,
             discountBadge: "25% OFF",
@@ -258,6 +267,9 @@ async function startServer() {
             ram: "8GB",
             cpu: "4 vCores",
             storage: "160GB NVMe",
+            cpuCores: 4,
+            memoryMb: 8192,
+            storageGb: 160,
             features: ["KVM Virtualization", "Root Access", "Snapshot Backups"],
             popular: true,
             popularText: "MOST POPULAR CHOICE",
@@ -274,6 +286,9 @@ async function startServer() {
             ram: "16GB",
             cpu: "8 vCores",
             storage: "320GB NVMe",
+            cpuCores: 8,
+            memoryMb: 16384,
+            storageGb: 320,
             features: ["KVM Virtualization", "Root Access", "Daily Backups"],
             popular: false,
             discountBadge: "25% OFF",
@@ -289,6 +304,9 @@ async function startServer() {
             ram: "32GB",
             cpu: "16 vCores",
             storage: "640GB NVMe",
+            cpuCores: 16,
+            memoryMb: 32768,
+            storageGb: 640,
             features: ["KVM Virtualization", "Root Access", "Premium 10Gbps Uplink", "Daily Backups"],
             popular: false,
             discountBadge: "20% OFF",

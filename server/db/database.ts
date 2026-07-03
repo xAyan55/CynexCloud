@@ -257,7 +257,12 @@ export const dbInit = () => {
     { name: "addons", type: "TEXT" },
     { name: "locationId", type: "INTEGER" },
     { name: "nestId", type: "INTEGER" },
-    { name: "eggId", type: "INTEGER" }
+    { name: "eggId", type: "INTEGER" },
+    { name: "cynexvmId", type: "TEXT" },
+    { name: "cynexvmUuid", type: "TEXT" },
+    { name: "osTemplate", type: "TEXT" },
+    { name: "rootPassword", type: "TEXT" },
+    { name: "nodeId", type: "TEXT" }
   ];
 
   serviceCols.forEach(col => {

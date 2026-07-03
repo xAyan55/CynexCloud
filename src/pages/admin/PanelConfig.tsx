@@ -17,6 +17,8 @@ interface Settings {
   social_login_provider: string
   discord_client_id: string
   discord_client_secret: string
+  cynexvm_url: string
+  cynexvm_api_key: string
 }
 
 export default function PanelConfig() {
@@ -32,7 +34,9 @@ export default function PanelConfig() {
     oxapay_merchant_key: "",
     social_login_provider: "none",
     discord_client_id: "",
-    discord_client_secret: ""
+    discord_client_secret: "",
+    cynexvm_url: "",
+    cynexvm_api_key: ""
   })
 
   useEffect(() => {
@@ -115,6 +119,23 @@ export default function PanelConfig() {
             <div>
               <Label htmlFor="pterodactyl_client_key">Client API Key</Label>
               <Input id="pterodactyl_client_key" type="password" placeholder="ptlc_..." className="mt-1.5" value={settings.pterodactyl_client_key} onChange={e => setSettings(prev => ({ ...prev, pterodactyl_client_key: e.target.value }))} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border">
+          <CardHeader>
+            <CardTitle className="text-base">CynexVM Panel</CardTitle>
+            <CardDescription>Configure CynexVM VPS management API connection.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="cynexvm_url">Panel URL</Label>
+              <Input id="cynexvm_url" placeholder="https://vm.yourdomain.com" className="mt-1.5" value={settings.cynexvm_url} onChange={e => setSettings(prev => ({ ...prev, cynexvm_url: e.target.value }))} />
+            </div>
+            <div>
+              <Label htmlFor="cynexvm_api_key">API Key</Label>
+              <Input id="cynexvm_api_key" type="password" placeholder="cv_live_..." className="mt-1.5" value={settings.cynexvm_api_key} onChange={e => setSettings(prev => ({ ...prev, cynexvm_api_key: e.target.value }))} />
             </div>
           </CardContent>
         </Card>

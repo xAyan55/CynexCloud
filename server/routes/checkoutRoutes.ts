@@ -5,6 +5,7 @@ import path from "path";
 import { queryRun } from "../db/database";
 import { requireAuth } from "./authRoutes";
 import { getPterodactylNodesForCheckout, getPterodactylSoftwareForCheckout } from "../services/pterodactylService";
+import { getNodes as getCynexvmNodes, getImages as getCynexvmImages, getCynexVMConfig } from "../services/cynexvmService";
 
 // Default values to seed if Firestore collections are empty or unreachable
 const DEFAULT_LOCATIONS = [
@@ -23,6 +24,17 @@ const DEFAULT_SOFTWARE = [
   { id: "sw-forge", name: "Forge", versions: ["1.20.1", "1.19.2", "1.18.2", "1.16.5", "1.12.2"], active: true },
   { id: "sw-velocity", name: "Velocity", versions: ["3.3.0-SNAPSHOT", "3.2.0"], active: true },
   { id: "sw-bungeecord", name: "BungeeCord", versions: ["latest"], active: true }
+];
+
+const DEFAULT_VPS_NODES = [
+  { id: "node-auto", name: "Auto (Best Available)", country: "Auto", ping: "—", availableRam: 0, availableDisk: 0, isOnline: true, flag: "🌐" }
+];
+
+const DEFAULT_VPS_IMAGES = [
+  { fingerprint: "ubuntu/22.04", aliases: ["ubuntu/22.04/amd64"], description: "Ubuntu 22.04 LTS (Jammy Jellyfish)", sizeBytes: 0 },
+  { fingerprint: "debian/12", aliases: ["debian/12/amd64"], description: "Debian 12 (Bookworm)", sizeBytes: 0 },
+  { fingerprint: "ubuntu/24.04", aliases: ["ubuntu/24.04/amd64"], description: "Ubuntu 24.04 LTS (Noble Numbat)", sizeBytes: 0 },
+  { fingerprint: "centos/9", aliases: ["centos/9/amd64"], description: "CentOS Stream 9", sizeBytes: 0 }
 ];
 
 const DEFAULT_ADDONS = [
@@ -248,10 +260,13 @@ export default function createCheckoutRouter(db: any) {
       softwareId, 
       version, 
       selectedAddons,
-      coupon
+      coupon,
+      nodeId,
+      osTemplate,
+      rootPassword
     } = req.body;
 
-    if (!planId || !serverName || !billingCycle || !locationId || !softwareId || !version) {
+    if (!planId || !serverName || !billingCycle) {
       return res.status(400).json({ error: "Missing required order parameters." });
     }
 
@@ -286,26 +301,6 @@ export default function createCheckoutRouter(db: any) {
         }
       });
 
-      // 4. Validate location & software options
-      let locations;
-      try {
-        locations = await getPterodactylNodesForCheckout();
-      } catch (err: any) {
-        locations = await getOrSeedCollection("checkout_locations", DEFAULT_LOCATIONS);
-      }
-      const targetLocation = locations.find((l: any) => String(l.id) === String(locationId));
-      if (!targetLocation) return res.status(400).json({ error: "Invalid location selection." });
-
-      let softwares;
-      try {
-        softwares = await getPterodactylSoftwareForCheckout();
-      } catch (err: any) {
-        softwares = await getOrSeedCollection("checkout_software", DEFAULT_SOFTWARE);
-      }
-      const targetSoftware = softwares.find((s: any) => String(s.id) === String(softwareId));
-      if (!targetSoftware) return res.status(400).json({ error: "Invalid software selection." });
-      if (!targetSoftware.versions.includes(version)) return res.status(400).json({ error: "Invalid version selection." });
-
       // 5. Finalize calculation
       const subtotal = baseSubtotal + addonsTotal;
       const cycleDiscountAmount = baseSubtotal * cycle.discount;
@@ -331,30 +326,75 @@ export default function createCheckoutRouter(db: any) {
       const invoiceId = "INV-" + crypto.randomUUID().substring(0, 8);
       const serviceId = "SRV-" + crypto.randomUUID().substring(0, 8);
 
-      // Extract software Egg/Nest IDs
-      const eggId = targetSoftware.eggId || 1;
-      const nestId = targetSoftware.nestId || 1;
+      // Check if this is a VPS plan
+      const isVPS = Boolean(nodeId || osTemplate);
 
-      // 6. Save service configuration record (Pending Payment)
-      await queryRun(
-        `INSERT INTO services (id, userId, planId, name, status, price, billingCycle, location, software, version, addons, locationId, nestId, eggId) 
-         VALUES (?, ?, ?, ?, 'Pending Payment', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          serviceId, 
-          req.user.userId, 
-          planId, 
-          serverName, 
-          finalPrice, 
-          cycle.name, 
-          targetLocation.name, 
-          targetSoftware.name, 
-          version, 
-          JSON.stringify(verifiedAddons),
-          parseInt(targetLocation.id, 10) || 1,
-          parseInt(nestId, 10) || 1,
-          parseInt(eggId, 10) || 1
-        ]
-      );
+      if (isVPS) {
+        // 6a. Save VPS service configuration (CynexVM)
+        await queryRun(
+          `INSERT INTO services (id, userId, planId, name, status, price, billingCycle, addons, nodeId, osTemplate, rootPassword) 
+           VALUES (?, ?, ?, ?, 'Pending Payment', ?, ?, ?, ?, ?, ?)`,
+          [
+            serviceId, 
+            req.user.userId, 
+            planId, 
+            serverName, 
+            finalPrice, 
+            cycle.name, 
+            JSON.stringify(verifiedAddons),
+            nodeId || "",
+            osTemplate || "ubuntu/22.04",
+            rootPassword || ""
+          ]
+        );
+      } else {
+        // 6b. Validate Minecraft/Pterodactyl-specific fields
+        if (!locationId || !softwareId || !version) {
+          return res.status(400).json({ error: "Missing required order parameters." });
+        }
+
+        let locations;
+        try {
+          locations = await getPterodactylNodesForCheckout();
+        } catch (err: any) {
+          locations = await getOrSeedCollection("checkout_locations", DEFAULT_LOCATIONS);
+        }
+        const targetLocation = locations.find((l: any) => String(l.id) === String(locationId));
+        if (!targetLocation) return res.status(400).json({ error: "Invalid location selection." });
+
+        let softwares;
+        try {
+          softwares = await getPterodactylSoftwareForCheckout();
+        } catch (err: any) {
+          softwares = await getOrSeedCollection("checkout_software", DEFAULT_SOFTWARE);
+        }
+        const targetSoftware = softwares.find((s: any) => String(s.id) === String(softwareId));
+        if (!targetSoftware) return res.status(400).json({ error: "Invalid software selection." });
+        if (!targetSoftware.versions.includes(version)) return res.status(400).json({ error: "Invalid version selection." });
+
+        const eggId = targetSoftware.eggId || 1;
+        const nestId = targetSoftware.nestId || 1;
+
+        await queryRun(
+          `INSERT INTO services (id, userId, planId, name, status, price, billingCycle, location, software, version, addons, locationId, nestId, eggId) 
+           VALUES (?, ?, ?, ?, 'Pending Payment', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            serviceId, 
+            req.user.userId, 
+            planId, 
+            serverName, 
+            finalPrice, 
+            cycle.name, 
+            targetLocation.name, 
+            targetSoftware.name, 
+            version, 
+            JSON.stringify(verifiedAddons),
+            parseInt(targetLocation.id, 10) || 1,
+            parseInt(nestId, 10) || 1,
+            parseInt(eggId, 10) || 1
+          ]
+        );
+      }
 
       // 7. Save order record
       await queryRun(
@@ -385,6 +425,39 @@ export default function createCheckoutRouter(db: any) {
     } catch (err: any) {
       console.error("Checkout order creation failed:", err);
       res.status(500).json({ error: "Checkout failed to create order: " + err.message });
+    }
+  });
+
+  /**
+   * GET /api/checkout/vps-config
+   * Retrieves CynexVM nodes and OS templates for VPS checkout
+   */
+  router.get("/vps-config", async (req, res) => {
+    try {
+      let nodes: any[];
+      let images: any[];
+      let panelUrl = "";
+
+      try {
+        const config = await getCynexVMConfig();
+        panelUrl = config.url || "";
+        if (config.url) {
+          nodes = (await getCynexvmNodes()) || [];
+          images = (await getCynexvmImages()) || [];
+        } else {
+          nodes = DEFAULT_VPS_NODES;
+          images = DEFAULT_VPS_IMAGES;
+        }
+      } catch (err: any) {
+        console.warn("[Checkout VPS] Failed to fetch CynexVM data, using defaults:", err.message);
+        nodes = DEFAULT_VPS_NODES;
+        images = DEFAULT_VPS_IMAGES;
+      }
+
+      res.json({ success: true, nodes: nodes.filter((n: any) => n.isOnline !== false), images, panelUrl });
+    } catch (err: any) {
+      console.error("Failed to load VPS checkout config:", err);
+      res.status(500).json({ error: "Failed to load VPS checkout configuration." });
     }
   });
 

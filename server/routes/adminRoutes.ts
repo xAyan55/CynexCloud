@@ -30,7 +30,9 @@ router.get("/settings", requireAuth, requireAdmin, async (req: any, res: Respons
       oxapay_merchant_key: await getVal("oxapay_merchant_key"),
       social_login_provider: await getVal("social_login_provider"),
       discord_client_id: await getVal("discord_client_id"),
-      discord_client_secret: await getVal("discord_client_secret")
+      discord_client_secret: await getVal("discord_client_secret"),
+      cynexvm_url: await getVal("cynexvm_url"),
+      cynexvm_api_key: await getVal("cynexvm_api_key")
     };
 
     res.json({ success: true, settings });
@@ -41,7 +43,7 @@ router.get("/settings", requireAuth, requireAdmin, async (req: any, res: Respons
 
 // Update settings (Admin only)
 router.put("/settings", requireAuth, requireAdmin, async (req: any, res: Response) => {
-  const { pterodactyl_url, pterodactyl_app_key, pterodactyl_client_key, oxapay_merchant_key, social_login_provider, discord_client_id, discord_client_secret } = req.body;
+  const { pterodactyl_url, pterodactyl_app_key, pterodactyl_client_key, oxapay_merchant_key, social_login_provider, discord_client_id, discord_client_secret, cynexvm_url, cynexvm_api_key } = req.body;
 
   try {
     const insertSetting = async (key: string, val: string) => {
@@ -59,7 +61,9 @@ router.put("/settings", requireAuth, requireAdmin, async (req: any, res: Respons
       oxapay_merchant_key: oxapay_merchant_key,
       social_login_provider: social_login_provider,
       discord_client_id: discord_client_id,
-      discord_client_secret: discord_client_secret
+      discord_client_secret: discord_client_secret,
+      cynexvm_url: cynexvm_url,
+      cynexvm_api_key: cynexvm_api_key
     };
 
     for (const [key, val] of Object.entries(fields)) {

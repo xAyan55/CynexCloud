@@ -87,6 +87,7 @@ const AdminTicketDetail = lazyRetry(() => import('@/pages/admin/AdminTicketDetai
 const AdminUsers = lazyRetry(() => import('@/pages/admin/AdminUsers'))
 
 const Checkout = lazyRetry(() => import('@/pages/Checkout'))
+const CheckoutVPS = lazyRetry(() => import('@/pages/CheckoutVPS'))
 
 export default function AppRouter() {
   const router = createBrowserRouter([
@@ -195,7 +196,7 @@ export default function AppRouter() {
         { path: 'knowledge-base/:category', element: <KnowledgeBaseCategory /> },
         { path: 'knowledge-base/:category/:article', element: <KnowledgeBaseArticle /> },
         { path: 'checkout/minecraft/:planId', element: <Checkout /> },
-        { path: 'checkout/vps/:planId', element: <Checkout /> },
+        { path: 'checkout/vps/:planId', element: <CheckoutVPS /> },
       ],
     },
   ])
