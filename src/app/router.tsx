@@ -201,6 +201,7 @@ export default function AppRouter() {
         { path: 'knowledge-base/:category', element: <KnowledgeBaseCategory /> },
         { path: 'knowledge-base/:category/:article', element: <KnowledgeBaseArticle /> },
         { path: 'checkout/minecraft/:planId', element: <Checkout /> },
+        { path: 'checkout/vps/:planId', element: <Checkout /> },
       ],
     },
   ])

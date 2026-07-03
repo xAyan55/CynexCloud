@@ -11,6 +11,7 @@ export interface PricingPlan {
   id: string;
   name: string;
   price: string;
+  usdPrice?: string;
   originalPrice?: string;
   description?: string;
   ram?: string;
