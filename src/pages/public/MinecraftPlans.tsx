@@ -18,7 +18,7 @@ export default function MinecraftPlans() {
           {MINECRAFT_PRICING.map((plan) => (
             <Card key={plan.id} className={cn("border-border relative flex flex-col", plan.popular && "border-primary/50")}>
               {plan.popular && (
-                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">{plan.popularText || "Popular"}</Badge>
+                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 shadow-[0_0_12px_-2px_hsl(var(--primary))] px-3 py-1 text-[11px] tracking-wider">{plan.popularText || "Popular"}</Badge>
               )}
               <CardHeader>
                 {plan.iconUrl && (
