@@ -66,19 +66,25 @@ export const MINECRAFT_FEATURES: Feature[] = [
   }
 ];
 
-export const MINECRAFT_PRICING: PricingPlan[] = config.minecraftPlans.map(plan => ({
-  id: plan.id,
-  name: plan.name.replace(" Plan", ""),
-  price: plan.price.replace("₹", "").replace("/m", ""),
-  description: `High performance Minecraft hosting with ${plan.ram} and ${plan.cpu}.`,
-  ram: plan.ram,
-  storage: plan.disk,
-  cpu: plan.cpu,
-  features: plan.features,
-  popular: plan.id === "creeper",
-  popularText: plan.id === "creeper" ? "BEST VALUE" : undefined,
-  iconUrl: plan.image
-}));
+export const MINECRAFT_PRICING: PricingPlan[] = config.minecraftPlans.map(plan => {
+  const parts = plan.price.split("/")
+  const inrPrice = parts[0].replace("₹", "").replace("/m", "")
+  const usdPrice = parts[1]?.replace("$", "") || ""
+  return {
+    id: plan.id,
+    name: plan.name.replace(" Plan", ""),
+    price: inrPrice,
+    usdPrice,
+    description: `High performance Minecraft hosting with ${plan.ram} and ${plan.cpu}.`,
+    ram: plan.ram,
+    storage: plan.disk,
+    cpu: plan.cpu,
+    features: plan.features,
+    popular: plan.id === "creeper",
+    popularText: plan.id === "creeper" ? "BEST VALUE" : undefined,
+    iconUrl: plan.image
+  }
+});
 
 export const VPS_PRICING: PricingPlan[] = [
   {

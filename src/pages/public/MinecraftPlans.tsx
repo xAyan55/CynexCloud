@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Check } from "lucide-react"
+import { MemoryStick, Cpu, HardDrive, ShoppingCart } from "lucide-react"
 import { MINECRAFT_PRICING } from "@/constants"
 import { cn } from "@/lib/utils"
 
@@ -14,7 +14,7 @@ export default function MinecraftPlans() {
           <h1 className="text-4xl font-bold font-heading tracking-tight mb-4">Minecraft Hosting Plans</h1>
           <p className="text-muted-foreground max-w-xl mx-auto">High-performance Minecraft hosting with instant setup.</p>
         </div>
-        <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {MINECRAFT_PRICING.map((plan) => (
             <Card key={plan.id} className={cn("card-hover border-border relative flex flex-col", plan.popular && "border-primary/50")}>
               {plan.popular && (
@@ -22,40 +22,53 @@ export default function MinecraftPlans() {
               )}
               <CardHeader>
                 {plan.iconUrl && (
-                  <img src={plan.iconUrl} alt={plan.name} className="w-12 h-12 object-contain mb-2" />
+                  <div className="flex justify-center mb-3">
+                    <img src={plan.iconUrl} alt={plan.name} className="w-16 h-16 object-contain" />
+                  </div>
                 )}
-                <CardTitle className="text-lg">{plan.name}</CardTitle>
-                <div className="mt-2">
+                <CardTitle className="text-lg text-center">{plan.name}</CardTitle>
+                <div className="text-center mt-2">
                   <span className="text-3xl font-bold text-foreground">₹{plan.price}</span>
+                  {plan.usdPrice && (
+                    <span className="text-muted-foreground text-sm ml-2">/${plan.usdPrice}</span>
+                  )}
                   <span className="text-muted-foreground text-sm ml-1">/mo</span>
                 </div>
-                <CardDescription className="mt-2">{plan.description}</CardDescription>
+                <CardDescription className="text-center mt-2">{plan.description}</CardDescription>
               </CardHeader>
-              <CardContent className="flex-1 flex flex-col">
-                <ul className="space-y-2 mb-6 flex-1">
-                  <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Check className="w-4 h-4 text-foreground shrink-0" />
-                    {plan.ram} RAM
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Check className="w-4 h-4 text-foreground shrink-0" />
-                    {plan.cpu} CPU
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Check className="w-4 h-4 text-foreground shrink-0" />
-                    {plan.storage} Storage
-                  </li>
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Check className="w-4 h-4 text-foreground shrink-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
+              <div className="px-6 pb-4 space-y-2.5 flex-1">
+                <div className="flex items-center gap-2.5 text-sm">
+                  <MemoryStick className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground">Ram:</span>
+                  <span className="text-foreground font-medium ml-auto">{plan.ram}</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-sm">
+                  <Cpu className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground">Cpu:</span>
+                  <span className="text-foreground font-medium ml-auto">{plan.cpu}</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-sm">
+                  <HardDrive className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground">Disk:</span>
+                  <span className="text-foreground font-medium ml-auto">{plan.storage}</span>
+                </div>
+                {plan.features.map((f) => (
+                  <div key={f} className="flex items-center gap-2.5 text-sm">
+                    <ShoppingCart className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <span className="text-muted-foreground">{f}</span>
+                  </div>
+                ))}
+                <div className="flex items-center gap-2.5 text-sm pt-1 border-t border-border mt-3">
+                  <ShoppingCart className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground">Price:</span>
+                  <span className="text-foreground font-medium ml-auto">₹{plan.price}/{plan.usdPrice && `$${plan.usdPrice}`}</span>
+                </div>
+              </div>
+              <div className="px-6 pb-6 mt-auto">
                 <Link to={`/checkout/minecraft/${plan.id}`}>
                   <Button className="w-full">Choose Plan</Button>
                 </Link>
-              </CardContent>
+              </div>
             </Card>
           ))}
         </div>
