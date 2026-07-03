@@ -781,6 +781,10 @@ async function startServer() {
         if (filePath.endsWith('.html')) {
           res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         }
+        if (filePath.endsWith('.xml')) {
+          res.setHeader('Cache-Control', 'public, max-age=86400');
+          res.setHeader('Content-Type', 'text/xml; charset=utf-8');
+        }
       }
     }));
     app.get('*', (req, res) => {
