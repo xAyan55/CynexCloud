@@ -16,8 +16,8 @@ export default function AuthLayout({ children, backgroundImage }: AuthLayoutProp
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 flex flex-col justify-between h-full p-12 select-none">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center overflow-hidden shrink-0">
-              <img src={config.brand.logoUrl} alt={config.brand.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden shrink-0">
+              <img src={config.brand.logoUrl} alt={config.brand.name} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
             </div>
             <span className="text-lg font-bold text-white">{config.brand.name}</span>
           </div>

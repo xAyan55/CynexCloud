@@ -39,8 +39,8 @@ export default function AppLayout() {
       )}>
         <div className="mx-auto max-w-7xl px-6 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center overflow-hidden shrink-0">
-              <img src={config.brand.logoUrl} alt={config.brand.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center overflow-hidden shrink-0">
+              <img src={config.brand.logoUrl} alt={config.brand.name} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
             </div>
             <span className="text-lg font-bold tracking-tight font-heading">
               {config.brand.name}<span className="text-muted-foreground font-light">{config.brand.suffix}</span>
@@ -145,8 +145,8 @@ export default function AppLayout() {
           <div className="grid md:grid-cols-4 gap-10 mb-16">
             <div className="md:col-span-1">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-white rounded flex items-center justify-center overflow-hidden shrink-0">
-                  <img src={config.brand.logoUrl} alt={config.brand.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                <div className="w-8 h-8 rounded flex items-center justify-center overflow-hidden shrink-0">
+                  <img src={config.brand.logoUrl} alt={config.brand.name} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                 </div>
                 <span className="text-lg font-bold tracking-tight">{config.brand.name}<span className="text-muted-foreground">{config.brand.suffix}</span></span>
               </div>
