@@ -30,7 +30,8 @@ export const dbInit = () => {
       twoFactorEnabled INTEGER DEFAULT 0,
       twoFactorSecret TEXT,
       banned INTEGER DEFAULT 0,
-      deleted INTEGER DEFAULT 0
+      deleted INTEGER DEFAULT 0,
+      discord_id TEXT
     )
   `);
 

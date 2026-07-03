@@ -175,6 +175,82 @@ async function startServer() {
     }
   });
 
+  // Discord OAuth callback
+  app.get("/api/auth/discord/callback", async (req: any, res) => {
+    const { code } = req.query;
+    if (!code) return res.redirect("/login?error=discord_auth_failed");
+
+    try {
+      const clientId = await queryGet<{ value: string }>("SELECT value FROM settings WHERE key = 'discord_client_id'");
+      const clientSecret = await queryGet<{ value: string }>("SELECT value FROM settings WHERE key = 'discord_client_secret'");
+      if (!clientId?.value || !clientSecret?.value) {
+        return res.redirect("/login?error=discord_not_configured");
+      }
+
+      const origin = req.get("origin") || `${req.protocol}://${req.get("host")}`;
+      const redirectUri = `${origin}/api/auth/discord/callback`;
+
+      // Exchange code for token
+      const tokenRes = await axios.post("https://discord.com/api/oauth2/token", new URLSearchParams({
+        client_id: clientId.value,
+        client_secret: clientSecret.value,
+        code: code as string,
+        grant_type: "authorization_code",
+        redirect_uri: redirectUri,
+        scope: "identify email",
+      }).toString(), { headers: { "Content-Type": "application/x-www-form-urlencoded" } });
+
+      const discordToken = tokenRes.data.access_token;
+      if (!discordToken) return res.redirect("/login?error=discord_auth_failed");
+
+      // Fetch Discord user info
+      const userRes = await axios.get("https://discord.com/api/users/@me", {
+        headers: { Authorization: `Bearer ${discordToken}` },
+      });
+      const discordUser = userRes.data;
+
+      // Look up existing user by discord_id, then by email, or create new
+      let dbUser = await queryGet<any>("SELECT * FROM users WHERE discord_id = ?", [discordUser.id]);
+      if (!dbUser && discordUser.email) {
+        dbUser = await queryGet<any>("SELECT * FROM users WHERE email = ?", [discordUser.email]);
+      }
+
+      if (dbUser) {
+        // Link discord_id if not set
+        if (!dbUser.discord_id) {
+          await queryRun("UPDATE users SET discord_id = ? WHERE id = ?", [discordUser.id, dbUser.id]);
+        }
+      } else {
+        // Create new user
+        const userId = "u_" + crypto.randomUUID().substring(0, 12);
+        const passwordHash = crypto.randomBytes(32).toString("hex"); // unused, social login
+        await queryRun(
+          `INSERT INTO users (id, username, email, passwordHash, emailVerified, avatar, role, discord_id) VALUES (?, ?, ?, ?, 1, ?, 'user', ?)`,
+          [userId, discordUser.username || discordUser.global_name || `discord_${discordUser.id}`, discordUser.email || `${discordUser.id}@discord.local`, passwordHash, discordUser.avatar ? `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png` : null, discordUser.id]
+        );
+        dbUser = { id: userId, username: discordUser.username || discordUser.global_name, email: discordUser.email, role: 'user', refreshTokenVersion: 1 };
+      }
+
+      // Generate tokens
+      const { generateAccessToken, generateRefreshToken } = await import("./server/services/tokenService");
+      const tokenFamily = crypto.randomUUID();
+      const payload = { userId: dbUser.id, username: dbUser.username, role: dbUser.role, permissions: [] };
+      const accessToken = generateAccessToken(payload);
+      const refreshToken = generateRefreshToken({ ...payload, tokenFamily, version: dbUser.refreshTokenVersion || 1 });
+      const csrfToken = crypto.randomBytes(32).toString("hex");
+
+      // Set cookies
+      res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, sameSite: "lax", maxAge: 7 * 24 * 60 * 60 * 1000 });
+      res.cookie("csrfToken", csrfToken, { httpOnly: false, secure: true, sameSite: "lax", maxAge: 7 * 24 * 60 * 60 * 1000 });
+
+      // Redirect to home with tokens in hash fragment (frontend reads them)
+      res.redirect(`${origin}/dashboard?discord_login=success`);
+    } catch (err: any) {
+      console.error("[Discord OAuth Callback Error]:", err.response?.data || err.message);
+      res.redirect("/login?error=discord_auth_failed");
+    }
+  });
+
   app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
