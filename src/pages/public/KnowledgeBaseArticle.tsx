@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom"
 import { ChevronLeft, Server, Cloud, Bot, FileText, BookOpen, HelpCircle } from "lucide-react"
 import { ARTICLES, CATEGORIES } from "@/data/knowledgeBase"
+import SEO from "@/components/SEO"
 
 const ICONS: Record<string, any> = { Server, Cloud, Bot, FileText, BookOpen, HelpCircle }
 
@@ -125,6 +126,7 @@ export default function KnowledgeBaseArticle() {
   if (!data || !categoryData) {
     return (
       <div className="py-24">
+        <SEO title="Article Not Found" description="The requested knowledge base article could not be found." path={`/knowledge-base/${category}/${article}`} />
         <div className="mx-auto max-w-3xl px-6 text-center">
           <h1 className="text-2xl font-bold font-heading mb-4">Article not found</h1>
           <Link to="/knowledge-base" className="text-sm text-zinc-400 hover:text-zinc-200 underline underline-offset-4">
@@ -137,6 +139,7 @@ export default function KnowledgeBaseArticle() {
 
   return (
     <div className="py-24">
+      <SEO title={data.title} description={data.excerpt} path={`/knowledge-base/${category}/${article}`} />
       <div className="mx-auto max-w-4xl px-6">
         <Link
           to="/knowledge-base"

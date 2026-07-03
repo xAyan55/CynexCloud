@@ -5,10 +5,12 @@ import { Badge } from "@/components/ui/badge"
 import { MemoryStick, Cpu, HardDrive, ShoppingCart } from "lucide-react"
 import { VPS_PRICING } from "@/constants"
 import { cn } from "@/lib/utils"
+import SEO from "@/components/SEO"
 
 export default function VPSPlans() {
   return (
     <div className="py-24">
+      <SEO title="VPS Server Plans" description="High-performance VPS plans from Bronze to Amber tier. KVM virtualization, dedicated IP, root access, and NVMe storage." path="/vps" />
       <div className="mx-auto max-w-7xl px-6">
         <div className="text-center mb-16">
           <h1 className="text-4xl font-bold font-heading tracking-tight mb-4">VPS Hosting Plans</h1>

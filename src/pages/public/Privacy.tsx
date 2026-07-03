@@ -1,6 +1,9 @@
+import SEO from "@/components/SEO"
+
 export default function Privacy() {
   return (
     <div className="py-24">
+      <SEO title="Privacy Policy" description="Read the Privacy Policy for Cynex Cloud hosting services." path="/privacy" />
       <div className="mx-auto max-w-3xl px-6">
         <h1 className="text-4xl font-bold font-heading tracking-tight mb-8">Privacy Policy</h1>
         <div className="space-y-6 text-muted-foreground">

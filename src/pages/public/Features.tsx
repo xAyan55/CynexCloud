@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { FEATURE_DESCRIPTIONS } from "@/featureDescriptions"
 import { Check } from "lucide-react"
+import SEO from "@/components/SEO"
 
 export default function Features() {
   const [expanded, setExpanded] = useState<string | null>(null)
@@ -9,6 +10,7 @@ export default function Features() {
 
   return (
     <div className="py-24">
+      <SEO title="Features" description="Discover the powerful features of Cynex Cloud — Ryzen 9 nodes, NVMe storage, DDoS protection, instant provisioning, and 24/7 support." path="/features" />
       <div className="mx-auto max-w-7xl px-6">
         <div className="text-center mb-16">
           <h1 className="text-4xl font-bold font-heading tracking-tight mb-4">All Features</h1>

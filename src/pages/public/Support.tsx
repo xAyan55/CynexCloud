@@ -7,10 +7,12 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Mail, MessageCircle } from "lucide-react"
 import { FAQS } from "@/constants"
 import config from "@/config.json"
+import SEO from "@/components/SEO"
 
 export default function Support() {
   return (
     <div className="py-24">
+      <SEO title="Support" description="Get help 24/7 via email, Discord, or our contact form. Browse our FAQ for quick answers." path="/support" />
       <div className="mx-auto max-w-7xl px-6">
         <div className="text-center mb-16">
           <h1 className="text-4xl font-bold font-heading tracking-tight mb-4">Support</h1>

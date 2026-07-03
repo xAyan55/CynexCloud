@@ -1,6 +1,9 @@
+import SEO from "@/components/SEO"
+
 export default function Terms() {
   return (
     <div className="py-24">
+      <SEO title="Terms of Service" description="Read the Terms of Service for Cynex Cloud hosting services." path="/terms" />
       <div className="mx-auto max-w-3xl px-6">
         <h1 className="text-4xl font-bold font-heading tracking-tight mb-8">Terms of Service</h1>
         <div className="prose prose-invert max-w-none space-y-6 text-muted-foreground">

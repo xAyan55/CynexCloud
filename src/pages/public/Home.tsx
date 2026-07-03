@@ -8,6 +8,7 @@ import { MINECRAFT_PRICING, FAQS } from "@/constants"
 import AnimatedSection from "@/components/AnimatedSection"
 import { cn } from "@/lib/utils"
 import config from "@/config.json"
+import SEO from "@/components/SEO"
 
 const FEATURES = [
   { icon: Zap, title: "Instant Provisioning", description: "Your server is deployed the microsecond your transaction clears." },
@@ -21,6 +22,7 @@ const FEATURES = [
 export default function Home() {
   return (
     <div>
+      <SEO title="Premium Minecraft, VPS & Discord Bot Hosting" description="High-performance Minecraft server hosting, VPS, and Discord Bot hosting with Ryzen 9 processors, NVMe SSD storage, and instant setup." path="/" />
       <section className="py-24 md:py-32 relative overflow-hidden">
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex flex-col md:flex-row items-center gap-12">

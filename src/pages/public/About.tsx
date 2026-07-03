@@ -1,6 +1,7 @@
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Zap, Shield, Headset } from "lucide-react"
 import config from "@/config.json"
+import SEO from "@/components/SEO"
 
 const VALUES = [
   { icon: Zap, title: "Performance First", description: "We use only the best hardware—AMD Ryzen 9, NVMe storage—so your services run at peak performance." },
@@ -11,6 +12,7 @@ const VALUES = [
 export default function About() {
   return (
     <div className="py-24">
+      <SEO title="About Us" description="Learn about Cynex Cloud — premium hosting powered by cutting-edge hardware and a passionate team." path="/about" />
       <div className="mx-auto max-w-7xl px-6">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h1 className="text-4xl font-bold font-heading tracking-tight mb-6">About {config.brand.name}{config.brand.suffix}</h1>

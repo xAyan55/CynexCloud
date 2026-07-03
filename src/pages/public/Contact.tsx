@@ -5,10 +5,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Mail, MessageCircle, MapPin } from "lucide-react"
 import config from "@/config.json"
+import SEO from "@/components/SEO"
 
 export default function Contact() {
   return (
     <div className="py-24">
+      <SEO title="Contact Us" description="Get in touch with the Cynex Cloud team. We're here to help with any questions or issues." path="/contact" />
       <div className="mx-auto max-w-7xl px-6">
         <div className="text-center mb-16">
           <h1 className="text-4xl font-bold font-heading tracking-tight mb-4">Contact Us</h1>

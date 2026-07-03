@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import SEO from "@/components/SEO"
 
 const CATEGORIES = [
   { id: "minecraft", title: "Minecraft Hosting", description: "High-performance Minecraft servers with instant setup.", img: "/images/sec-imgs/mc-sec.png", link: "/minecraft" },
@@ -10,6 +11,7 @@ const CATEGORIES = [
 export default function SelectCategory() {
   return (
     <div className="py-24">
+      <SEO title="Select Your Hosting Plan" description="Choose from Minecraft server hosting, VPS servers, or Discord Bot hosting plans tailored to your needs." path="/select-category" />
       <div className="mx-auto max-w-7xl px-6">
         <div className="text-center mb-16">
           <h1 className="text-4xl font-bold font-heading tracking-tight mb-4">Choose Your Service</h1>

@@ -2,74 +2,194 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://cynexcloud.eu.cc/</loc>
-    <lastmod>2026-07-01</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://cynexcloud.eu.cc/select-category</loc>
-    <lastmod>2026-07-01</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://cynexcloud.eu.cc/minecraft</loc>
-    <lastmod>2026-07-01</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://cynexcloud.eu.cc/vps</loc>
-    <lastmod>2026-07-01</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://cynexcloud.eu.cc/discord-bot</loc>
-    <lastmod>2026-07-01</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://cynexcloud.eu.cc/features</loc>
-    <lastmod>2026-07-01</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://cynexcloud.eu.cc/support</loc>
-    <lastmod>2026-07-01</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://cynexcloud.eu.cc/about</loc>
-    <lastmod>2026-07-01</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://cynexcloud.eu.cc/contact</loc>
-    <lastmod>2026-07-01</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://cynexcloud.eu.cc/knowledge-base</loc>
-    <lastmod>2026-07-01</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://cynexcloud.eu.cc/terms</loc>
-    <lastmod>2026-07-01</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://cynexcloud.eu.cc/privacy</loc>
-    <lastmod>2026-07-01</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://cynexcloud.eu.cc/knowledge-base/minecraft-hosting</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://cynexcloud.eu.cc/knowledge-base/vps-hosting</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://cynexcloud.eu.cc/knowledge-base/discord-bots</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://cynexcloud.eu.cc/knowledge-base/billing</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cynexcloud.eu.cc/knowledge-base/getting-started</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cynexcloud.eu.cc/knowledge-base/faq</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cynexcloud.eu.cc/knowledge-base/minecraft-hosting/how-to-install-a-modpack</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cynexcloud.eu.cc/knowledge-base/minecraft-hosting/configuring-server-properties</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cynexcloud.eu.cc/knowledge-base/minecraft-hosting/setting-up-permissions</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cynexcloud.eu.cc/knowledge-base/vps-hosting/securing-your-vps</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cynexcloud.eu.cc/knowledge-base/vps-hosting/vps-performance-optimization</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cynexcloud.eu.cc/knowledge-base/discord-bots/deploying-your-first-bot</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cynexcloud.eu.cc/knowledge-base/discord-bots/common-bot-errors</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cynexcloud.eu.cc/knowledge-base/billing/understanding-your-invoice</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cynexcloud.eu.cc/knowledge-base/billing/how-to-upgrade-your-plan</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cynexcloud.eu.cc/knowledge-base/getting-started/creating-your-account</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cynexcloud.eu.cc/knowledge-base/getting-started/your-first-server-deployment</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cynexcloud.eu.cc/knowledge-base/faq/what-payment-methods-do-you-accept</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://cynexcloud.eu.cc/knowledge-base/faq/how-long-does-provisioning-take</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://cynexcloud.eu.cc/knowledge-base/faq/can-i-get-a-refund</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
   </url>
 </urlset>

@@ -5,10 +5,12 @@ import { Badge } from "@/components/ui/badge"
 import { MemoryStick, Cpu, HardDrive, ShoppingCart } from "lucide-react"
 import { MINECRAFT_PRICING } from "@/constants"
 import { cn } from "@/lib/utils"
+import SEO from "@/components/SEO"
 
 export default function MinecraftPlans() {
   return (
     <div className="py-24">
+      <SEO title="Minecraft Server Hosting Plans" description="Affordable Minecraft hosting plans with 4GB to 44GB RAM, NVMe SSD, DDoS protection, and instant setup." path="/minecraft" />
       <div className="mx-auto max-w-7xl px-6">
         <div className="text-center mb-16">
           <h1 className="text-4xl font-bold font-heading tracking-tight mb-4">Minecraft Hosting Plans</h1>

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Search, Server, Cloud, Bot, HelpCircle, FileText, BookOpen, ChevronRight } from "lucide-react"
 import { CATEGORIES, ARTICLES } from "@/data/knowledgeBase"
+import SEO from "@/components/SEO"
 
 const ICONS: Record<string, any> = { Server, Cloud, Bot, FileText, BookOpen, HelpCircle }
 
@@ -24,6 +25,7 @@ export default function KnowledgeBase() {
 
   return (
     <div className="py-24">
+      <SEO title="Knowledge Base" description="Browse tutorials, guides, and FAQs for Minecraft, VPS, and Discord Bot hosting." path="/knowledge-base" />
       <div className="mx-auto max-w-7xl px-6">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold font-heading tracking-tight mb-4">Knowledge Base</h1>

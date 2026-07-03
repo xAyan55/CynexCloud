@@ -4,10 +4,12 @@ import { Badge } from "@/components/ui/badge"
 import { MemoryStick, Cpu, HardDrive, ShoppingCart, Bot } from "lucide-react"
 import { DISCORD_PRICING } from "@/constants"
 import { cn } from "@/lib/utils"
+import SEO from "@/components/SEO"
 
 export default function DiscordBotPlans() {
   return (
     <div className="py-24">
+      <SEO title="Discord Bot Hosting Plans" description="Reliable Discord Bot hosting with 99.9% uptime, Node.js/Python/Go support, and auto-restart." path="/discord-bot" />
       <div className="mx-auto max-w-7xl px-6">
         <div className="text-center mb-16">
           <h1 className="text-4xl font-bold font-heading tracking-tight mb-4">Discord Bot Hosting</h1>
