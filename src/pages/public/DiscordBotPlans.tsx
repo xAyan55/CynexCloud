@@ -36,6 +36,9 @@ export default function DiscordBotPlans() {
                   <span className="text-3xl font-bold text-foreground">₹{plan.price}</span>
                   <span className="text-muted-foreground text-sm ml-1">/mo</span>
                 </div>
+                <div className="text-center">
+                  <span className="text-xs text-muted-foreground">${plan.usdPrice} USD</span>
+                </div>
                 <CardDescription className="text-center mt-2">{plan.description}</CardDescription>
               </CardHeader>
               <div className="px-6 pb-4 space-y-2.5 flex-1">
