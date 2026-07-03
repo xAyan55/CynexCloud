@@ -212,6 +212,17 @@ async function startServer() {
   // Plan Routes
   app.get("/api/plans", async (req, res) => {
     try {
+      // Define VPS seed plans (used both for initial seed and as fallback when Firestore lacks them)
+      const vpsSeedPlans = [
+        { id: "bronze", name: "Bronze", price: "₹99", price_numeric: 99, description: "Entry-level VPS for lightweight tasks and personal projects.", ram: "4GB", cpu: "1 Core", storage: "20GB SSD", cpuCores: 1, memoryMb: 4096, storageGb: 20, features: ["KVM Virtualization", "Root Access", "Dedicated IP", "SSD Storage"], popular: false, image: "/images/vps-imgs/bronze.png", category: "vps" },
+        { id: "silver", name: "Silver", price: "₹199", price_numeric: 199, description: "Great value for small websites and development environments.", ram: "8GB", cpu: "2 Core", storage: "40GB SSD", cpuCores: 2, memoryMb: 8192, storageGb: 40, features: ["KVM Virtualization", "Root Access", "Dedicated IP", "SSD Storage"], popular: false, image: "/images/vps-imgs/silver.png", category: "vps" },
+        { id: "platinum", name: "Platinum", price: "₹299", price_numeric: 299, description: "Balanced performance for growing applications.", ram: "12GB", cpu: "3 Core", storage: "60GB SSD", cpuCores: 3, memoryMb: 12288, storageGb: 60, features: ["KVM Virtualization", "Root Access", "Dedicated IP", "Snapshot Backups"], popular: false, image: "/images/vps-imgs/platinum.png", category: "vps" },
+        { id: "gold", name: "Gold", price: "₹399", price_numeric: 399, description: "High-performance VPS for production workloads.", ram: "16GB", cpu: "4 Core", storage: "80GB SSD", cpuCores: 4, memoryMb: 16384, storageGb: 80, features: ["KVM Virtualization", "Root Access", "Dedicated IP", "Snapshot Backups"], popular: true, popularText: "RECOMMENDED", image: "/images/vps-imgs/gold.png", category: "vps" },
+        { id: "diamond", name: "Diamond", price: "₹499", price_numeric: 499, description: "Premium resources for demanding applications.", ram: "20GB", cpu: "5 Core", storage: "100GB SSD", cpuCores: 5, memoryMb: 20480, storageGb: 100, features: ["KVM Virtualization", "Root Access", "Dedicated IP", "Daily Backups"], popular: false, image: "/images/vps-imgs/diamond.png", category: "vps" },
+        { id: "crystal", name: "Crystal", price: "₹599", price_numeric: 599, description: "Enterprise-grade power for high-traffic platforms.", ram: "24GB", cpu: "6 Core", storage: "120GB SSD", cpuCores: 6, memoryMb: 24576, storageGb: 120, features: ["KVM Virtualization", "Root Access", "Dedicated IP", "Daily Backups", "Priority Support"], popular: false, image: "/images/vps-imgs/crystal.png", category: "vps" },
+        { id: "amber", name: "Amber", price: "₹699", price_numeric: 699, description: "Maximum resources for the most demanding workloads.", ram: "28GB", cpu: "7 Core", storage: "140GB SSD", cpuCores: 7, memoryMb: 28672, storageGb: 140, features: ["KVM Virtualization", "Root Access", "Dedicated IP", "Daily Backups", "Priority Support", "10Gbps Uplink"], popular: false, image: "/images/vps-imgs/amber.png", category: "vps" }
+      ];
+
       const snapshot = await db.collection("plans").get();
       if (snapshot.empty) {
         const minecraftPlans = config.minecraftPlans.map((p: any) => ({ 
@@ -220,208 +231,15 @@ async function startServer() {
           storage: p.disk,
           price_numeric: parseFloat(p.price.match(/[0-9.]+/)?.[0] || "0")
         }));
-        const vpsPlans = [
-          {
-            id: "bronze",
-            name: "Bronze",
-            price: "99",
-            price_numeric: 99,
-            description: "Entry-level VPS for lightweight tasks and personal projects.",
-            ram: "4GB",
-            cpu: "1 Core",
-            storage: "20GB SSD",
-            cpuCores: 1,
-            memoryMb: 4096,
-            storageGb: 20,
-            features: ["KVM Virtualization", "Root Access", "Dedicated IP", "SSD Storage"],
-            popular: false,
-            image: "/images/vps-imgs/bronze.png",
-            category: "vps"
-          },
-          {
-            id: "silver",
-            name: "Silver",
-            price: "199",
-            price_numeric: 199,
-            description: "Great value for small websites and development environments.",
-            ram: "8GB",
-            cpu: "2 Core",
-            storage: "40GB SSD",
-            cpuCores: 2,
-            memoryMb: 8192,
-            storageGb: 40,
-            features: ["KVM Virtualization", "Root Access", "Dedicated IP", "SSD Storage"],
-            popular: false,
-            image: "/images/vps-imgs/silver.png",
-            category: "vps"
-          },
-          {
-            id: "platinum",
-            name: "Platinum",
-            price: "299",
-            price_numeric: 299,
-            description: "Balanced performance for growing applications.",
-            ram: "12GB",
-            cpu: "3 Core",
-            storage: "60GB SSD",
-            cpuCores: 3,
-            memoryMb: 12288,
-            storageGb: 60,
-            features: ["KVM Virtualization", "Root Access", "Dedicated IP", "Snapshot Backups"],
-            popular: false,
-            image: "/images/vps-imgs/platinum.png",
-            category: "vps"
-          },
-          {
-            id: "gold",
-            name: "Gold",
-            price: "399",
-            price_numeric: 399,
-            description: "High-performance VPS for production workloads.",
-            ram: "16GB",
-            cpu: "4 Core",
-            storage: "80GB SSD",
-            cpuCores: 4,
-            memoryMb: 16384,
-            storageGb: 80,
-            features: ["KVM Virtualization", "Root Access", "Dedicated IP", "Snapshot Backups"],
-            popular: true,
-            popularText: "RECOMMENDED",
-            image: "/images/vps-imgs/gold.png",
-            category: "vps"
-          },
-          {
-            id: "diamond",
-            name: "Diamond",
-            price: "499",
-            price_numeric: 499,
-            description: "Premium resources for demanding applications.",
-            ram: "20GB",
-            cpu: "5 Core",
-            storage: "100GB SSD",
-            cpuCores: 5,
-            memoryMb: 20480,
-            storageGb: 100,
-            features: ["KVM Virtualization", "Root Access", "Dedicated IP", "Daily Backups"],
-            popular: false,
-            image: "/images/vps-imgs/diamond.png",
-            category: "vps"
-          },
-          {
-            id: "crystal",
-            name: "Crystal",
-            price: "599",
-            price_numeric: 599,
-            description: "Enterprise-grade power for high-traffic platforms.",
-            ram: "24GB",
-            cpu: "6 Core",
-            storage: "120GB SSD",
-            cpuCores: 6,
-            memoryMb: 24576,
-            storageGb: 120,
-            features: ["KVM Virtualization", "Root Access", "Dedicated IP", "Daily Backups", "Priority Support"],
-            popular: false,
-            image: "/images/vps-imgs/crystal.png",
-            category: "vps"
-          },
-          {
-            id: "amber",
-            name: "Amber",
-            price: "699",
-            price_numeric: 699,
-            description: "Maximum resources for the most demanding workloads.",
-            ram: "28GB",
-            cpu: "7 Core",
-            storage: "140GB SSD",
-            cpuCores: 7,
-            memoryMb: 28672,
-            storageGb: 140,
-            features: ["KVM Virtualization", "Root Access", "Dedicated IP", "Daily Backups", "Priority Support", "10Gbps Uplink"],
-            popular: false,
-            image: "/images/vps-imgs/amber.png",
-            category: "vps"
-          }
-        ];
         const discordPlans = [
-          {
-            id: "bot-micro",
-            name: "Bot Micro",
-            price: "120",
-            price_numeric: 120,
-            originalPrice: "200",
-            description: "The lightest setup for background tasks and single-channel helper bots.",
-            ram: "256MB",
-            cpu: "0.25 vCore",
-            storage: "2GB SSD",
-            features: ["Node.js/Python/Go", "99.9% Uptime"],
-            popular: false,
-            discountBadge: "40% OFF",
-            category: "discord"
-          },
-          {
-            id: "bot-starter",
-            name: "Bot Starter",
-            price: "240",
-            price_numeric: 240,
-            originalPrice: "400",
-            description: "Perfect for small community bots and simple automation tasks.",
-            ram: "512MB",
-            cpu: "0.5 vCore",
-            storage: "5GB SSD",
-            features: ["Node.js/Python/Go", "99.9% Uptime"],
-            popular: false,
-            discountBadge: "40% OFF",
-            category: "discord"
-          },
-          {
-            id: "bot-advanced",
-            name: "Bot Advanced",
-            price: "480",
-            price_numeric: 480,
-            originalPrice: "800",
-            description: "Optimized for large servers with many active users and complex commands.",
-            ram: "1GB",
-            cpu: "1 vCore",
-            storage: "10GB SSD",
-            features: ["Node.js/Python/Go", "Auto-Restart"],
-            popular: true,
-            popularText: "RECOMMENDED FOR PROS",
-            discountBadge: "40% OFF",
-            category: "discord"
-          },
-          {
-            id: "bot-enterprise",
-            name: "Bot Enterprise",
-            price: "1000",
-            price_numeric: 1000,
-            originalPrice: "1600",
-            description: "Maximum performance for global bots serving millions of users.",
-            ram: "2GB",
-            cpu: "2 vCores",
-            storage: "20GB SSD",
-            features: ["Node.js/Python/Go", "Custom Database"],
-            popular: false,
-            discountBadge: "35% OFF",
-            category: "discord"
-          },
-          {
-            id: "bot-extreme",
-            name: "Bot Extreme",
-            price: "1800",
-            price_numeric: 1800,
-            originalPrice: "2500",
-            description: "Premium hosting for top-tier verified Discord bots with high-intensity command queries.",
-            ram: "4GB",
-            cpu: "4 vCores",
-            storage: "40GB SSD",
-            features: ["Node.js/Python/Go", "Custom Redis/Database", "Priority 24/7 Support"],
-            popular: false,
-            discountBadge: "28% OFF",
-            category: "discord"
-          }
+          { id: "bot-micro", name: "Bot Micro", price: "₹120", price_numeric: 120, originalPrice: "₹200", description: "The lightest setup for background tasks and single-channel helper bots.", ram: "256MB", cpu: "0.25 vCore", storage: "2GB SSD", features: ["Node.js/Python/Go", "99.9% Uptime"], popular: false, discountBadge: "40% OFF", category: "discord" },
+          { id: "bot-starter", name: "Bot Starter", price: "₹240", price_numeric: 240, originalPrice: "₹400", description: "Perfect for small community bots and simple automation tasks.", ram: "512MB", cpu: "0.5 vCore", storage: "5GB SSD", features: ["Node.js/Python/Go", "99.9% Uptime"], popular: false, discountBadge: "40% OFF", category: "discord" },
+          { id: "bot-advanced", name: "Bot Advanced", price: "₹480", price_numeric: 480, originalPrice: "₹800", description: "Optimized for large servers with many active users and complex commands.", ram: "1GB", cpu: "1 vCore", storage: "10GB SSD", features: ["Node.js/Python/Go", "Auto-Restart"], popular: true, popularText: "RECOMMENDED FOR PROS", discountBadge: "40% OFF", category: "discord" },
+          { id: "bot-enterprise", name: "Bot Enterprise", price: "₹1000", price_numeric: 1000, originalPrice: "₹1600", description: "Maximum performance for global bots serving millions of users.", ram: "2GB", cpu: "2 vCores", storage: "20GB SSD", features: ["Node.js/Python/Go", "Custom Database"], popular: false, discountBadge: "35% OFF", category: "discord" },
+          { id: "bot-extreme", name: "Bot Extreme", price: "₹1800", price_numeric: 1800, originalPrice: "₹2500", description: "Premium hosting for top-tier verified Discord bots with high-intensity command queries.", ram: "4GB", cpu: "4 vCores", storage: "40GB SSD", features: ["Node.js/Python/Go", "Custom Redis/Database", "Priority 24/7 Support"], popular: false, discountBadge: "28% OFF", category: "discord" }
         ];
 
-        const allInitialPlans = [...minecraftPlans, ...vpsPlans, ...discordPlans];
+        const allInitialPlans = [...minecraftPlans, ...vpsSeedPlans, ...discordPlans];
         const batch = db.batch();
         allInitialPlans.forEach(p => {
           const docRef = db.collection("plans").doc(p.id);
@@ -435,6 +253,15 @@ async function startServer() {
         const data = doc.data();
         return { id: doc.id, ...data, storage: data.storage || data.disk };
       });
+
+      // Merge in VPS seed plans if any are missing from Firestore (e.g. old DB has vps-dev but not bronze)
+      const existingIds = new Set(plans.map((p: any) => p.id));
+      vpsSeedPlans.forEach(vpsPlan => {
+        if (!existingIds.has(vpsPlan.id)) {
+          plans.push(vpsPlan);
+        }
+      });
+
       plans.sort((a: any, b: any) => (a.price_numeric || 0) - (b.price_numeric || 0));
       res.json(plans);
     } catch (error: any) {
