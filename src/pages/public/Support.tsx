@@ -22,7 +22,10 @@ export default function Support() {
             <CardHeader>
               <Mail className="w-8 h-8 text-foreground mb-2" />
               <CardTitle className="text-base">Email Us</CardTitle>
-              <CardDescription>{config.contact.email}</CardDescription>
+              <CardDescription>
+                Reach our support team directly via email. We typically respond within 24 hours.
+              </CardDescription>
+              <CardDescription className="text-sm font-medium text-foreground pt-2">{config.contact.email}</CardDescription>
             </CardHeader>
           </Card>
           <Card className="border-border">
@@ -30,7 +33,10 @@ export default function Support() {
               <MessageCircle className="w-8 h-8 text-foreground mb-2" />
               <CardTitle className="text-base">Discord</CardTitle>
               <CardDescription>
-                <a href={config.contact.discord} target="_blank" rel="noopener noreferrer" className="hover:text-foreground">Join our Discord</a>
+                Join our community server for real-time help, updates, and discussions.
+              </CardDescription>
+              <CardDescription className="pt-2">
+                <a href={config.contact.discord} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground hover:underline">Join our Discord &rarr;</a>
               </CardDescription>
             </CardHeader>
           </Card>
