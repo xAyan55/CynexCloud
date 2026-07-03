@@ -64,7 +64,7 @@ export default function Home() {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {FEATURES.map((feature) => (
-              <Card key={feature.title} className="border-border">
+              <Card key={feature.title} className="border-border transition-colors duration-300 hover:border-zinc-600">
                 <CardHeader>
                   <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center mb-2">
                     <feature.icon className="w-5 h-5 text-accent-foreground" />
