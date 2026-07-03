@@ -1,6 +1,7 @@
 import { lazy, Suspense, ComponentType } from 'react'
 import { createBrowserRouter, RouterProvider, Navigate, useRouteError, isRouteErrorResponse } from 'react-router-dom'
 import { Toaster } from '@/components/ui/sonner'
+import FallbackLoader from '@/components/FallbackLoader'
 
 const RouteErrorBoundary = () => {
   const error = useRouteError()
@@ -86,13 +87,6 @@ const AdminTicketDetail = lazyRetry(() => import('@/pages/admin/AdminTicketDetai
 const AdminUsers = lazyRetry(() => import('@/pages/admin/AdminUsers'))
 
 const Checkout = lazyRetry(() => import('@/pages/Checkout'))
-
-const FallbackLoader = () => (
-  <div className="min-h-screen bg-black flex items-center justify-center text-zinc-500 font-semibold gap-3 select-none">
-    <div className="w-5 h-5 border-2 border-zinc-800 border-t-white rounded-full animate-spin" />
-    <span className="text-xs">Loading page...</span>
-  </div>
-)
 
 export default function AppRouter() {
   const router = createBrowserRouter([
