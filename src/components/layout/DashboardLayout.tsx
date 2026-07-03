@@ -6,7 +6,7 @@ import {
   ChevronLeft, ChevronRight, LogOut, PanelTop, Package, Tickets
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -119,6 +119,7 @@ export default function DashboardLayout() {
                   !collapsed && "px-3"
                 )}>
                   <Avatar className="w-7 h-7">
+                    {user?.avatar ? <AvatarImage src={user.avatar} alt={user.username} /> : null}
                     <AvatarFallback className="text-xs bg-muted text-foreground">
                       {user?.username?.charAt(0).toUpperCase() || "U"}
                     </AvatarFallback>

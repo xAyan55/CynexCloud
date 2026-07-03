@@ -24,7 +24,7 @@ import {
   csrfCheck
 } from "../middleware/security";
 import { verifyAccessToken, handleTokenRefresh, verifyRefreshToken } from "../services/tokenService";
-import { queryAll } from "../db/database";
+import { queryAll, queryGet } from "../db/database";
 
 const router = Router();
 
@@ -90,9 +90,16 @@ router.post("/refresh", async (req, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000
   });
 
+  // Fetch full user data for the response (includes avatar, email)
+  const dbUser = await queryGet(
+    `SELECT id, username, email, avatar, role FROM users WHERE id = ?`,
+    [tokens.payload.userId]
+  );
+
   res.json({
     accessToken: tokens.accessToken,
-    user: tokens.payload
+    csrfToken: req.cookies?.csrfToken || "",
+    user: dbUser || tokens.payload
   });
 });
 

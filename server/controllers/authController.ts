@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
+import fs from "fs";
+import path from "path";
 import { queryGet, queryRun } from "../db/database";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../services/tokenService";
 import { createSession } from "../services/sessionManager";
@@ -10,6 +12,19 @@ import { checkPasswordBreached, checkPasswordHistory, validatePasswordStrength }
 import { incrementAuthFailure, clearAuthFailure } from "../middleware/security";
 
 const BCRYPT_ROUNDS = 12;
+
+function getRandomAvatar(): string {
+  const pfpDir = path.join(process.cwd(), "dist", "images", "pfp");
+  for (const shape of ["Circle", "Square"]) {
+    try {
+      const files = fs.readdirSync(path.join(pfpDir, shape)).filter(f => f.endsWith(".png"));
+      if (files.length > 0) {
+        return `/images/pfp/${shape}/${files[Math.floor(Math.random() * files.length)]}`;
+      }
+    } catch {}
+  }
+  return "";
+}
 
 // Helper to set cookie headers
 const setAuthCookies = (res: Response, refreshToken: string, csrfToken: string) => {
@@ -60,10 +75,11 @@ export const register = async (req: Request, res: Response) => {
     const role = isFirstUser ? "admin" : "user";
     const permissions = isFirstUser ? JSON.stringify(["admin"]) : JSON.stringify([]);
 
+    const avatar = getRandomAvatar();
     await queryRun(
-      `INSERT INTO users (id, username, email, passwordHash, twoFactorSecret, role, permissions)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [userId, username, email, passwordHash, verificationToken, role, permissions]
+      `INSERT INTO users (id, username, email, passwordHash, twoFactorSecret, role, permissions, avatar)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [userId, username, email, passwordHash, verificationToken, role, permissions, avatar]
     );
 
     // Save initial password in history

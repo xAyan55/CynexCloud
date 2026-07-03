@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Loader2 } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
 import { toast } from "sonner"
@@ -33,6 +33,7 @@ export default function Profile() {
         <Card className="border-border md:col-span-1">
           <CardContent className="flex flex-col items-center py-8">
             <Avatar className="w-20 h-20 mb-4">
+              {user?.avatar ? <AvatarImage src={user.avatar} alt={user.username} /> : null}
               <AvatarFallback className="text-2xl bg-muted text-foreground">{user?.username?.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
             <p className="text-lg font-medium text-foreground">{user?.username}</p>
