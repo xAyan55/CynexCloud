@@ -68,65 +68,14 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right Interactive Dashboard Mockup */}
+            {/* Right Side - GIF */}
             <div className="lg:col-span-5 flex justify-center">
-              <Card className="w-full max-w-md border-border/80 bg-zinc-950/80 backdrop-blur-sm shadow-2xl font-mono text-[11px] overflow-hidden select-none">
-                <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-zinc-900/60">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
-                  </div>
-                  <span className="text-[10px] text-muted-foreground font-sans">server-console.sh</span>
-                  <Terminal className="w-3.5 h-3.5 text-muted-foreground" />
-                </div>
-                
-                <div className="p-4 space-y-3.5 min-h-[220px]">
-                  <div className="flex items-center justify-between text-muted-foreground">
-                    <span>Node: node-eu-04 (Frankfurt, DE)</span>
-                    <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 border-emerald-500/30 text-emerald-400 bg-emerald-950/10">Active</Badge>
-                  </div>
-                  
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between">
-                      <span className="text-zinc-400">CPU Usage</span>
-                      <span className="text-emerald-400">18.4%</span>
-                    </div>
-                    <div className="w-full bg-zinc-900 rounded-full h-1">
-                      <div className="bg-emerald-500 h-1 rounded-full" style={{ width: "18.4%" }} />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between">
-                      <span className="text-zinc-400">RAM Allocation</span>
-                      <span className="text-zinc-300">4,096MB / 16,384MB</span>
-                    </div>
-                    <div className="w-full bg-zinc-900 rounded-full h-1">
-                      <div className="bg-zinc-400 h-1 rounded-full" style={{ width: "25%" }} />
-                    </div>
-                  </div>
-
-                  <div className="border-t border-border/40 pt-3 space-y-1 text-zinc-500">
-                    <p className="text-emerald-500/80">&gt; cynex-provisioner --init --category=minecraft</p>
-                    <p>&gt; [SYSTEM] Allocated port: 25565</p>
-                    <p>&gt; [SYSTEM] Starting server on Ryzen 9 7950X...</p>
-                    <p>&gt; [INFO] Server started successfully in 4.2 seconds.</p>
-                  </div>
-                </div>
-
-                <div className="px-4 py-3 border-t border-border bg-zinc-900/40 flex items-center justify-between">
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="h-7 px-2.5 text-[10px] bg-zinc-950">
-                      <Play className="w-3.5 h-3.5 mr-1.5 text-emerald-500" /> Start
-                    </Button>
-                    <Button size="sm" variant="outline" className="h-7 px-2.5 text-[10px] bg-zinc-950">
-                      <Power className="w-3.5 h-3.5 mr-1.5 text-rose-500" /> Stop
-                    </Button>
-                  </div>
-                  <span className="text-[10px] text-muted-foreground font-sans">Ready</span>
-                </div>
-              </Card>
+              <img
+                src="/images/main-imgs/mc-char.gif"
+                alt="Minecraft Character"
+                className="w-full max-w-xs h-auto object-contain drop-shadow-2xl animate-float"
+                style={{ animation: "float 3s ease-in-out infinite" }}
+              />
             </div>
             
           </div>
