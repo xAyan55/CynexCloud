@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Separator } from "@/components/ui/separator"
 import { Zap, Shield, Cpu, HardDrive, Globe, Headset, ArrowRight, Check, Terminal, Play, Power, AlertCircle } from "lucide-react"
 import { MINECRAFT_PRICING, VPS_PRICING, DISCORD_PRICING, FAQS } from "@/constants"
 import AnimatedSection from "@/components/AnimatedSection"
